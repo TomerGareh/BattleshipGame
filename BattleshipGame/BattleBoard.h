@@ -5,6 +5,10 @@ using std::string;
 
 const size_t BOARD_SIZE = 10;
 
+enum class ShipType {
+	RubberBoat, RocketShip, Submarine, Battleship
+};
+
 class BattleBoard
 {
 public:

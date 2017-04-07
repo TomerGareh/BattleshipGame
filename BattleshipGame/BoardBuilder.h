@@ -2,14 +2,19 @@
 
 #include <memory>
 #include <string>
+#include <tuple>
+#include <list>
 #include <set>
 #include <functional>
 #include "BattleBoard.h"
 
 using std::string;
+using std::tuple;
+using std::list;
 using std::set;
 using std::function;
 using std::shared_ptr;
+using std::unique_ptr;
 
 namespace battleship
 {
@@ -59,12 +64,33 @@ namespace battleship
 		using ErrorPriorityFunction = function<bool(const BoardInitializeError&, const BoardInitializeError&)>;
 
 		BoardBuilder* addPiece(int x, int y, char type);
+
 		shared_ptr<BattleBoard> build();
 
 	private:
-		
+		class ShipMask
+		{
+			typedef list<tuple<int, int, char>> ShipMaskList;
+			typedef unique_ptr<ShipMaskList> ShipMaskListPtr;
+			
+			ShipMaskListPtr mask;
+
+			ShipMask(ShipType ship);
+
+			~ShipMask();
+
+			bool applyMask(const char board[BOARD_SIZE][BOARD_SIZE], tuple<int, int> pos, bool isPlayerA,
+				bool& wrongSize, bool& adjacentShips, bool& horizontalMatch);
+
+			friend class BoardBuilder;
+		};
+
 		shared_ptr<BattleBoard> _board;
+
+		bool isValidBoard(const char board[BOARD_SIZE][BOARD_SIZE]);
+
 		void printErrors();
+
 		bool validate();
 	};
 }

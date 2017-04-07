@@ -1,48 +1,24 @@
 #pragma once
 
 #include <memory>
-#include <list>
-#include <tuple>
 #include "IBattleshipGameAlgo.h"
 #include "BattleBoard.h"
 
-
-typedef std::list<std::tuple<int, int, char>> ShipMaskList;
-typedef std::unique_ptr<ShipMaskList> ShipMaskListPtr;
-
-enum class ShipType {
-	RubberBoat, RocketShip, Submarine, Battleship
-};
-
-class GameFromFileAlgo : IBattleshipGameAlgo
+namespace battleship
 {
-private:
-	class ShipMask
+	class GameFromFileAlgo : IBattleshipGameAlgo
 	{
-		ShipMaskListPtr mask;
-		
-		ShipMask(ShipType ship);
+	public:
+		GameFromFileAlgo();
 
-		~ShipMask();
+		~GameFromFileAlgo();
 
-		bool applyMask(const char board[BOARD_SIZE][BOARD_SIZE], std::tuple<int, int> pos, bool isPlayerA,
-					   bool& wrongSize, bool& adjacentShips, bool& horizontalMatch);
+		void setBoard(const char** board, int numRows, int numCols) override;
 
-		friend class GameFromFileAlgo;
+		std::pair<int, int> attack() override;
+
+		void notifyOnAttackResult(int player, int row, int col, AttackResult result) override;
+
+		std::shared_ptr<BattleBoard> buildBoardFromFile(const char* path);
 	};
-
-	bool isValidBoard(const char board[BOARD_SIZE][BOARD_SIZE]);
-
-public:
-	GameFromFileAlgo();
-	
-	~GameFromFileAlgo();
-	
-	void setBoard(const char** board, int numRows, int numCols) override;
-	
-	std::pair<int, int> attack() override;
-	
-	void notifyOnAttackResult(int player, int row, int col, AttackResult result) override;
-
-	void readBoardFile(const std::string& fileName, char board[BOARD_SIZE][BOARD_SIZE]);
-};
+}

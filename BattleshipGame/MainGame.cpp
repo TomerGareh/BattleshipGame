@@ -12,24 +12,6 @@ using namespace battleship;
 using std::unique_ptr;
 using std::shared_ptr;
 
-shared_ptr<BattleBoard> buildBoardFromFile(char* path)
-{
-	BoardBuilder builder{};
-
-	// TODO:
-	// For each row/col in file in path - read from file and addPiece
-	{
-		int x = 0;
-		int y = 0;
-		char type = 'd';
-
-		builder.addPiece(x, y, type);
-	}
-
-	auto board = builder.build();
-	return board;
-}
-
 void loadFilesInPath(char* path)
 {
 	// system("dir /b /s /a-d * > file_names.txt");
@@ -45,7 +27,7 @@ int main(int argc, char* argv[])
 	unique_ptr<IBattleshipGameAlgo> algo = 
 		BattleshipGameAlgoFactory::createGameAlgo(BattleshipGameAlgoTypeEnum::FILE_GAME_ALGO);
 
-	auto board = buildBoardFromFile(path);
+	auto board = algo->buildBoardFromFile(path);
 	if (NULL == board)
 		return 2; // Some error code
 
