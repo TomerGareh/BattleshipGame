@@ -112,12 +112,20 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="BattleBoard.h" />
+    <ClInclude Include="BattleshipGameAlgoFactory.h" />
+    <ClInclude Include="BoardBuilder.h" />
     <ClInclude Include="GameFromFileAlgo.h" />
     <ClInclude Include="IBattleshipGameAlgo.h" />
+    <ClInclude Include="MainGame.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BattleBoard.cpp" />
+    <ClCompile Include="BattleshipGameAlgoFactory.cpp" />
+    <ClCompile Include="BoardBuilder.cpp" />
     <ClCompile Include="GameFromFileAlgo.cpp" />
+    <ClCompile Include="MainGame.cpp">
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Default</CompileAs>
+    </ClCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
