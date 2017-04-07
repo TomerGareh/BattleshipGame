@@ -6,7 +6,8 @@ BattleBoard::BattleBoard()
 
 BattleBoard::~BattleBoard()
 {
-	if (matrix != NULL) {
+	if (matrix != NULL)
+	{
 		delete[] matrix;
 	}
 }
