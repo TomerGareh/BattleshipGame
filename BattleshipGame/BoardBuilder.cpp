@@ -13,7 +13,7 @@ namespace battleship
 
 	BoardBuilder::ShipMask::ShipMask(ShipType ship)
 	{
-		mask = std::make_unique<ShipMaskList>(new ShipMaskList());
+		mask = std::make_unique<ShipMaskList>();
 
 		switch (ship)
 		{
@@ -93,14 +93,14 @@ namespace battleship
 		return this;
 	}
 
-	bool BoardBuilder::isValidBoard(const char board[BOARD_SIZE][BOARD_SIZE])
+	bool BoardBuilder::isValidBoard()
 	{
 		char visitedBoard[BOARD_SIZE][BOARD_SIZE];
 
-		unique_ptr<ShipMask> rubberMask = std::make_unique<ShipMask>(ShipMask(ShipType::RubberBoat));
-		unique_ptr<ShipMask> rocketMask = std::make_unique<ShipMask>(ShipMask(ShipType::RocketShip));
-		unique_ptr<ShipMask> submarineMask = std::make_unique<ShipMask>(ShipMask(ShipType::Submarine));
-		unique_ptr<ShipMask> battleshipMask = std::make_unique<ShipMask>(ShipMask(ShipType::Battleship));
+		unique_ptr<ShipMask> rubberMask = std::make_unique<ShipMask>(ShipType::RubberBoat);
+		unique_ptr<ShipMask> rocketMask = std::make_unique<ShipMask>(ShipType::RocketShip);
+		unique_ptr<ShipMask> submarineMask = std::make_unique<ShipMask>(ShipType::Submarine);
+		unique_ptr<ShipMask> battleshipMask = std::make_unique<ShipMask>(ShipType::Battleship);
 
 		int numOfShipsA = 0;
 		int numOfShipsB = 0;
@@ -109,7 +109,7 @@ namespace battleship
 		{
 			for (int j = 0; j < BOARD_SIZE; j++)
 			{
-				if (isupper(board[i][j]))
+				if (isupper(_board->matrix[i][j]))
 				{
 
 				}

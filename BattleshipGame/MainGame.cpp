@@ -1,6 +1,7 @@
 #include "MainGame.h"
-#include "BattleshipGameAlgoFactory.h"
 #include "IBattleshipGameAlgo.h"
+#include "BattleshipGameAlgoFactory.h"
+#include "GameFromFileAlgo.h"
 #include "BattleBoard.h"
 #include "BoardBuilder.h"
 
@@ -24,10 +25,11 @@ int main(int argc, char* argv[])
 	loadFilesInPath(path);
 
 	// Game initialization
-	unique_ptr<IBattleshipGameAlgo> algo = 
+	unique_ptr<IBattleshipGameAlgo> algo =
 		BattleshipGameAlgoFactory::createGameAlgo(BattleshipGameAlgoTypeEnum::FILE_GAME_ALGO);
 
-	auto board = algo->buildBoardFromFile(path);
+
+	auto board = (static_cast<unique_ptr<GameFromFileAlgo>>(algo))->buildBoardFromFile(path);
 	if (NULL == board)
 		return 2; // Some error code
 

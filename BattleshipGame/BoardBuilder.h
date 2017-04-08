@@ -87,7 +87,7 @@ namespace battleship
 
 		shared_ptr<BattleBoard> _board;
 
-		bool isValidBoard(const char board[BOARD_SIZE][BOARD_SIZE]);
+		bool isValidBoard();
 
 		void printErrors();
 

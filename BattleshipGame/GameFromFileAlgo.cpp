@@ -19,7 +19,7 @@ namespace battleship
 	// This function assumes that the file exists and the file name is valid
 	std::shared_ptr<BattleBoard> GameFromFileAlgo::buildBoardFromFile(const char* path)
 	{
-		BoardBuilder builder{};
+		BoardBuilder builder;
 
 		std::ifstream fin(path);
 		char nextChar;
