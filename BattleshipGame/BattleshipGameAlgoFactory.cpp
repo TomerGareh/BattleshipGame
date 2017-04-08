@@ -34,7 +34,7 @@ namespace battleship
 	// This function assumes that the file exists and the file name is valid
 	shared_ptr<BattleBoard> BattleshipGameAlgoFactory::buildBoardFromFile(const string& path)
 	{
-		BoardBuilder builder{};
+		BoardBuilder builder;
 
 		// TODO: Tomer - there is a bug below
 		// See: http://www.cplusplus.com/forum/beginner/93910/
@@ -52,6 +52,8 @@ namespace battleship
 				builder.addPiece(i, j, nextChar);
 			}
 		}
+
+		// close file
 
 		auto board = builder.build();
 		return board;

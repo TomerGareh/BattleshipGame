@@ -1,22 +1,17 @@
 #pragma once
 
-#include <memory>
 #include "IBattleshipGameAlgo.h"
-#include "BattleBoard.h"
 
-namespace battleship
+class GameFromFileAlgo : IBattleshipGameAlgo
 {
-	class GameFromFileAlgo : IBattleshipGameAlgo
-	{
-	public:
-		GameFromFileAlgo();
+public:
+	GameFromFileAlgo();
 
-		~GameFromFileAlgo();
+	~GameFromFileAlgo();
 
-		void setBoard(const char** board, int numRows, int numCols) override;
+	void setBoard(const char** board, int numRows, int numCols) override;
 
-		std::pair<int, int> attack() override;
+	std::pair<int, int> attack() override;
 
-		void notifyOnAttackResult(int player, int row, int col, AttackResult result) override;
-	};
-}
+	void notifyOnAttackResult(int player, int row, int col, AttackResult result) override;
+};

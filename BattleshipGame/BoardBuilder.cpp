@@ -109,7 +109,7 @@ namespace battleship
 		{
 			for (int j = 0; j < BOARD_SIZE; j++)
 			{
-				if (isupper(_board->matrix[i][j]))
+				if (isupper(_board->_matrix[i][j]))
 				{
 
 				}
