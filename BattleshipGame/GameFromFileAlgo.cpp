@@ -1,8 +1,4 @@
 #include <memory>
-#include <iostream>
-#include <fstream>
-#include <cstdio>
-#include <cctype>
 #include "GameFromFileAlgo.h"
 #include "BoardBuilder.h"
 
@@ -16,6 +12,7 @@ namespace battleship
 	{
 	}
 
+<<<<<<< HEAD
 	// This function assumes that the file exists and the file name is valid
 	std::shared_ptr<BattleBoard> GameFromFileAlgo::buildBoardFromFile(const char* path)
 	{
@@ -40,12 +37,16 @@ namespace battleship
 		return board;
 	}
 
+=======
+>>>>>>> origin/master
 	void GameFromFileAlgo::setBoard(const char** board, int numRows, int numCols)
 	{
+		// Ignored by the read from file logic
 	}
 
 	std::pair<int, int> GameFromFileAlgo::attack()
 	{
+		// Execute the next step from the attack file
 		return std::pair<int, int>();
 	}
 
