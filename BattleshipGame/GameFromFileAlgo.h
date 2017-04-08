@@ -18,7 +18,5 @@ namespace battleship
 		std::pair<int, int> attack() override;
 
 		void notifyOnAttackResult(int player, int row, int col, AttackResult result) override;
-
-		std::shared_ptr<BattleBoard> buildBoardFromFile(const char* path);
 	};
 }

@@ -57,14 +57,18 @@ namespace battleship
 	class BattleBoard
 	{
 	public:
-		char _matrix[BOARD_SIZE][BOARD_SIZE] = { 0 };
-		GamePiecesDict _gamePieces;
-
 		virtual ~BattleBoard();
+
+		const char** getBoardMatrix() const;
 
 		friend class BoardBuilder;
 
 	private:
+		char** _matrix = NULL;
+		GamePiecesDict _gamePieces;
+		int playerAShipCount = 0;
+		int playerBShipCount = 0;
+
 		BattleBoard();
 
 		/* Edits the board, without adding any game-pieces */

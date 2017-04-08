@@ -18,15 +18,21 @@ namespace battleship
 	{
 	}
 
-	#pragma endregion GamePiece
+	#pragma endregion
 	#pragma region BattleBoard
 
 	BattleBoard::BattleBoard()
 	{
+		_matrix = new char*[BOARD_SIZE];
+		for (int index = 0; index < BOARD_SIZE; index++)
+			_matrix[index] = new char[BOARD_SIZE];
 	}
 
 	BattleBoard::~BattleBoard()
 	{
+		for (int index = 0; index < BOARD_SIZE; index++)
+			delete[] _matrix[index];
+		delete[] _matrix;
 	}
 
 	void BattleBoard::initSquare(int x, int y, char type)
@@ -53,7 +59,21 @@ namespace battleship
 			xOffset += deltaX;
 			yOffset += deltaY;
 		}
+
+		if (player == PlayerEnum::A)
+		{
+			playerAShipCount++;
+		}
+		else
+		{
+			playerBShipCount++;
+		}
 	}
 
-	#pragma endregion BattleBoard
+	const char** BattleBoard::getBoardMatrix() const
+	{
+		return _matrix;
+	}
+
+	#pragma endregion
 }
