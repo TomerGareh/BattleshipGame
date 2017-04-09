@@ -10,6 +10,8 @@ using std::unique_ptr;
 
 namespace battleship
 {
+	const int FOREFEIT_COORDINATES = -1;
+
 	class GameManager
 	{
 	public:
@@ -21,7 +23,10 @@ namespace battleship
 					   IGameVisual& visualizer);
 
 	private:
-		bool isPlayerShipsLeft(PlayerEnum player);
-		bool isGameOver();
+		bool isPlayerShipsLeft(BattleBoard* board, PlayerEnum player);
+		bool isGameOver(BattleBoard* board, bool isPlayerAForfeit, bool isPlayerBForfeit);
+		IBattleshipGameAlgo* switchPlayerTurns(IBattleshipGameAlgo& playerA, IBattleshipGameAlgo& playerB,
+											   IBattleshipGameAlgo* currPlayer,
+											   bool isPlayerAForfeit, bool isPlayerBForfeit);
 	};
 }

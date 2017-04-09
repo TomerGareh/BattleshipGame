@@ -89,7 +89,7 @@ namespace battleship
 
 	BoardBuilder* BoardBuilder::addPiece(int x, int y, char type)
 	{
-		_board->initSquare(x, y, type);
+		_board->initSquare(x - 1, y - 1, type);
 		return this;
 	}
 
@@ -140,6 +140,14 @@ namespace battleship
 		// TODO: when a game piece is verified, add it to the board using this api
 		// void _board->addGamePiece(int firstX, int firstY, int size,
 		//								  PlayerEnum player, Orientation orientation)
+
+		// !!!!
+		// !!!!
+		// !!!!
+		// !!!!
+		// TODO: Tomer - See this when you merge!!
+		// Call: _board->addGamePiece(firstX - 1, firstY - 1 .....)
+		// We need to normalize coordinates from 1-BOARD_SIZE to 0-BOARD_SIZE-1 as the array works
 
 		printErrors();
 

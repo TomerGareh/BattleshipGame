@@ -21,4 +21,5 @@ std::pair<int, int> GameFromFileAlgo::attack()
 
 void GameFromFileAlgo::notifyOnAttackResult(int player, int row, int col, AttackResult result)
 {
+	// Ignored by the read from file logic
 }
