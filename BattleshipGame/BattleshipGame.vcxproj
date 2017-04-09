@@ -115,7 +115,9 @@
     <ClInclude Include="BattleshipGameAlgoFactory.h" />
     <ClInclude Include="BoardBuilder.h" />
     <ClInclude Include="GameFromFileAlgo.h" />
+    <ClInclude Include="GameManager.h" />
     <ClInclude Include="IBattleshipGameAlgo.h" />
+    <ClInclude Include="IGameVisual.h" />
     <ClInclude Include="MainGame.h" />
   </ItemGroup>
   <ItemGroup>
@@ -123,6 +125,8 @@
     <ClCompile Include="BattleshipGameAlgoFactory.cpp" />
     <ClCompile Include="BoardBuilder.cpp" />
     <ClCompile Include="GameFromFileAlgo.cpp" />
+    <ClCompile Include="GameManager.cpp" />
+    <ClCompile Include="IGameVisual.cpp" />
     <ClCompile Include="MainGame.cpp">
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Default</CompileAs>
     </ClCompile>
