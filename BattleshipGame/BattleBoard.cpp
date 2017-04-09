@@ -4,23 +4,37 @@ namespace battleship
 {
 	#pragma region GamePiece
 
-	GamePiece::GamePiece(int firstX, int firstY, int size, PlayerEnum player, Orientation orientation) :
-		_firstX(firstX),
-		_firstY(firstY),
+	ShipType::ShipType(BoardSquare representation, int size, int points):
+		_representation(representation),
 		_size(size),
-		_player(player),
-		_orient(orientation),
-		_lifeLeft(size)
+		_points(points)
 	{
 	}
 
-	GamePiece::~GamePiece()
+	#pragma endregion
+	#pragma region GamePiece
+
+	GamePiece::GamePiece(int firstX, int firstY, const ShipType *const type,
+						 PlayerEnum player, Orientation orientation) :
+		_firstX(firstX),
+		_firstY(firstY),
+		_shipType(type),
+		_player(player),
+		_orient(orientation),
+		_lifeLeft(type->_size)
 	{
 	}
 
 	#pragma endregion
 	#pragma region BattleBoard
 
+	// Static members initialization
+	const ShipType BattleBoard::RUBBER_BOAT(BoardSquare::RubberBoat, 1, 2);
+	const ShipType BattleBoard::ROCKET_SHIP(BoardSquare::RocketShip, 2, 3);
+	const ShipType BattleBoard::SUBMARINE(BoardSquare::Submarine, 3, 7 );
+	const ShipType BattleBoard::BATTLESHIP(BoardSquare::Battleship, 4, 8 );
+
+	// Ctor
 	BattleBoard::BattleBoard()
 	{
 		_matrix = new char*[BOARD_SIZE];
@@ -29,10 +43,11 @@ namespace battleship
 			_matrix[index] = new char[BOARD_SIZE];
 
 			for (int subIndex = 0; subIndex < BOARD_SIZE; subIndex++)
-				_matrix[index][subIndex] = (char)(ShipType::Empty);
+				_matrix[index][subIndex] = (char)(BoardSquare::Empty);
 		}
 	}
 
+	// Dtor
 	BattleBoard::~BattleBoard()
 	{
 		for (int index = 0; index < BOARD_SIZE; index++)
@@ -40,21 +55,25 @@ namespace battleship
 		delete[] _matrix;
 	}
 
+
+	// Logic methods
+
 	void BattleBoard::initSquare(int x, int y, char type)
 	{
 		_matrix[x][y] = type;
 	}
 
-	void BattleBoard::addGamePiece(int firstX, int firstY, int size, PlayerEnum player, Orientation orientation)
+	void BattleBoard::addGamePiece(int firstX, int firstY, const ShipType& shipType,
+								   PlayerEnum player, Orientation orientation)
 	{
-		auto gamePieceVal = std::make_shared<GamePiece>(firstX, firstY, size, player, orientation);
+		auto gamePieceVal = std::make_shared<GamePiece>(firstX, firstY, shipType, player, orientation);
 
 		int deltaX = (orientation == Orientation::HORIZONTAL) ? 1 : 0;
 		int deltaY = (orientation == Orientation::VERTICAL) ? 1 : 0;
 		int xOffset = 0;
 		int yOffset = 0;
 
-		for (int index = 0; index < size; index++)
+		for (int index = 0; index < (shipType._size); index++)
 		{
 			int curX = firstX + xOffset;
 			int curY = firstY + yOffset;
@@ -82,7 +101,9 @@ namespace battleship
 		int xOffset = 0;
 		int yOffset = 0;
 
-		for (int index = 0; index < pieceToRemove->_size; index++)
+		int pieceSize = pieceToRemove->_shipType->_size;
+
+		for (int index = 0; index < pieceSize; index++)
 		{
 			int curX = pieceToRemove->_firstX + xOffset;
 			int curY = pieceToRemove->_firstY + yOffset;
@@ -92,7 +113,7 @@ namespace battleship
 			_gamePieces.erase(gamePieceKey);
 
 			// Remove from game board matrix
-			_matrix[curX][curY] = (char)ShipType::Empty;
+			_matrix[curX][curY] = (char)BoardSquare::Empty;
 
 			xOffset += deltaX;
 			yOffset += deltaY;
@@ -117,7 +138,7 @@ namespace battleship
 			gamePiece = dictIter->second;
 
 			// Ship got hit in this part for the first time, reduce life
-			if (_matrix[coordX][coordY] != (char)ShipType::Hit)
+			if (_matrix[coordX][coordY] != (char)BoardSquare::Hit)
 				gamePiece->_lifeLeft--;
 
 			if (gamePiece->_lifeLeft == 0)
@@ -126,12 +147,15 @@ namespace battleship
 			}
 			else
 			{	// Ship hit, but not sinked
-				_matrix[coordX][coordY] = (char)ShipType::Hit;
+				_matrix[coordX][coordY] = (char)BoardSquare::Hit;
 			}
 		}
 
 		return gamePiece;
 	}
+
+
+	// Getters & Setters
 
 	const char** BattleBoard::getBoardMatrix() const
 	{

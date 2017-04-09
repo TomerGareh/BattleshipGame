@@ -75,7 +75,7 @@ namespace battleship
 			
 			ShipMaskListPtr mask;
 
-			ShipMask(ShipType ship);
+			ShipMask(BoardSquare ship);
 
 			~ShipMask();
 

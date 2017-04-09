@@ -11,28 +11,28 @@ namespace battleship
 	{
 	}
 
-	BoardBuilder::ShipMask::ShipMask(ShipType ship)
+	BoardBuilder::ShipMask::ShipMask(BoardSquare ship)
 	{
 		mask = std::make_unique<ShipMaskList>();
 
 		switch (ship)
 		{
-		case ShipType::RubberBoat:
+		case BoardSquare::RubberBoat:
 			mask->insert(mask->end(), {std::make_tuple(-1, 0, ' '), std::make_tuple(0, 1, ' '), std::make_tuple(1, 0, ' '),
 									   std::make_tuple(0, -1, ' ')});
 			break;
-		case ShipType::RocketShip:
+		case BoardSquare::RocketShip:
 			mask->insert(mask->end(), {std::make_tuple(0, 1, 'P'), std::make_tuple(-1, 0, ' '), std::make_tuple(-1, 1, ' '),
 									   std::make_tuple(0, 2, ' '), std::make_tuple(1, 1, ' '), std::make_tuple(1, 0, ' '),
 									   std::make_tuple(0, -1, ' ')});
 			break;
-		case ShipType::Submarine:
+		case BoardSquare::Submarine:
 			mask->insert(mask->end(), {std::make_tuple(0, 1, 'M'), std::make_tuple(0, 2, 'M'), std::make_tuple(-1, 0, ' '),
 									   std::make_tuple(-1, 1, ' '), std::make_tuple(-1, 2, ' '), std::make_tuple(0, 3, ' '),
 									   std::make_tuple(1, 2, ' '), std::make_tuple(1, 1, ' '), std::make_tuple(1, 0, ' '),
 									   std::make_tuple(0, -1, ' ')});
 			break;
-		case ShipType::Battleship:
+		case BoardSquare::Battleship:
 			mask->insert(mask->end(), {std::make_tuple(0, 1, 'D'), std::make_tuple(0, 2, 'D'), std::make_tuple(0, 3, 'D'),
 									   std::make_tuple(-1, 0, ' '), std::make_tuple(-1, 1, ' '), std::make_tuple(-1, 2, ' '),
 									   std::make_tuple(-1, 3, ' '), std::make_tuple(0, 4, ' '), std::make_tuple(1, 3, ' '),
@@ -97,10 +97,10 @@ namespace battleship
 	{
 		char visitedBoard[BOARD_SIZE][BOARD_SIZE];
 
-		unique_ptr<ShipMask> rubberMask = std::make_unique<ShipMask>(ShipType::RubberBoat);
-		unique_ptr<ShipMask> rocketMask = std::make_unique<ShipMask>(ShipType::RocketShip);
-		unique_ptr<ShipMask> submarineMask = std::make_unique<ShipMask>(ShipType::Submarine);
-		unique_ptr<ShipMask> battleshipMask = std::make_unique<ShipMask>(ShipType::Battleship);
+		unique_ptr<ShipMask> rubberMask = std::make_unique<ShipMask>(BoardSquare::RubberBoat);
+		unique_ptr<ShipMask> rocketMask = std::make_unique<ShipMask>(BoardSquare::RocketShip);
+		unique_ptr<ShipMask> submarineMask = std::make_unique<ShipMask>(BoardSquare::Submarine);
+		unique_ptr<ShipMask> battleshipMask = std::make_unique<ShipMask>(BoardSquare::Battleship);
 
 		int numOfShipsA = 0;
 		int numOfShipsB = 0;

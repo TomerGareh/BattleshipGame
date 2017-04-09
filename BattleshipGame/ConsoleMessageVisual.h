@@ -15,7 +15,7 @@ namespace battleship
 
 		virtual void visualizeAttackResults(int row, int col, AttackResult attackResults) override;
 		virtual void visualizeEndGame(shared_ptr<BattleBoard> board,
-			bool isPlayerAForfeit, bool isPlayerBForfeit) override;
+									  int playerAWins, int playerBWins) override;
 	};
 }
 

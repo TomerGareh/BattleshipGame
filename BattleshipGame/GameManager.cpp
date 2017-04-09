@@ -11,13 +11,13 @@ namespace battleship
 	{
 	}
 
-	bool GameManager::isPlayerShipsLeft(BattleBoard* board, PlayerEnum player)
+	bool GameManager::isPlayerShipsLeft(BattleBoard* board, PlayerEnum player) const
 	{
 		int shipsCount = (player == PlayerEnum::A) ? board->getPlayerAShipCount() : board->getPlayerBShipCount;
 		return (shipsCount > 0);
 	}
 
-	bool GameManager::isGameOver(BattleBoard* board, bool isPlayerAForfeit, bool isPlayerBForfeit)
+	bool GameManager::isGameOver(BattleBoard* board, bool isPlayerAForfeit, bool isPlayerBForfeit) const
 	{
 		if ((isPlayerAForfeit && isPlayerBForfeit) ||
 			(!isPlayerShipsLeft(board, PlayerEnum::A)) ||
@@ -33,7 +33,7 @@ namespace battleship
 
 	IBattleshipGameAlgo* GameManager::switchPlayerTurns(IBattleshipGameAlgo& playerA, IBattleshipGameAlgo& playerB,
 														IBattleshipGameAlgo* currPlayer,
-														bool isPlayerAForfeit, bool isPlayerBForfeit)
+														bool isPlayerAForfeit, bool isPlayerBForfeit) const
 	{
 		if ((currPlayer == &playerA) && (!isPlayerBForfeit))
 			return &playerB;
@@ -41,6 +41,33 @@ namespace battleship
 			return &playerA;
 		else
 			return &playerB;
+	}
+
+	void GameManager::updateCurrentGamePoints(const GamePiece *const sankPiece,
+											  int& playerAScore, int& playerBScore) const
+	{
+		if (sankPiece->_player == PlayerEnum::A)
+		{
+			playerBScore += sankPiece->_shipType->_points;
+		}
+		else
+		{
+			playerAScore += sankPiece->_shipType->_points;
+		}
+	}
+
+	void GameManager::updateScoreboard(const BattleBoard *const board)
+	{
+		if (board->getPlayerAShipCount == 0)
+		{
+			_playerBWins++;
+		}
+		else if (board->getPlayerBShipCount == 0)
+		{
+			_playerAWins++;
+		}
+
+		// Otherwise - this is a tie
 	}
 
 	void GameManager::startGame(shared_ptr<BattleBoard> board,
@@ -53,6 +80,8 @@ namespace battleship
 		IBattleshipGameAlgo* currentPlayer = &playerA;
 		bool isPlayerAForfeit = false;
 		bool isPlayerBForfeit = false;
+		int playerAPoints = 0;
+		int playerBPoints = 0;
 
 		while (!isGameOver(board.get(), isPlayerAForfeit, isPlayerBForfeit))
 		{
@@ -92,6 +121,7 @@ namespace battleship
 			else if (attackedGamePiece->_lifeLeft == 0)
 			{	// Sink
 				attackResult = AttackResult::Sink;
+				updateCurrentGamePoints(attackedGamePiece.get(), playerAPoints, playerBPoints);
 			}
 			else
 			{	// Hit
@@ -103,6 +133,7 @@ namespace battleship
 			visualizer.visualizeAttackResults(target.first, target.second, attackResult);
 		}
 
-		visualizer.visualizeEndGame(board, isPlayerAForfeit, isPlayerBForfeit);
+		updateScoreboard(board.get());
+		visualizer.visualizeEndGame(board, _playerAWins, _playerBWins);
 	}
 }

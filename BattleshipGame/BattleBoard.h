@@ -18,9 +18,11 @@ namespace battleship
 	/* Forward Declarations */
 	class BoardBuilder;
 
+	/* Type defs */
 	using GamePiecesDict = unordered_map<pair<int, int>, shared_ptr<GamePiece>>;
 
-	enum class ShipType: char
+	/* Enums & consts */
+	enum class BoardSquare : char
 	{
 		Empty = ' ',
 		Hit = '*',
@@ -28,6 +30,22 @@ namespace battleship
 		RocketShip = 'P',
 		Submarine = 'M',
 		Battleship = 'D'
+	};
+
+	struct ShipType
+	{
+		BoardSquare _representation;
+		int _size;
+		int _points;
+
+		virtual ~ShipType() = default;
+
+		friend class BattleBoard;	// The only class who is allowed to instantiate ShipTypes
+
+	private:
+		ShipType(BoardSquare representation, int size, int points);
+		ShipType(ShipType const&) = delete;	// Disable copying
+		ShipType& operator=(ShipType const&) = delete;	// Disable copying (assignment)
 	};
 
 	enum class Orientation: bool
@@ -47,14 +65,14 @@ namespace battleship
 	public:
 		int _firstX = 0;
 		int _firstY = 0;
-		int _size = 0;
+		const ShipType *const _shipType;
 		Orientation _orient = Orientation::HORIZONTAL;
 		PlayerEnum _player = PlayerEnum::A;
 
 		int _lifeLeft = 0;
 
-		GamePiece(int firstX, int firstY, int size, PlayerEnum player, Orientation orientation);
-		virtual ~GamePiece();
+		GamePiece(int firstX, int firstY, const ShipType *const type, PlayerEnum player, Orientation orientation);
+		virtual ~GamePiece() = default;
 	};
 
 	class BattleBoard
@@ -71,6 +89,12 @@ namespace battleship
 		friend class BoardBuilder;
 
 	private:
+		// Unique instances of 4 known ship types
+		static const ShipType RUBBER_BOAT;
+		static const ShipType ROCKET_SHIP;
+		static const ShipType SUBMARINE;
+		static const ShipType BATTLESHIP;
+
 		char** _matrix = NULL;
 		GamePiecesDict _gamePieces;
 		int _playerAShipCount = 0;
@@ -82,7 +106,8 @@ namespace battleship
 		void initSquare(int x, int y, char type);
 
 		/* Called when the board-matrix is initialized, to assemble game pieces list */
-		void addGamePiece(int firstX, int firstY, int size, PlayerEnum player, Orientation orientation);
+		void addGamePiece(int firstX, int firstY, const ShipType& shipType,
+						  PlayerEnum player, Orientation orientation);
 
 		void sinkShip(GamePiece* pieceToRemove);
 	};

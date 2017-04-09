@@ -13,7 +13,7 @@ namespace battleship
 
 		virtual void visualizeAttackResults(int row, int col, AttackResult attackResults) = 0;
 		virtual void visualizeEndGame(shared_ptr<BattleBoard> board,
-									  bool isPlayerAForfeit, bool isPlayerBForfeit) = 0;
+									  int playerAWins, int playerBWins) = 0;
 	};
 }
 

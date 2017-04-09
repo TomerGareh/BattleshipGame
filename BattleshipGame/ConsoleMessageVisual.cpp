@@ -18,21 +18,21 @@ namespace battleship
 
 	void ConsoleMessageVisual::visualizeAttackResults(int row, int col, AttackResult attackResults)
 	{
-		// TODO: What should we do here?
+		// Console does not notify on attack results
 	}
 
 	void ConsoleMessageVisual::visualizeEndGame(shared_ptr<BattleBoard> board,
-												bool isPlayerAForfeit, bool isPlayerBForfeit)
+												int playerAWins, int playerBWins)
 	{
-		bool isPlayerAWon = (board->getPlayerBShipCount == 0);
-		if (!(isPlayerAForfeit && isPlayerBForfeit))
+		bool isTie = (board->getPlayerAShipCount != 0) && (board->getPlayerBShipCount != 0);
+		if (!isTie)
 		{
 			bool isPlayerAWon = (board->getPlayerBShipCount == 0);
 			cout << "Player " << (isPlayerAWon ? "A" : "B") << " won" << endl;
 		}
 		
 		cout << "Points:" << endl;
-		cout << "Player A: " << "to be implemented. " << endl;
-		cout << "Player B: " << "to be implemented. " << endl;
+		cout << "Player A: " << playerAWins << endl;
+		cout << "Player B: " << playerBWins << endl;
 	}
 }

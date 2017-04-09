@@ -23,10 +23,15 @@ namespace battleship
 					   IGameVisual& visualizer);
 
 	private:
-		bool isPlayerShipsLeft(BattleBoard* board, PlayerEnum player);
-		bool isGameOver(BattleBoard* board, bool isPlayerAForfeit, bool isPlayerBForfeit);
+		int _playerAWins = 0;
+		int _playerBWins = 0;
+
+		bool isPlayerShipsLeft(BattleBoard* board, PlayerEnum player) const;
+		bool isGameOver(BattleBoard* board, bool isPlayerAForfeit, bool isPlayerBForfeit) const;
 		IBattleshipGameAlgo* switchPlayerTurns(IBattleshipGameAlgo& playerA, IBattleshipGameAlgo& playerB,
 											   IBattleshipGameAlgo* currPlayer,
-											   bool isPlayerAForfeit, bool isPlayerBForfeit);
+											   bool isPlayerAForfeit, bool isPlayerBForfeit) const;
+		void updateCurrentGamePoints(const GamePiece *const sankPiece, int& playerAScore, int& playerBScore) const;
+		void updateScoreboard(const BattleBoard *const board);
 	};
 }
