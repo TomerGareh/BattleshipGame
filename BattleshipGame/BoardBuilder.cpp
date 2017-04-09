@@ -275,6 +275,14 @@ namespace battleship
 		// void _board->addGamePiece(int firstRow, int firstCol, int size,
 		//								  PlayerEnum player, Orientation orientation)
 
+		// !!!!
+		// !!!!
+		// !!!!
+		// !!!!
+		// TODO: Tomer - See this when you merge!!
+		// Call: _board->addGamePiece(firstX - 1, firstY - 1 .....)
+		// We need to normalize coordinates from 1-BOARD_SIZE to 0-BOARD_SIZE-1 as the array works
+
 		printErrors();
 
 		return errorQueue.empty();	// Empty error queue means the board is valid
