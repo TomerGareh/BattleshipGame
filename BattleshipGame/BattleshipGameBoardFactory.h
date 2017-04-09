@@ -1,38 +1,32 @@
 #pragma once
 
 #include <memory>
+#include <string>
 
-using std::unique_ptr;
 using std::shared_ptr;
+using std::string;
 
 namespace battleship
 {
-	class IBattleshipGameAlgo;
 	class BattleBoard;
-
-	enum class BattleshipGameAlgoTypeEnum
-	{
-		FILE_GAME_ALGO
-	};
 
 	enum class BattleshipBoardInitTypeEnum
 	{
 		LOAD_BOARD_FROM_FILE
 	};
 
-	class BattleshipGameAlgoFactory
+	class BattleshipGameBoardFactory
 	{
 	public:
-		BattleshipGameAlgoFactory() = delete;
-		~BattleshipGameAlgoFactory() = default;
-
-		static unique_ptr<IBattleshipGameAlgo> createGameAlgo(BattleshipGameAlgoTypeEnum algoType);
+		~BattleshipGameBoardFactory() = delete;	// Disallow allocation of this object
+												// (more precisely - deallocation)
 
 		static shared_ptr<BattleBoard> loadBattleBoard(BattleshipBoardInitTypeEnum loadMethod);
 		static shared_ptr<BattleBoard> loadBattleBoard(BattleshipBoardInitTypeEnum loadMethod, const string& param0);
 
 	private:
 
+		BattleshipGameBoardFactory() = default;	// This class shouldn't be instantiated
 		static shared_ptr<BattleBoard> buildBoardFromFile(const string& path);
 	};
 }

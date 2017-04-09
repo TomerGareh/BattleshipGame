@@ -3,7 +3,9 @@
 #include "BattleshipGameAlgoFactory.h"
 #include "GameFromFileAlgo.h"
 #include "BattleBoard.h"
-#include "BoardBuilder.h"
+#include "GameManager.h"
+#include "IGameVisual.h"
+#include "ConsoleMessageVisual.h"
 
 #include <cstdlib>
 #include <memory>
@@ -23,19 +25,23 @@ int main(int argc, char* argv[])
 	// TODO: load all 3 files here
 	char* path = (argc > 1) ? argv[0] : ".";
 	loadFilesInPath(path);
+	string playerAAttackFile;
+	string playerBAttackFile;
+	// ...
 
 	// Game initialization
-	unique_ptr<IBattleshipGameAlgo> algo =
-		BattleshipGameAlgoFactory::createGameAlgo(BattleshipGameAlgoTypeEnum::FILE_GAME_ALGO);
+	GameFromFileAlgo playerA(playerAAttackFile);
+	GameFromFileAlgo playerB(playerBAttackFile);
 
-
-	auto board = (static_cast<unique_ptr<GameFromFileAlgo>>(algo))->buildBoardFromFile(path);
+	auto board = BattleshipGameAlgoFactory::loadBattleBoard(BattleshipBoardInitTypeEnum::LOAD_BOARD_FROM_FILE);
 	if (NULL == board)
-		return 2; // Some error code
+		return -1; // TODO: Return some predefined error code
 
-	// algo->setBoard();
+	ConsoleMessageVisual visualization;
+	GameManager gameManager;
+	gameManager.startGame(board, playerA, playerB, visualization);
 
-	// TODO: Continue.. Organize here
+	// TODO: Continue.. Print results.. Organize here
 
 	return 0;
 }
