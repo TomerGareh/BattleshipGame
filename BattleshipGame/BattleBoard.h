@@ -90,12 +90,8 @@ namespace battleship
 		void initSquare(int row, int col, char type);
 
 		/* Called when the board-matrix is initialized, to assemble game pieces list */
-<<<<<<< HEAD
 		void addGamePiece(int firstRow, int firstCol, int size, PlayerEnum player, Orientation orientation);
-=======
-		void addGamePiece(int firstX, int firstY, int size, PlayerEnum player, Orientation orientation);
 
 		void sinkShip(GamePiece* pieceToRemove);
->>>>>>> origin/master
 	};
 }

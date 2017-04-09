@@ -15,28 +15,34 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="IBattleshipGameAlgo.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GameFromFileAlgo.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="BattleBoard.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="BattleshipGameAlgoFactory.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MainGame.h">
+    <ClInclude Include="BattleshipGameBoardFactory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BoardBuilder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="IGameVisual.h">
+    <ClInclude Include="ConsoleMessageVisual.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GameFromFileAlgo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GameManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IBattleshipGameAlgo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IGameVisual.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IOUtil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MainGame.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -44,22 +50,28 @@
     <ClCompile Include="BattleBoard.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GameFromFileAlgo.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BattleshipGameAlgoFactory.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MainGame.cpp">
+    <ClCompile Include="BattleshipGameBoardFactory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="BoardBuilder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="IGameVisual.cpp">
+    <ClCompile Include="ConsoleMessageVisual.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GameFromFileAlgo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GameManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="IGameVisual.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="IOUtil.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MainGame.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
