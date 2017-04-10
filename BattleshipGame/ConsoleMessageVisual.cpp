@@ -24,10 +24,10 @@ namespace battleship
 	void ConsoleMessageVisual::visualizeEndGame(shared_ptr<BattleBoard> board,
 												int playerAWins, int playerBWins)
 	{
-		bool isTie = (board->getPlayerAShipCount != 0) && (board->getPlayerBShipCount != 0);
+		bool isTie = ((board->getPlayerAShipCount() != 0) && (board->getPlayerBShipCount() != 0));
 		if (!isTie)
 		{
-			bool isPlayerAWon = (board->getPlayerBShipCount == 0);
+			bool isPlayerAWon = (board->getPlayerBShipCount() == 0);
 			cout << "Player " << (isPlayerAWon ? "A" : "B") << " won" << endl;
 		}
 		

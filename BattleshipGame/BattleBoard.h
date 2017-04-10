@@ -2,11 +2,11 @@
 
 #include <memory>
 #include <string>
-#include <unordered_map>
+#include <map>
 #include <utility>
 
 using std::string;
-using std::unordered_map;
+using std::map;
 using std::pair;
 using std::shared_ptr;
 
@@ -17,9 +17,10 @@ namespace battleship
 
 	/* Forward Declarations */
 	class BoardBuilder;
+	struct GamePiece;
 
 	/* Type defs */
-	using GamePiecesDict = unordered_map<pair<int, int>, shared_ptr<GamePiece>>;
+	using GamePiecesDict = map<pair<int, int>, shared_ptr<GamePiece>>;
 
 	/* Enums & consts */
 	enum class BoardSquare : char

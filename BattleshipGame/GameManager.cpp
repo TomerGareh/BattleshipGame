@@ -13,7 +13,8 @@ namespace battleship
 
 	bool GameManager::isPlayerShipsLeft(BattleBoard* board, PlayerEnum player) const
 	{
-		int shipsCount = (player == PlayerEnum::A) ? board->getPlayerAShipCount() : board->getPlayerBShipCount;
+		const int shipsCount = (player == PlayerEnum::A) ?
+								board->getPlayerAShipCount() : board->getPlayerBShipCount();
 		return (shipsCount > 0);
 	}
 
@@ -58,11 +59,11 @@ namespace battleship
 
 	void GameManager::updateScoreboard(const BattleBoard *const board)
 	{
-		if (board->getPlayerAShipCount == 0)
+		if (board->getPlayerAShipCount() == 0)
 		{
 			_playerBWins++;
 		}
-		else if (board->getPlayerBShipCount == 0)
+		else if (board->getPlayerBShipCount() == 0)
 		{
 			_playerAWins++;
 		}

@@ -30,9 +30,9 @@ namespace battleship
 		/** Parses the file line by line and invokes the lineParser on each line read.
 		 *  This helper function deals with IO errors and managing external file resources.
 		 */
-		static void parseFile(string filename, function<void(string& nextReadLine)> lineParser);
+		static void parseFile(const string& filename, function<void(string& nextReadLine)> lineParser);
 
 	private:
-		IOUtil();	// This helper class shouldn't be instantiated
+		IOUtil() = default;	// This helper class shouldn't be instantiated
 	};
 }

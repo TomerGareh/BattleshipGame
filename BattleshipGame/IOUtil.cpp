@@ -11,15 +11,6 @@ namespace battleship
 {
 	using std::ifstream;
 
-	IOUtil::IOUtil()
-	{
-	}
-
-
-	IOUtil::~IOUtil()
-	{
-	}
-
 	void IOUtil::replaceIllegalCharacters(string& line, const char replacementChar)
 	{
 		// This lambda expression replaces all non digit and punctuation separator characters with replacementChar
@@ -40,7 +31,7 @@ namespace battleship
 		line.erase(end_pos, line.end());
 	}
 
-	void IOUtil::parseFile(string filename, function<void(string& nextReadLine)> lineParser)
+	void IOUtil::parseFile(const string& filename, function<void(string& nextReadLine)> lineParser)
 	{
 		string nextLine;
 		ifstream fs(filename);

@@ -3,8 +3,10 @@
 #include "IBattleshipGameAlgo.h"
 #include <vector>
 #include <utility>
+#include <string>
 
 using std::vector;
+using std::string;
 
 /** A player algorithm that relies on a predefined moves list that is read from an
  *	external file. The player will play until he wins / loses / his move list is over,
@@ -13,7 +15,7 @@ using std::vector;
 class GameFromFileAlgo : public IBattleshipGameAlgo
 {
 public:
-	GameFromFileAlgo(string& attackFile);
+	GameFromFileAlgo(const string& attackFile);
 
 	virtual ~GameFromFileAlgo() = default;
 
@@ -33,5 +35,5 @@ private:
 	vector<std::pair<int, int>> _predefinedMoves;
 
 	/** Populates the player's moves list with attack moves read from <filename> */
-	void populateMovesFromFile(string& filename);
+	void populateMovesFromFile(const string& filename);
 };

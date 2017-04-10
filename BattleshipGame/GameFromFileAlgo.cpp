@@ -3,9 +3,8 @@
 #include "BattleBoard.h"
 
 using namespace battleship;
-using std::string;
 
-void GameFromFileAlgo::populateMovesFromFile(string& filename)
+void GameFromFileAlgo::populateMovesFromFile(const string& filename)
 {
 	// This line-parser logic will clean the line string from illegal characters and spaces,
 	// and then attempt to break it to tokens and look for a pair of numbers.
@@ -16,7 +15,7 @@ void GameFromFileAlgo::populateMovesFromFile(string& filename)
 	auto& moveListRef = _predefinedMoves;
 	auto lineParser = [moveListRef](string& nextLine) mutable
 	{
-		IOUtil::replaceIllegalCharacters(nextLine, ' ');
+		IOUtil::replaceIllegalCharacters(nextLine, (char)BoardSquare::Empty);
 		IOUtil::removeLeadingTrailingSpaces(nextLine);
 
 		// Search for punctuation delimeter, if not found this is an illegal row, skip it (do nothing)
@@ -46,7 +45,7 @@ void GameFromFileAlgo::populateMovesFromFile(string& filename)
 	IOUtil::parseFile(filename, lineParser);
 }
 
-GameFromFileAlgo::GameFromFileAlgo(string& attackFile): IBattleshipGameAlgo()
+GameFromFileAlgo::GameFromFileAlgo(const string& attackFile): IBattleshipGameAlgo()
 {
 	// Build player move list from attack file contents
 	populateMovesFromFile(attackFile);

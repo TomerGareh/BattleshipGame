@@ -70,6 +70,7 @@ namespace battleship
 	private:
 		class ShipMask
 		{
+		public:
 			typedef list<tuple<int, int, char>> ShipMaskList;
 			typedef unique_ptr<ShipMaskList> ShipMaskListPtr;
 			

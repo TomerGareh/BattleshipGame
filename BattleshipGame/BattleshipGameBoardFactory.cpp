@@ -28,11 +28,13 @@ namespace battleship
 					break;
 				}
 				nextCharUpper = toupper(nextChar);
-				if ((nextCharUpper != ' ') && (nextCharUpper != (char)ShipType::RubberBoat)
-					&& (nextCharUpper != (char)ShipType::RocketShip) && (nextCharUpper != (char)ShipType::Submarine)
-					&& (nextCharUpper != (char)ShipType::Battleship))
+				if ((nextCharUpper != (char)BoardSquare::Empty) &&
+					(nextCharUpper != (char)BoardSquare::RubberBoat) &&
+					(nextCharUpper != (char)BoardSquare::RocketShip) &&
+					(nextCharUpper != (char)BoardSquare::Submarine) &&
+					(nextCharUpper != (char)BoardSquare::Battleship))
 				{
-					nextChar = ' ';
+					nextChar = (char)BoardSquare::Empty;
 				}
 				builder.addPiece(i, j, nextChar);
 			}

@@ -66,7 +66,7 @@ namespace battleship
 	void BattleBoard::addGamePiece(int firstRow, int firstCol, const ShipType& shipType,
 								   PlayerEnum player, Orientation orientation)
 	{
-		auto gamePieceVal = std::make_shared<GamePiece>(firstRow, firstCol, shipType, player, orientation);
+		auto gamePieceVal = std::make_shared<GamePiece>(firstRow, firstCol, &shipType, player, orientation);
 
 		int deltaRow = (orientation == Orientation::VERTICAL) ? 1 : 0;
 		int deltaCol = (orientation == Orientation::HORIZONTAL) ? 1 : 0;
@@ -96,27 +96,27 @@ namespace battleship
 
 	void BattleBoard::sinkShip(GamePiece* pieceToRemove)
 	{
-		int deltaX = (pieceToRemove->_orient == Orientation::HORIZONTAL) ? 1 : 0;
-		int deltaY = (pieceToRemove->_orient == Orientation::VERTICAL) ? 1 : 0;
-		int xOffset = 0;
-		int yOffset = 0;
+		int deltaRow = (pieceToRemove->_orient == Orientation::VERTICAL) ? 1 : 0;
+		int deltaCol = (pieceToRemove->_orient == Orientation::HORIZONTAL) ? 1 : 0;
+		int rowOffset = 0;
+		int colOffset = 0;
 
 		int pieceSize = pieceToRemove->_shipType->_size;
 
 		for (int index = 0; index < pieceSize; index++)
 		{
-			int curX = pieceToRemove->_firstX + xOffset;
-			int curY = pieceToRemove->_firstY + yOffset;
+			int curRow = pieceToRemove->_firstRow + rowOffset;
+			int curCol = pieceToRemove->_firstCol + colOffset;
 
 			// Remove from game-pieces dictionary
-			auto gamePieceKey = std::make_pair(curX, curY);
+			auto gamePieceKey = std::make_pair(curRow, curCol);
 			_gamePieces.erase(gamePieceKey);
 
 			// Remove from game board matrix
-			_matrix[curX][curY] = (char)BoardSquare::Empty;
+			_matrix[curRow][curCol] = (char)BoardSquare::Empty;
 
-			xOffset += deltaX;
-			yOffset += deltaY;
+			rowOffset += deltaRow;
+			colOffset += deltaCol;
 		}
 
 		// Reduce ship count
@@ -128,8 +128,8 @@ namespace battleship
 
 	const shared_ptr<const GamePiece> BattleBoard::executeAttack(pair<int, int> target)
 	{
-		int coordX = target.first;
-		int coordY = target.second;
+		int coordRow = target.first;
+		int coordCol = target.second;
 		auto dictIter = _gamePieces.find(target);
 		shared_ptr<GamePiece> gamePiece = NULL;
 
@@ -138,7 +138,7 @@ namespace battleship
 			gamePiece = dictIter->second;
 
 			// Ship got hit in this part for the first time, reduce life
-			if (_matrix[coordX][coordY] != (char)BoardSquare::Hit)
+			if (_matrix[coordRow][coordCol] != (char)BoardSquare::Hit)
 				gamePiece->_lifeLeft--;
 
 			if (gamePiece->_lifeLeft == 0)
@@ -147,7 +147,7 @@ namespace battleship
 			}
 			else
 			{	// Ship hit, but not sinked
-				_matrix[coordX][coordY] = (char)BoardSquare::Hit;
+				_matrix[coordRow][coordCol] = (char)BoardSquare::Hit;
 			}
 		}
 
@@ -159,7 +159,7 @@ namespace battleship
 
 	const char** BattleBoard::getBoardMatrix() const
 	{
-		return _matrix;
+		return const_cast<const char**>(_matrix);
 	}
 
 	const int BattleBoard::getPlayerAShipCount() const

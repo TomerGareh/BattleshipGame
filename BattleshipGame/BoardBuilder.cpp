@@ -5,7 +5,7 @@ namespace battleship
 {
 	BoardBuilder::BoardBuilder()
 	{
-		_board = std::make_shared<BattleBoard>();	// Only BoardBuilder can instantiate this class
+		_board = std::shared_ptr<BattleBoard>(new BattleBoard());	// Only BoardBuilder can instantiate this class
 	}
 
 	BoardBuilder::~BoardBuilder()
@@ -18,31 +18,59 @@ namespace battleship
 
 		switch (ship)
 		{
-		case BoardSquare::RubberBoat:
-			mask->insert(mask->end(), {std::make_tuple(-1, 0, ' '), std::make_tuple(0, 1, ' '), std::make_tuple(1, 0, ' '),
-									   std::make_tuple(0, -1, ' ')});
-			break;
-		case BoardSquare::RocketShip:
-			mask->insert(mask->end(), {std::make_tuple(0, 1, (char)ShipType::RocketShip), std::make_tuple(-1, 0, ' '),
-									   std::make_tuple(-1, 1, ' '), std::make_tuple(0, 2, ' '), std::make_tuple(1, 1, ' '),
-									   std::make_tuple(1, 0, ' '), std::make_tuple(0, -1, ' ')});
-			break;
-		case BoardSquare::Submarine:
-			mask->insert(mask->end(), {std::make_tuple(0, 1, (char)ShipType::Submarine), std::make_tuple(0, 2, (char)ShipType::Submarine),
-									   std::make_tuple(-1, 0, ' '), std::make_tuple(-1, 1, ' '), std::make_tuple(-1, 2, ' '),
-									   std::make_tuple(0, 3, ' '), std::make_tuple(1, 2, ' '), std::make_tuple(1, 1, ' '),
-									   std::make_tuple(1, 0, ' '), std::make_tuple(0, -1, ' ')});
-			break;
-		case BoardSquare::Battleship:
-			mask->insert(mask->end(), {std::make_tuple(0, 1, (char)ShipType::Battleship), std::make_tuple(0, 2, (char)ShipType::Battleship),
-									   std::make_tuple(0, 3, (char)ShipType::Battleship), std::make_tuple(-1, 0, ' '),
-									   std::make_tuple(-1, 1, ' '), std::make_tuple(-1, 2, ' '), std::make_tuple(-1, 3, ' '),
-									   std::make_tuple(0, 4, ' '), std::make_tuple(1, 3, ' '), std::make_tuple(1, 2, ' '),
-									   std::make_tuple(1, 1, ' '), std::make_tuple(1, 0, ' '), std::make_tuple(0, -1, ' ')});
-			break;
-		default:
-			mask = NULL;
-			break;
+			case BoardSquare::RubberBoat:
+			{
+				mask->insert(mask->end(), { std::make_tuple(-1, 0, (char)BoardSquare::Empty), std::make_tuple(0, 1, (char)BoardSquare::Empty),
+										    std::make_tuple(1, 0, (char)BoardSquare::Empty), std::make_tuple(0, -1, (char)BoardSquare::Empty) });
+				break;
+			}
+			case BoardSquare::RocketShip:
+			{
+				mask->insert(mask->end(), { std::make_tuple(0, 1, (char)BoardSquare::RocketShip),
+											std::make_tuple(-1, 0, (char)BoardSquare::Empty),
+											std::make_tuple(-1, 1, (char)BoardSquare::Empty),
+											std::make_tuple(0, 2, (char)BoardSquare::Empty),
+											std::make_tuple(1, 1, (char)BoardSquare::Empty),
+											std::make_tuple(1, 0, (char)BoardSquare::Empty),
+											std::make_tuple(0, -1, (char)BoardSquare::Empty) });
+				break;
+			}
+			case BoardSquare::Submarine:
+			{
+				mask->insert(mask->end(), { std::make_tuple(0, 1, (char)BoardSquare::Submarine),
+											std::make_tuple(0, 2, (char)BoardSquare::Submarine),
+											std::make_tuple(-1, 0, (char)BoardSquare::Empty),
+											std::make_tuple(-1, 1, (char)BoardSquare::Empty),
+											std::make_tuple(-1, 2, (char)BoardSquare::Empty),
+											std::make_tuple(0, 3, (char)BoardSquare::Empty),
+											std::make_tuple(1, 2, (char)BoardSquare::Empty),
+											std::make_tuple(1, 1, (char)BoardSquare::Empty),
+											std::make_tuple(1, 0, (char)BoardSquare::Empty),
+											std::make_tuple(0, -1, (char)BoardSquare::Empty) });
+				break;
+			}
+			case BoardSquare::Battleship:
+			{
+				mask->insert(mask->end(), { std::make_tuple(0, 1, (char)BoardSquare::Battleship),
+											std::make_tuple(0, 2, (char)BoardSquare::Battleship),
+											std::make_tuple(0, 3, (char)BoardSquare::Battleship),
+											std::make_tuple(-1, 0, (char)BoardSquare::Empty),
+											std::make_tuple(-1, 1, (char)BoardSquare::Empty),
+											std::make_tuple(-1, 2, (char)BoardSquare::Empty),
+											std::make_tuple(-1, 3, (char)BoardSquare::Empty),
+										    std::make_tuple(0, 4, (char)BoardSquare::Empty),
+											std::make_tuple(1, 3, (char)BoardSquare::Empty),
+											std::make_tuple(1, 2, (char)BoardSquare::Empty),
+										    std::make_tuple(1, 1, (char)BoardSquare::Empty),
+											std::make_tuple(1, 0, (char)BoardSquare::Empty),
+											std::make_tuple(0, -1, (char)BoardSquare::Empty) });
+				break;
+			}
+			default:
+			{
+				mask = NULL;
+				break;
+			}
 		}
 
 		matchSizeHorizontal = 1;
@@ -73,7 +101,7 @@ namespace battleship
 
 			if (horizontalException && verticalException)
 			{
-				if (currMask != ' ')
+				if (currMask != (char)BoardSquare::Empty)
 				{
 					isHorizontalMask = false;
 					isVerticalMask = false;
@@ -89,7 +117,7 @@ namespace battleship
 			
 			if ((!horizontalException) && (board->_matrix[row + i][col + j] == currMask))
 			{
-				if (currMask != ' ')
+				if (currMask != (char)BoardSquare::Empty)
 				{
 					matchSizeHorizontal++;
 				}
@@ -101,7 +129,7 @@ namespace battleship
 			
 			if ((!verticalException) && (board->_matrix[row + j][col + i] == currMask))
 			{
-				if (currMask != ' ')
+				if (currMask != (char)BoardSquare::Empty)
 				{
 					matchSizeVertical++;
 				}
@@ -114,7 +142,7 @@ namespace battleship
 			if ((!horizontalException) && (!verticalException)
 				&& (board->_matrix[row + i][col + j] != currMask) && (board->_matrix[row + j][col + i] != currMask))
 			{
-				if (currMask != ' ')
+				if (currMask != (char)BoardSquare::Empty)
 				{
 					wrongSize = true;
 				}
@@ -162,7 +190,6 @@ namespace battleship
 		PlayerEnum player;
 		bool visitedBoard[BOARD_SIZE][BOARD_SIZE];
 		bool isMatch;
-		int matchSize;
 		Orientation orient;
 		for (int i = 0; i < BOARD_SIZE; i++)
 		{
@@ -170,78 +197,85 @@ namespace battleship
 			{
 				currSquare = _board->_matrix[i][j];
 				player = (isupper(currSquare)) ? PlayerEnum::A : PlayerEnum::B;
+				const ShipType* shipType = NULL;
 
 				switch (currSquare)
 				{
-				case (char)ShipType::RubberBoat:
-					isMatch = rubberMask->applyMask(_board, i, j, player);
-					if (rubberMask->matchSizeHorizontal >= rubberMask->matchSizeVertical)
+					case (char)BoardSquare::RubberBoat:
 					{
-						matchSize = rubberMask->matchSizeHorizontal;
-						orient = Orientation::HORIZONTAL;
+						isMatch = rubberMask->applyMask(_board, i, j, player);
+						shipType = &BattleBoard::RUBBER_BOAT;
+						if (rubberMask->matchSizeHorizontal >= rubberMask->matchSizeVertical)
+						{
+							orient = Orientation::HORIZONTAL;
+						}
+						else
+						{
+							orient = Orientation::VERTICAL;
+						}
+						rubberMask->resetMatchSizes();
+						break;
 					}
-					else
+					case (char)BoardSquare::RocketShip:
 					{
-						matchSize = rubberMask->matchSizeVertical;
-						orient = Orientation::VERTICAL;
+						isMatch = rocketMask->applyMask(_board, i, j, player);
+						shipType = &BattleBoard::ROCKET_SHIP;
+						if (rocketMask->matchSizeHorizontal >= rocketMask->matchSizeVertical)
+						{
+							orient = Orientation::HORIZONTAL;
+						}
+						else
+						{
+							orient = Orientation::VERTICAL;
+						}
+						rocketMask->resetMatchSizes();
+						break;
 					}
-					rubberMask->resetMatchSizes();
-					break;
-				case (char)ShipType::RocketShip:
-					isMatch = rocketMask->applyMask(_board, i, j, player);
-					if (rocketMask->matchSizeHorizontal >= rocketMask->matchSizeVertical)
+					case (char)BoardSquare::Submarine:
 					{
-						matchSize = rocketMask->matchSizeHorizontal;
-						orient = Orientation::HORIZONTAL;
+						isMatch = submarineMask->applyMask(_board, i, j, player);
+						shipType = &BattleBoard::SUBMARINE;
+						if (submarineMask->matchSizeHorizontal >= submarineMask->matchSizeVertical)
+						{
+							orient = Orientation::HORIZONTAL;
+						}
+						else
+						{
+							orient = Orientation::VERTICAL;
+						}
+						submarineMask->resetMatchSizes();
+						break;
 					}
-					else
+					case (char)BoardSquare::Battleship:
 					{
-						matchSize = rocketMask->matchSizeVertical;
-						orient = Orientation::VERTICAL;
+						isMatch = battleshipMask->applyMask(_board, i, j, player);
+						shipType = &BattleBoard::BATTLESHIP;
+						if (battleshipMask->matchSizeHorizontal >= battleshipMask->matchSizeVertical)
+						{
+							orient = Orientation::HORIZONTAL;
+						}
+						else
+						{
+							orient = Orientation::VERTICAL;
+						}
+						battleshipMask->resetMatchSizes();
+						break;
 					}
-					rocketMask->resetMatchSizes();
-					break;
-				case (char)ShipType::Submarine:
-					isMatch = submarineMask->applyMask(_board, i, j, player);
-					if (submarineMask->matchSizeHorizontal >= submarineMask->matchSizeVertical)
+					default:
 					{
-						matchSize = submarineMask->matchSizeHorizontal;
-						orient = Orientation::HORIZONTAL;
+						isMatch = false;
+						break;
 					}
-					else
-					{
-						matchSize = submarineMask->matchSizeVertical;
-						orient = Orientation::VERTICAL;
-					}
-					submarineMask->resetMatchSizes();
-					break;
-				case (char)ShipType::Battleship:
-					isMatch = battleshipMask->applyMask(_board, i, j, player);
-					if (battleshipMask->matchSizeHorizontal >= battleshipMask->matchSizeVertical)
-					{
-						matchSize = battleshipMask->matchSizeHorizontal;
-						orient = Orientation::HORIZONTAL;
-					}
-					else
-					{
-						matchSize = battleshipMask->matchSizeVertical;
-						orient = Orientation::VERTICAL;
-					}
-					battleshipMask->resetMatchSizes();
-					break;
-				default:
-					isMatch = false;
-					break;
 				}
 
-				if (currSquare != ' ')
+				if (currSquare != (char)BoardSquare::Empty)
 				{
-					markVisitedSquares(visitedBoard, i, j, matchSize, orient);
+					markVisitedSquares(visitedBoard, i, j, shipType->_size, orient);
 				}
 
 				if (isMatch)
 				{
-					_board->addGamePiece(i, j, matchSize, player, orient);
+					_board->addGamePiece(i, j, *shipType, player, orient);
 				}
 
 				//error queue
