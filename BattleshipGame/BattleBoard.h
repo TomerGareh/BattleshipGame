@@ -27,6 +27,7 @@ namespace battleship
 	{
 		Empty = ' ',
 		Hit = '*',
+		Bombared = '@',
 		RubberBoat = 'B',
 		RocketShip = 'P',
 		Submarine = 'M',
@@ -58,7 +59,8 @@ namespace battleship
 	enum class PlayerEnum : bool
 	{
 		A,
-		B
+		B,
+		NONE
 	};
 
 	struct GamePiece
@@ -86,6 +88,7 @@ namespace battleship
 		const char** getBoardMatrix() const;
 		const int getPlayerAShipCount() const;
 		const int getPlayerBShipCount() const;
+		const PlayerEnum whichPlayerOwnsSquare(int row, int col) const;
 
 		friend class BoardBuilder;
 

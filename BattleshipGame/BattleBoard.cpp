@@ -172,5 +172,20 @@ namespace battleship
 		return _playerBShipCount;
 	}
 
+	const PlayerEnum BattleBoard::whichPlayerOwnsSquare(int row, int col) const
+	{
+		auto dictIter = _gamePieces.find(std::make_pair(row, col));
+
+		if (dictIter == _gamePieces.end())
+		{
+			return PlayerEnum::NONE;
+		}
+		else
+		{
+			shared_ptr<GamePiece> gamePiece = dictIter->second;
+			return gamePiece->_player;
+		}
+	}
+
 	#pragma endregion
 }

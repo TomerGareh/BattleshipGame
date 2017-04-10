@@ -1,9 +1,5 @@
 #include "ConsoleMessageVisual.h"
 #include "BattleBoard.h"
-#include <iostream>
-
-using std::cout;
-using std::endl;
 
 namespace battleship
 {
@@ -16,23 +12,15 @@ namespace battleship
 	{
 	}
 
-	void ConsoleMessageVisual::visualizeAttackResults(int row, int col, AttackResult attackResults)
+	void ConsoleMessageVisual::visualizeBeginGame(shared_ptr<BattleBoard> board)
+	{
+		// Console doesn't executes any setup logic in the beginning of the game
+	}
+
+	void ConsoleMessageVisual::visualizeAttackResults(shared_ptr<BattleBoard> board,
+													  int row, int col, AttackResult attackResults)
 	{
 		// Console does not notify on attack results
 	}
 
-	void ConsoleMessageVisual::visualizeEndGame(shared_ptr<BattleBoard> board,
-												int playerAWins, int playerBWins)
-	{
-		bool isTie = ((board->getPlayerAShipCount() != 0) && (board->getPlayerBShipCount() != 0));
-		if (!isTie)
-		{
-			bool isPlayerAWon = (board->getPlayerBShipCount() == 0);
-			cout << "Player " << (isPlayerAWon ? "A" : "B") << " won" << endl;
-		}
-		
-		cout << "Points:" << endl;
-		cout << "Player A: " << playerAWins << endl;
-		cout << "Player B: " << playerBWins << endl;
-	}
 }

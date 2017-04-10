@@ -131,7 +131,7 @@ namespace battleship
 
 			playerA.notifyOnAttackResult(attackingPlayerNumber, target.first, target.second, attackResult);
 			playerB.notifyOnAttackResult(attackingPlayerNumber, target.first, target.second, attackResult);
-			visualizer.visualizeAttackResults(target.first, target.second, attackResult);
+			visualizer.visualizeAttackResults(board, target.first, target.second, attackResult);
 		}
 
 		updateScoreboard(board.get());

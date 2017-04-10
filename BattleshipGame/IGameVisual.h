@@ -11,9 +11,11 @@ namespace battleship
 		IGameVisual();
 		virtual ~IGameVisual();
 
-		virtual void visualizeAttackResults(int row, int col, AttackResult attackResults) = 0;
+		virtual void visualizeBeginGame(shared_ptr<BattleBoard> board) = 0;
+		virtual void visualizeAttackResults(shared_ptr<BattleBoard> board,
+											int row, int col, AttackResult attackResults) = 0;
 		virtual void visualizeEndGame(shared_ptr<BattleBoard> board,
-									  int playerAWins, int playerBWins) = 0;
+									  int playerAWins, int playerBWins);
 	};
 }
 
