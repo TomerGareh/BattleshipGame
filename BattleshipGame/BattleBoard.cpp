@@ -169,7 +169,7 @@ namespace battleship
 
 	const int BattleBoard::getPlayerBShipCount() const
 	{
-		return _playerBShipCount
+		return _playerBShipCount;
 	}
 
 	#pragma endregion
