@@ -6,6 +6,7 @@
 #include "GameManager.h"
 #include "IGameVisual.h"
 #include "ConsoleMessageVisual.h"
+#include "IOUtil.h"
 
 #include <cstdlib>
 #include <memory>
@@ -15,16 +16,11 @@ using namespace battleship;
 using std::unique_ptr;
 using std::shared_ptr;
 
-void loadFilesInPath(char* path)
-{
-	// system("dir /b /s /a-d * > file_names.txt");
-}
-
 int main(int argc, char* argv[])
 {
 	// TODO: load all 3 files here
 	char* path = (argc > 1) ? argv[0] : ".";
-	loadFilesInPath(path);
+	IOUtil::loadFilesInPath(path);
 	string playerAAttackFile;
 	string playerBAttackFile;
 	// ...

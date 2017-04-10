@@ -1,5 +1,6 @@
 #include "IOUtil.h"
 #include <iostream>
+#include <stdio.h>
 #include <fstream>
 #include <string>
 #include <algorithm>
@@ -57,5 +58,12 @@ namespace battleship
 			std::cerr << "Error: IO error occured while reading file " << filename << std::endl;
 
 		fs.close();
+	}
+
+	void IOUtil::loadFilesInPath(const string& path)
+	{
+		char* systemCommand;
+		sprintf(systemCommand, "2>NUL dir /a-d /b %s > filenames.txt", path);
+		system(systemCommand);
 	}
 }

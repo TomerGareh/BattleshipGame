@@ -32,6 +32,8 @@ namespace battleship
 		 */
 		static void parseFile(const string& filename, function<void(string& nextReadLine)> lineParser);
 
+		static void loadFilesInPath(const string& path);
+
 	private:
 		IOUtil() = default;	// This helper class shouldn't be instantiated
 	};
