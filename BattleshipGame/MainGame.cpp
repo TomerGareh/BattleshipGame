@@ -1,6 +1,6 @@
 #include "MainGame.h"
 #include "IBattleshipGameAlgo.h"
-#include "BattleshipGameAlgoFactory.h"
+#include "BattleshipGameBoardFactory.h"
 #include "GameFromFileAlgo.h"
 #include "BattleBoard.h"
 #include "GameManager.h"
@@ -33,7 +33,7 @@ int main(int argc, char* argv[])
 	GameFromFileAlgo playerA(playerAAttackFile);
 	GameFromFileAlgo playerB(playerBAttackFile);
 
-	auto board = BattleshipGameAlgoFactory::loadBattleBoard(BattleshipBoardInitTypeEnum::LOAD_BOARD_FROM_FILE);
+	auto board = BattleshipGameBoardFactory::loadBattleBoard(BattleshipBoardInitTypeEnum::LOAD_BOARD_FROM_FILE);
 	if (NULL == board)
 		return -1; // TODO: Return some predefined error code
 

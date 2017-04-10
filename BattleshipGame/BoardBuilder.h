@@ -63,7 +63,7 @@ namespace battleship
 		// Typedefs
 		using ErrorPriorityFunction = function<bool(const BoardInitializeError&, const BoardInitializeError&)>;
 
-		BoardBuilder* addPiece(int x, int y, char type);
+		BoardBuilder* addPiece(int row, int col, char type);
 
 		shared_ptr<BattleBoard> build();
 
@@ -75,17 +75,25 @@ namespace battleship
 			
 			ShipMaskListPtr mask;
 
+			int matchSizeHorizontal;
+			int matchSizeVertical;
+			bool wrongSize;
+			bool adjacentShips;
+
 			ShipMask(BoardSquare ship);
 
 			~ShipMask();
 
-			bool applyMask(const char board[BOARD_SIZE][BOARD_SIZE], tuple<int, int> pos, bool isPlayerA,
-				bool& wrongSize, bool& adjacentShips, bool& horizontalMatch);
+			bool applyMask(const shared_ptr<BattleBoard> board, int row, int col, PlayerEnum player);
+
+			void resetMatchSizes();
 
 			friend class BoardBuilder;
 		};
 
 		shared_ptr<BattleBoard> _board;
+
+		void markVisitedSquares(bool visitedBoard[BOARD_SIZE][BOARD_SIZE], int row, int col, int size, Orientation orient);
 
 		bool isValidBoard();
 

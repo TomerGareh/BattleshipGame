@@ -1,3 +1,4 @@
+#include <fstream>
 #include "BattleshipGameBoardFactory.h"
 #include "BattleBoard.h"
 #include "BoardBuilder.h"
@@ -14,19 +15,34 @@ namespace battleship
 		// See example at GameFromFileAlgo - populateFromFile
 		/* -----------*/
 		std::ifstream fin(path);
-		char nextChar;
+		char nextChar, nextCharUpper;
+		bool isEOF;
 		for (int i = 0; i < BOARD_SIZE; i++)
 		{
 			for (int j = 0; j < BOARD_SIZE; j++)
 			{
 				fin.get(nextChar);
-				if ((nextChar == '\n') || (nextChar == '\r\n') || (nextChar == EOF))
+				isEOF = fin.eof();
+				if ((nextChar == '\n') || (nextChar == '\r\n') || isEOF)
 				{
 					break;
 				}
+				nextCharUpper = toupper(nextChar);
+				if ((nextCharUpper != ' ') && (nextCharUpper != (char)ShipType::RubberBoat)
+					&& (nextCharUpper != (char)ShipType::RocketShip) && (nextCharUpper != (char)ShipType::Submarine)
+					&& (nextCharUpper != (char)ShipType::Battleship))
+				{
+					nextChar = ' ';
+				}
 				builder.addPiece(i, j, nextChar);
 			}
+			if (isEOF)
+			{
+				break;
+			}
 		}
+
+		fin.close();
 		/* -----------*/
 
 		auto board = builder.build();

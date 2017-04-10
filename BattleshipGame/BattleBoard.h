@@ -63,15 +63,15 @@ namespace battleship
 	struct GamePiece
 	{
 	public:
-		int _firstX = 0;
-		int _firstY = 0;
+		int _firstRow = 0;
+		int _firstCol = 0;
 		const ShipType *const _shipType;
 		Orientation _orient = Orientation::HORIZONTAL;
 		PlayerEnum _player = PlayerEnum::A;
 
 		int _lifeLeft = 0;
 
-		GamePiece(int firstX, int firstY, const ShipType *const type, PlayerEnum player, Orientation orientation);
+		GamePiece(int firstRow, int firstCol, const ShipType *const type, PlayerEnum player, Orientation orientation);
 		virtual ~GamePiece() = default;
 	};
 
@@ -103,10 +103,10 @@ namespace battleship
 		BattleBoard();
 
 		/* Edits the board, without adding any game-pieces */
-		void initSquare(int x, int y, char type);
+		void initSquare(int row, int col, char type);
 
 		/* Called when the board-matrix is initialized, to assemble game pieces list */
-		void addGamePiece(int firstX, int firstY, const ShipType& shipType,
+		void addGamePiece(int firstRow, int firstCol, const ShipType& shipType,
 						  PlayerEnum player, Orientation orientation);
 
 		void sinkShip(GamePiece* pieceToRemove);
