@@ -62,8 +62,11 @@ namespace battleship
 
 	void IOUtil::loadFilesInPath(const string& path)
 	{
-		char* systemCommand;
-		sprintf(systemCommand, "2>NUL dir /a-d /b %s > filenames.txt", path);
+		const int BUFFER_SIZE = 1024;
+		char systemCommand[BUFFER_SIZE];
+
+		// Use the safer sprintf_s since Visual Studio throws warnings on sprintf due to potential misuse
+		sprintf_s(systemCommand, BUFFER_SIZE, "2>NUL dir /a-d /b %s > filenames.txt", path);
 		system(systemCommand);
 	}
 }

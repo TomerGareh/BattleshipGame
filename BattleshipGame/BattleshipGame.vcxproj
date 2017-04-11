@@ -120,6 +120,7 @@
     <ClInclude Include="IGameVisual.h" />
     <ClInclude Include="IOUtil.h" />
     <ClInclude Include="MainGame.h" />
+    <ClInclude Include="TextualGuiVisual.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BattleBoard.cpp" />
@@ -131,6 +132,7 @@
     <ClCompile Include="IGameVisual.cpp" />
     <ClCompile Include="IOUtil.cpp" />
     <ClCompile Include="MainGame.cpp" />
+    <ClCompile Include="TextualGuiVisual.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

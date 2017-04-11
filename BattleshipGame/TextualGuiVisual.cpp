@@ -47,6 +47,8 @@ namespace battleship
 		{
 			color = PLAYER_A_COLOR_MAPPING.at(BoardSquare::Empty);
 		}
+
+		return color;
 	}
 
 	void TextualGuiVisual::printBoard(shared_ptr<BattleBoard> board)

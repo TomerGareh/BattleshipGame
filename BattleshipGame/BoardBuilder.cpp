@@ -190,6 +190,7 @@ namespace battleship
 		PlayerEnum player;
 		bool visitedBoard[BOARD_SIZE][BOARD_SIZE];
 		bool isMatch;
+		int matchSize;
 		Orientation orient;
 		for (int i = 0; i < BOARD_SIZE; i++)
 		{
@@ -207,10 +208,12 @@ namespace battleship
 						shipType = &BattleBoard::RUBBER_BOAT;
 						if (rubberMask->matchSizeHorizontal >= rubberMask->matchSizeVertical)
 						{
+							matchSize = rubberMask->matchSizeHorizontal;
 							orient = Orientation::HORIZONTAL;
 						}
 						else
 						{
+							matchSize = rubberMask->matchSizeVertical;
 							orient = Orientation::VERTICAL;
 						}
 						rubberMask->resetMatchSizes();
@@ -222,10 +225,12 @@ namespace battleship
 						shipType = &BattleBoard::ROCKET_SHIP;
 						if (rocketMask->matchSizeHorizontal >= rocketMask->matchSizeVertical)
 						{
+							matchSize = rocketMask->matchSizeHorizontal;
 							orient = Orientation::HORIZONTAL;
 						}
 						else
 						{
+							matchSize = rocketMask->matchSizeVertical;
 							orient = Orientation::VERTICAL;
 						}
 						rocketMask->resetMatchSizes();
@@ -237,10 +242,12 @@ namespace battleship
 						shipType = &BattleBoard::SUBMARINE;
 						if (submarineMask->matchSizeHorizontal >= submarineMask->matchSizeVertical)
 						{
+							matchSize = submarineMask->matchSizeHorizontal;
 							orient = Orientation::HORIZONTAL;
 						}
 						else
 						{
+							matchSize = submarineMask->matchSizeVertical;
 							orient = Orientation::VERTICAL;
 						}
 						submarineMask->resetMatchSizes();
@@ -252,10 +259,12 @@ namespace battleship
 						shipType = &BattleBoard::BATTLESHIP;
 						if (battleshipMask->matchSizeHorizontal >= battleshipMask->matchSizeVertical)
 						{
+							matchSize = battleshipMask->matchSizeHorizontal;
 							orient = Orientation::HORIZONTAL;
 						}
 						else
 						{
+							matchSize = battleshipMask->matchSizeVertical;
 							orient = Orientation::VERTICAL;
 						}
 						battleshipMask->resetMatchSizes();
@@ -270,7 +279,7 @@ namespace battleship
 
 				if (currSquare != (char)BoardSquare::Empty)
 				{
-					markVisitedSquares(visitedBoard, i, j, shipType->_size, orient);
+					markVisitedSquares(visitedBoard, i, j, matchSize, orient);
 				}
 
 				if (isMatch)
