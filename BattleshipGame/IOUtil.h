@@ -2,14 +2,13 @@
 
 #include <functional>
 #include <string>
+#include <initializer_list>
 
 namespace battleship
 {
 	using std::string;
 	using std::function;
-
-	/** A delimeter character to be used for attack files, to separate pair of coordinates */
-	const char COORDS_DELIM = ',';
+	using std::initializer_list;
 
 	/** A helper class for dealing with IO operations logic common to the entire battleship game. */
 	class IOUtil
@@ -18,10 +17,10 @@ namespace battleship
 		virtual ~IOUtil() = delete;	// Disallow allocation of this helper object
 									// (more precisely - deallocation)
 
-		/** Replaces all illegal characters - which are all characters that are not digits or COORDS_DELIM
+		/** Replaces all illegal characters - which are all characters that are not specified in legalChars
 		 *  with the replacementChar given in the line string.
 		 */
-		static void replaceIllegalCharacters(string& line, const char replacementChar);
+		static void replaceIllegalCharacters(string& line, const char replacementChar, initializer_list<char> legalChars);
 
 		/** Removes all leading and trailing space and tab characters from the string.
 		 */

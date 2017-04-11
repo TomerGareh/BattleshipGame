@@ -12,12 +12,24 @@ namespace battleship
 {
 	using std::ifstream;
 
-	void IOUtil::replaceIllegalCharacters(string& line, const char replacementChar)
+	void IOUtil::replaceIllegalCharacters(string& line, const char replacementChar, initializer_list<char> legalChars)
 	{
-		// This lambda expression replaces all non digit and punctuation separator characters with replacementChar
-		auto isIllegalChar = [](const char& c)
+		// This lambda expression replaces all illegal characters with replacementChar
+		// We compare to all legal possibilities and if we're not one of them -- replace.
+		auto isIllegalChar = [legalChars](const char& c)
 		{
-			return (!((c >= '0') && (c <= '9')) && (c != COORDS_DELIM));
+			bool isLegal = false;
+
+			for (const char& legalC : legalChars)
+			{
+				if (legalC == c)
+				{
+					isLegal = true;
+					break;
+				}
+			}
+
+			return isLegal;
 		};
 
 		std::replace_if(line.begin(), line.end(), isIllegalChar, replacementChar);

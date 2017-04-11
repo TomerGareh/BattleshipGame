@@ -15,12 +15,13 @@ void GameFromFileAlgo::populateMovesFromFile(const string& filename)
 	auto& moveListRef = _predefinedMoves;
 	auto lineParser = [moveListRef](string& nextLine) mutable
 	{
-		IOUtil::replaceIllegalCharacters(nextLine, (char)BoardSquare::Empty);
+		auto legalChars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', COORDS_DELIM };
+		IOUtil::replaceIllegalCharacters(nextLine, (char)BoardSquare::Empty, legalChars);
 		IOUtil::removeLeadingTrailingSpaces(nextLine);
 
 		// Search for punctuation delimeter, if not found this is an illegal row, skip it (do nothing)
 		size_t delim_pos;
-		if ((delim_pos = nextLine.find(COORDS_DELIM)) != string::npos)
+		if ((delim_pos = nextLine.find(GameFromFileAlgo::COORDS_DELIM)) != string::npos)
 		{
 			// Break to tokens
 			string firstToken = nextLine.substr(0, delim_pos);
@@ -31,7 +32,7 @@ void GameFromFileAlgo::populateMovesFromFile(const string& filename)
 			int firstNum = stoi(firstToken);
 			int secondNum = stoi(secondToken);
 
-			// Check if these are legal coordinates
+			// Check if these are legal coordinates, otherwise ignore
 			if ((firstNum >= 1) && (firstNum <= BOARD_SIZE) &&
 				(secondNum >= 1) && (secondNum <= BOARD_SIZE))
 			{

@@ -15,6 +15,10 @@ using std::string;
 class GameFromFileAlgo : public IBattleshipGameAlgo
 {
 public:
+	
+	/** A delimeter character to be used for attack files, to separate pair of coordinates */
+	static const char COORDS_DELIM = ',';
+
 	GameFromFileAlgo(const string& attackFile);
 
 	virtual ~GameFromFileAlgo() = default;
@@ -31,6 +35,7 @@ public:
 	void notifyOnAttackResult(int player, int row, int col, AttackResult result) override;
 
 private:
+
 	/** A list of the player's predefined moves, as read from the external attack file */
 	vector<std::pair<int, int>> _predefinedMoves;
 

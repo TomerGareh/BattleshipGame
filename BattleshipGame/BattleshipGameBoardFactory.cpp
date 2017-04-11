@@ -10,43 +10,63 @@ namespace battleship
 	shared_ptr<BattleBoard> BattleshipGameBoardFactory::buildBoardFromFile(const string& path)
 	{
 		BoardBuilder builder;
+		int rowCounter = 0;
+		int colCounter = 0;
 
-		// TODO: Tomer - use IOUtil
-		// See example at GameFromFileAlgo - populateFromFile
-		/* -----------*/
-		std::ifstream fin(path);
-		char nextChar, nextCharUpper;
-		bool isEOF;
-		for (int i = 0; i < BOARD_SIZE; i++)
+		auto lineParser = [builder, rowCounter, colCounter](string& nextLine) mutable
 		{
-			for (int j = 0; j < BOARD_SIZE; j++)
+			// Read at the first BOARD_SIZE rows, ignore the rest
+			if (rowCounter >= BOARD_SIZE)
+				return;
+
+			auto legalChars =
+				{ 
+					(char)toupper((char)BoardSquare::Empty),
+					(char)toupper((char)BoardSquare::RubberBoat),
+					(char)toupper((char)BoardSquare::RocketShip),
+					(char)toupper((char)BoardSquare::Submarine),
+					(char)toupper((char)BoardSquare::Battleship),
+					(char)tolower((char)BoardSquare::RubberBoat),
+					(char)tolower((char)BoardSquare::RocketShip),
+					(char)tolower((char)BoardSquare::Submarine),
+					(char)tolower((char)BoardSquare::Battleship)
+				};
+			IOUtil::replaceIllegalCharacters(nextLine, (char)BoardSquare::Empty, legalChars);
+
+			// Traverse each character in the row and put into the board
+			for (char& nextChar : nextLine)
 			{
-				fin.get(nextChar);
-				isEOF = fin.eof();
-				if ((nextChar == '\n') || (nextChar == '\r\n') || isEOF)
-				{
+				builder.addPiece(rowCounter, colCounter, nextChar);
+				colCounter++;
+
+				// Read at most BOARD_SIZE characters from each line, skip the rest
+				if (colCounter >= BOARD_SIZE)
 					break;
-				}
-				nextCharUpper = toupper(nextChar);
-				if ((nextCharUpper != (char)BoardSquare::Empty) &&
-					(nextCharUpper != (char)BoardSquare::RubberBoat) &&
-					(nextCharUpper != (char)BoardSquare::RocketShip) &&
-					(nextCharUpper != (char)BoardSquare::Submarine) &&
-					(nextCharUpper != (char)BoardSquare::Battleship))
-				{
-					nextChar = (char)BoardSquare::Empty;
-				}
-				builder.addPiece(i, j, nextChar);
 			}
-			if (isEOF)
+
+			// For rows missing characters - fill the rest with blanks
+			while (colCounter < BOARD_SIZE)
 			{
-				break;
+				builder.addPiece(rowCounter, colCounter, (char)BoardSquare::Empty);
+				colCounter++;
+			}
+
+			rowCounter++;
+		};
+
+		// Start parsing the file, line by line
+		IOUtil::parseFile(path, lineParser);
+
+		// For missing rows - fill rows of blank squares
+		while (rowCounter < BOARD_SIZE)
+		{
+			for (colCounter = 0; colCounter < BOARD_SIZE; colCounter++)
+			{
+				builder.addPiece(rowCounter, colCounter, (char)BoardSquare::Empty);
 			}
 		}
 
-		fin.close();
-		/* -----------*/
-
+		// Finalize the board, perform validation here
 		auto board = builder.build();
 		return board;
 	}
