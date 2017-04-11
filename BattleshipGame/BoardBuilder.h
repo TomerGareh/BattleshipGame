@@ -21,13 +21,19 @@ namespace battleship
 	/* Lower index is higher priority */
 	enum class ErrorPriorityEnum: int
 	{
-		WRONG_SIZE_SHAPE_FOR_SHIP_PLAYER_A = 0,
-		WRONG_SIZE_SHAPE_FOR_SHIP_PLAYER_B = 1,
-		TOO_MANY_SHIPS_PLAYER_A = 2,
-		TOO_FEW_SHIPS_PLAYER_A = 3,
-		TOO_MANY_SHIPS_PLAYER_B = 4,
-		TOO_FEW_SHIPS_PLAYER_B = 5,
-		ADJACENT_SHIPS_ON_BOARD = 6
+		WRONG_SIZE_SHAPE_FOR_SHIP_B_PLAYER_A = 0,
+		WRONG_SIZE_SHAPE_FOR_SHIP_P_PLAYER_A = 1,
+		WRONG_SIZE_SHAPE_FOR_SHIP_M_PLAYER_A = 2,
+		WRONG_SIZE_SHAPE_FOR_SHIP_D_PLAYER_A = 3,
+		WRONG_SIZE_SHAPE_FOR_SHIP_B_PLAYER_B = 4,
+		WRONG_SIZE_SHAPE_FOR_SHIP_P_PLAYER_B = 5,
+		WRONG_SIZE_SHAPE_FOR_SHIP_M_PLAYER_B = 6,
+		WRONG_SIZE_SHAPE_FOR_SHIP_D_PLAYER_B = 7,
+		TOO_MANY_SHIPS_PLAYER_A = 8,
+		TOO_FEW_SHIPS_PLAYER_A = 9,
+		TOO_MANY_SHIPS_PLAYER_B = 10,
+		TOO_FEW_SHIPS_PLAYER_B = 11,
+		ADJACENT_SHIPS_ON_BOARD = 12
 	};
 
 	class BoardBuilder
@@ -39,25 +45,18 @@ namespace battleship
 		class BoardInitializeError
 		{
 		public:
+			BoardInitializeError(ErrorPriorityEnum errorType);
+
+			~BoardInitializeError();
+			
 			const string& getMsg() const { return _msg; };
+			
 			const ErrorPriorityEnum getPriority() const { return _errorPriority; };
 		private:
 			string _msg;
-			battleship::ErrorPriorityEnum _errorPriority;
+			ErrorPriorityEnum _errorPriority;
 
-			string getErrorMsg(battleship::ErrorPriorityEnum errorType)
-			{
-				// TODO:
-				/*
-					Wrong size or shape for ship <char> for player A
-					Wrong size or shape for ship <char> for player B
-					Too many ships for player A
-					Too few ships for player A
-					Too many ships for player B
-					Too few ships for player B
-					Adjacent Ships on Board
-				*/
-			}
+			string getErrorMsg(ErrorPriorityEnum errorType);
 		};
 
 		// Typedefs
@@ -87,7 +86,7 @@ namespace battleship
 
 			bool applyMask(const shared_ptr<BattleBoard> board, int row, int col, PlayerEnum player);
 
-			void resetMatchSizes();
+			void resetMaskFlags();
 
 			friend class BoardBuilder;
 		};
@@ -96,9 +95,9 @@ namespace battleship
 
 		void markVisitedSquares(bool visitedBoard[BOARD_SIZE][BOARD_SIZE], int row, int col, int size, Orientation orient);
 
-		bool isValidBoard();
+		bool isValidBoard(set<BoardInitializeError, ErrorPriorityFunction>* errorQueue);
 
-		void printErrors();
+		void printErrors(set<BoardInitializeError, ErrorPriorityFunction>* errorQueue);
 
 		bool validate();
 	};

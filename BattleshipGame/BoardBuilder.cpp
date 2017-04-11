@@ -1,3 +1,4 @@
+#include <iostream>
 #include <algorithm>
 #include "BoardBuilder.h"
 
@@ -10,6 +11,76 @@ namespace battleship
 
 	BoardBuilder::~BoardBuilder()
 	{
+	}
+
+	BoardBuilder::BoardInitializeError::BoardInitializeError(ErrorPriorityEnum errorType) :
+		_errorPriority(errorType), _msg(getErrorMsg(errorType))
+	{
+	}
+
+	BoardBuilder::BoardInitializeError::~BoardInitializeError()
+	{
+	}
+
+	string BoardBuilder::BoardInitializeError::getErrorMsg(ErrorPriorityEnum errorType)
+	{
+		switch ((int)errorType)
+		{
+		case (int)ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_B_PLAYER_A:
+		{
+			return "Wrong size or shape for ship B for player A";
+		}
+		case (int)ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_P_PLAYER_A:
+		{
+			return "Wrong size or shape for ship P for player A";
+		}
+		case (int)ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_M_PLAYER_A:
+		{
+			return "Wrong size or shape for ship M for player A";
+		}
+		case (int)ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_D_PLAYER_A:
+		{
+			return "Wrong size or shape for ship D for player A";
+		}
+		case (int)ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_B_PLAYER_B:
+		{
+			return "Wrong size or shape for ship b for player B";
+		}
+		case (int)ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_P_PLAYER_B:
+		{
+			return "Wrong size or shape for ship p for player B";
+		}
+		case (int)ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_M_PLAYER_B:
+		{
+			return "Wrong size or shape for ship m for player B";
+		}
+		case (int)ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_D_PLAYER_B:
+		{
+			return "Wrong size or shape for ship d for player B";
+		}
+		case (int)ErrorPriorityEnum::TOO_MANY_SHIPS_PLAYER_A:
+		{
+			return "Too many ships for player A";
+		}
+		case (int)ErrorPriorityEnum::TOO_FEW_SHIPS_PLAYER_A:
+		{
+			return "Too few ships for player A";
+		}
+		case (int)ErrorPriorityEnum::TOO_MANY_SHIPS_PLAYER_B:
+		{
+			return "Too many ships for player B";
+		}
+		case (int)ErrorPriorityEnum::TOO_FEW_SHIPS_PLAYER_B:
+		{
+			return "Too few ships for player B";
+		}
+		case (int)ErrorPriorityEnum::ADJACENT_SHIPS_ON_BOARD:
+		{
+			return "Adjacent Ships on Board";
+		}
+		default:
+			break;
+		}
 	}
 
 	BoardBuilder::ShipMask::ShipMask(BoardSquare ship)
@@ -91,11 +162,11 @@ namespace battleship
 		bool isVerticalMask = true;
 		bool horizontalException, verticalException;
 
-		for (ShipMaskList::const_iterator it = mask->begin(); it != mask->end(); it++)
+		for (auto maskItem : *mask)
 		{
-			i = std::get<0>(*it);
-			j = std::get<1>(*it);
-			currMask = std::get<2>(*it);
+			i = std::get<0>(maskItem);
+			j = std::get<1>(maskItem);
+			currMask = std::get<2>(maskItem);
 			horizontalException = ((row + i < 0) || (row + i >= BOARD_SIZE) || (col + j < 0) || (col + j >= BOARD_SIZE));
 			verticalException = ((row + j < 0) || (row + j >= BOARD_SIZE) || (col + i < 0) || (col + i >= BOARD_SIZE));
 
@@ -156,10 +227,12 @@ namespace battleship
 		return (isHorizontalMask || isVerticalMask);
 	}
 
-	void BoardBuilder::ShipMask::resetMatchSizes()
+	void BoardBuilder::ShipMask::resetMaskFlags()
 	{
 		matchSizeHorizontal = 1;
 		matchSizeVertical = 1;
+		wrongSize = false;
+		adjacentShips = false;
 	}
 
 	BoardBuilder* BoardBuilder::addPiece(int row, int col, char type)
@@ -179,16 +252,18 @@ namespace battleship
 	}
 
 	// This function assumes that the board contains only ship characters or space, and not any other character
-	bool BoardBuilder::isValidBoard()
+	bool BoardBuilder::isValidBoard(set<BoardInitializeError, ErrorPriorityFunction>* errorQueue)
 	{
-		unique_ptr<ShipMask> rubberMask = std::make_unique<ShipMask>(BoardSquare::RubberBoat);
-		unique_ptr<ShipMask> rocketMask = std::make_unique<ShipMask>(BoardSquare::RocketShip);
-		unique_ptr<ShipMask> submarineMask = std::make_unique<ShipMask>(BoardSquare::Submarine);
-		unique_ptr<ShipMask> battleshipMask = std::make_unique<ShipMask>(BoardSquare::Battleship);
+		shared_ptr<ShipMask> rubberMask = std::make_shared<ShipMask>(BoardSquare::RubberBoat);
+		shared_ptr<ShipMask> rocketMask = std::make_shared<ShipMask>(BoardSquare::RocketShip);
+		shared_ptr<ShipMask> submarineMask = std::make_shared<ShipMask>(BoardSquare::Submarine);
+		shared_ptr<ShipMask> battleshipMask = std::make_shared<ShipMask>(BoardSquare::Battleship);
+		shared_ptr<ShipMask> currMask = NULL;
 
+		bool validBoard = true;
 		char currSquare;
 		PlayerEnum player;
-		bool visitedBoard[BOARD_SIZE][BOARD_SIZE];
+		bool visitedBoard[BOARD_SIZE][BOARD_SIZE] = {false};
 		bool isMatch;
 		int matchSize;
 		Orientation orient;
@@ -196,109 +271,135 @@ namespace battleship
 		{
 			for (int j = 0; j < BOARD_SIZE; j++)
 			{
+				if (visitedBoard[i][j])
+				{
+					continue;
+				}
+
 				currSquare = _board->_matrix[i][j];
 				player = (isupper(currSquare)) ? PlayerEnum::A : PlayerEnum::B;
 				const ShipType* shipType = NULL;
 
 				switch (currSquare)
 				{
-					case (char)BoardSquare::RubberBoat:
+				case (char)BoardSquare::RubberBoat:
+				{
+					shipType = &BattleBoard::RUBBER_BOAT;
+					isMatch = rubberMask->applyMask(_board, i, j, player);
+					if (rubberMask->wrongSize)
 					{
-						isMatch = rubberMask->applyMask(_board, i, j, player);
-						shipType = &BattleBoard::RUBBER_BOAT;
-						if (rubberMask->matchSizeHorizontal >= rubberMask->matchSizeVertical)
+						if (player == PlayerEnum::A)
 						{
-							matchSize = rubberMask->matchSizeHorizontal;
-							orient = Orientation::HORIZONTAL;
+							errorQueue->insert(BoardInitializeError(ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_B_PLAYER_A));
 						}
 						else
 						{
-							matchSize = rubberMask->matchSizeVertical;
-							orient = Orientation::VERTICAL;
+							errorQueue->insert(BoardInitializeError(ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_B_PLAYER_B));
 						}
-						rubberMask->resetMatchSizes();
-						break;
 					}
-					case (char)BoardSquare::RocketShip:
+					currMask = rubberMask;
+					break;
+				}
+				case (char)BoardSquare::RocketShip:
+				{
+					shipType = &BattleBoard::ROCKET_SHIP;
+					isMatch = rocketMask->applyMask(_board, i, j, player);
+					if (rocketMask->wrongSize)
 					{
-						isMatch = rocketMask->applyMask(_board, i, j, player);
-						shipType = &BattleBoard::ROCKET_SHIP;
-						if (rocketMask->matchSizeHorizontal >= rocketMask->matchSizeVertical)
+						if (player == PlayerEnum::A)
 						{
-							matchSize = rocketMask->matchSizeHorizontal;
-							orient = Orientation::HORIZONTAL;
+							errorQueue->insert(BoardInitializeError(ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_P_PLAYER_A));
 						}
 						else
 						{
-							matchSize = rocketMask->matchSizeVertical;
-							orient = Orientation::VERTICAL;
+							errorQueue->insert(BoardInitializeError(ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_P_PLAYER_B));
 						}
-						rocketMask->resetMatchSizes();
-						break;
 					}
-					case (char)BoardSquare::Submarine:
+					currMask = rocketMask;
+					break;
+				}
+				case (char)BoardSquare::Submarine:
+				{
+					shipType = &BattleBoard::SUBMARINE;
+					isMatch = submarineMask->applyMask(_board, i, j, player);
+					if (submarineMask->wrongSize)
 					{
-						isMatch = submarineMask->applyMask(_board, i, j, player);
-						shipType = &BattleBoard::SUBMARINE;
-						if (submarineMask->matchSizeHorizontal >= submarineMask->matchSizeVertical)
+						if (player == PlayerEnum::A)
 						{
-							matchSize = submarineMask->matchSizeHorizontal;
-							orient = Orientation::HORIZONTAL;
+							errorQueue->insert(BoardInitializeError(ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_M_PLAYER_A));
 						}
 						else
 						{
-							matchSize = submarineMask->matchSizeVertical;
-							orient = Orientation::VERTICAL;
+							errorQueue->insert(BoardInitializeError(ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_M_PLAYER_B));
 						}
-						submarineMask->resetMatchSizes();
-						break;
 					}
-					case (char)BoardSquare::Battleship:
+					currMask = submarineMask;
+					break;
+				}
+				case (char)BoardSquare::Battleship:
+				{
+					shipType = &BattleBoard::BATTLESHIP;
+					isMatch = battleshipMask->applyMask(_board, i, j, player);
+					if (battleshipMask->wrongSize)
 					{
-						isMatch = battleshipMask->applyMask(_board, i, j, player);
-						shipType = &BattleBoard::BATTLESHIP;
-						if (battleshipMask->matchSizeHorizontal >= battleshipMask->matchSizeVertical)
+						if (player == PlayerEnum::A)
 						{
-							matchSize = battleshipMask->matchSizeHorizontal;
-							orient = Orientation::HORIZONTAL;
+							errorQueue->insert(BoardInitializeError(ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_D_PLAYER_A));
 						}
 						else
 						{
-							matchSize = battleshipMask->matchSizeVertical;
-							orient = Orientation::VERTICAL;
+							errorQueue->insert(BoardInitializeError(ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_D_PLAYER_B));
 						}
-						battleshipMask->resetMatchSizes();
-						break;
 					}
-					default:
-					{
-						isMatch = false;
-						break;
-					}
+					currMask = battleshipMask;
+					break;
+				}
+				default:
+					break;
 				}
 
 				if (currSquare != (char)BoardSquare::Empty)
 				{
+					if (currMask->matchSizeHorizontal >= currMask->matchSizeVertical)
+					{
+						matchSize = currMask->matchSizeHorizontal;
+						orient = Orientation::HORIZONTAL;
+					}
+					else
+					{
+						matchSize = currMask->matchSizeVertical;
+						orient = Orientation::VERTICAL;
+					}
+
 					markVisitedSquares(visitedBoard, i, j, matchSize, orient);
-				}
+					
+					if (isMatch)
+					{
+						_board->addGamePiece(i, j, *shipType, player, orient);
+					}
+					else
+					{
+						validBoard = false;
+						if (currMask->adjacentShips)
+						{
+							errorQueue->insert(BoardInitializeError(ErrorPriorityEnum::ADJACENT_SHIPS_ON_BOARD));
+						}
+					}
 
-				if (isMatch)
-				{
-					_board->addGamePiece(i, j, *shipType, player, orient);
+					currMask->resetMaskFlags();
 				}
-
-				//error queue
-				//reset flags
-				//final answer
 			}
 		}
 
-		return true;
+		return validBoard;
 	}
 
-	void BoardBuilder::printErrors()
+	void BoardBuilder::printErrors(set<BoardInitializeError, ErrorPriorityFunction>* errorQueue)
 	{
-		// TODO: Check if there are errors and if so print them
+		for (auto err : *errorQueue)
+		{
+			std::cout << err.getMsg() << std::endl;
+		}
 	}
 
 	bool BoardBuilder::validate()
@@ -312,23 +413,12 @@ namespace battleship
 		// This is a set so errors can only be repeated once.
 		set<BoardInitializeError, ErrorPriorityFunction> errorQueue(sortFunc);
 		
-		// TODO: Call validation process here, add errors to errorQueue
+		// Call validation process here, add errors to errorQueue
+		bool validBoard = isValidBoard(&errorQueue);
 
-		// TODO: when a game piece is verified, add it to the board using this api
-		// void _board->addGamePiece(int firstRow, int firstCol, int size,
-		//								  PlayerEnum player, Orientation orientation)
+		printErrors(&errorQueue);
 
-		// !!!!
-		// !!!!
-		// !!!!
-		// !!!!
-		// TODO: Tomer - See this when you merge!!
-		// Call: _board->addGamePiece(firstX - 1, firstY - 1 .....)
-		// We need to normalize coordinates from 1-BOARD_SIZE to 0-BOARD_SIZE-1 as the array works
-
-		printErrors();
-
-		return errorQueue.empty();	// Empty error queue means the board is valid
+		return validBoard;
 	}
 
 	shared_ptr<BattleBoard> BoardBuilder::build()
