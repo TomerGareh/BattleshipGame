@@ -1,14 +1,18 @@
 #pragma once
 
-#include <functional>
+#include <memory>
 #include <string>
+#include <functional>
 #include <initializer_list>
+#include <map>
 
 namespace battleship
 {
+	using std::shared_ptr;
 	using std::string;
 	using std::function;
 	using std::initializer_list;
+	using std::map;
 
 	/** A helper class for dealing with IO operations logic common to the entire battleship game. */
 	class IOUtil
@@ -31,9 +35,18 @@ namespace battleship
 		 */
 		static void parseFile(const string& filename, function<void(string& nextReadLine)> lineParser);
 
-		static void loadFilesInPath(const string& path);
+		static bool endsWith(const string& fullString, const string& ending);
+
+		static shared_ptr<map<string, string>> loadFilesInPath(const string& path);
+
+		static const string BOARD_SUFFIX;
+		static const string ATTACK_A_SUFFIX;
+		static const string ATTACK_B_SUFFIX;
 
 	private:
 		IOUtil() = default;	// This helper class shouldn't be instantiated
+
+		static void printLoadFileErrors(bool missingBoardFile, bool missingAttackAFile, bool missingAttackBFile,
+										const string& pathToDisplay);
 	};
 }

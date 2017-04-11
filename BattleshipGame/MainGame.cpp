@@ -34,15 +34,6 @@ void parseArgs(int argc, char* argv[], map<const char*, char*>& config)
 	{
 		config[BP_CONFIG_PATH] = argv[1];
 	}
-	else
-	{
-		// TODO: load all 3 files here, fill config with results
-		char* path = (argc > 1) ? argv[0] : ".";
-		IOUtil::loadFilesInPath(path);
-		string playerAAttackFile;
-		string playerBAttackFile;
-		// ...
-	}
 
 	for (int i = 1; i < argc; i++)
 	{
@@ -62,11 +53,19 @@ int main(int argc, char* argv[])
 	map<const char*, char*> configuration;
 	parseArgs(argc, argv, configuration);
 
+	auto inputFileNames = IOUtil::loadFilesInPath(string(configuration[BP_CONFIG_PATH]));
+	if (NULL == inputFileNames)
+		return -1; // TODO: Return some predefined error code
+
+	string boardFile = (*inputFileNames)[IOUtil::BOARD_SUFFIX];
+	string playerAAttackFile = (*inputFileNames)[IOUtil::ATTACK_A_SUFFIX];
+	string playerBAttackFile = (*inputFileNames)[IOUtil::ATTACK_B_SUFFIX];
+
 	// Game initialization
 	GameFromFileAlgo playerA(playerAAttackFile);
 	GameFromFileAlgo playerB(playerBAttackFile);
 
-	auto board = BattleshipGameBoardFactory::loadBattleBoard(BattleshipBoardInitTypeEnum::LOAD_BOARD_FROM_FILE);
+	auto board = BattleshipGameBoardFactory::loadBattleBoard(BattleshipBoardInitTypeEnum::LOAD_BOARD_FROM_FILE, boardFile);
 	if (NULL == board)
 		return -1; // TODO: Return some predefined error code
 
