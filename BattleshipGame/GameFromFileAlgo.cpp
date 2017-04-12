@@ -12,8 +12,8 @@ void GameFromFileAlgo::populateMovesFromFile(const string& filename)
 	// We pass a local ref to the object's field: _predefinedMoves, because this single field can't
 	// be captured inside the lambda expression (we have to capture "this" if we want to allow access,
 	// instead we capture a "fake" reference to the _predefinedMoves field)
-	auto& moveListRef = _predefinedMoves;
-	auto lineParser = [moveListRef](string& nextLine) mutable
+	auto* moveListPtr = &_predefinedMoves;
+	auto lineParser = [moveListPtr](string& nextLine) mutable
 	{
 		auto legalChars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', COORDS_DELIM };
 		IOUtil::replaceIllegalCharacters(nextLine, (char)BoardSquare::Empty, legalChars);
@@ -37,7 +37,7 @@ void GameFromFileAlgo::populateMovesFromFile(const string& filename)
 				(secondNum >= 1) && (secondNum <= BOARD_SIZE))
 			{
 				auto move = std::make_pair(firstNum, secondNum);
-				moveListRef.push_back(move);
+				moveListPtr->push_back(move);
 			}
 		}
 	};

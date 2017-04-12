@@ -13,6 +13,7 @@ using std::shared_ptr;
 namespace battleship
 {
 	const size_t BOARD_SIZE = 10;
+	const int NUM_OF_SHIPS_PER_PLAYER = 5;
 	const pair<int, int> FORFEIT = std::make_pair<int, int>(-1, -1);
 
 	/* Forward Declarations */

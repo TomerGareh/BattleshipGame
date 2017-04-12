@@ -22,18 +22,18 @@ namespace battleship
 		// We compare to all legal possibilities and if we're not one of them -- replace.
 		auto isIllegalChar = [legalChars](const char& c)
 		{
-			bool isLegal = false;
+			bool isIllegal = true;
 
 			for (const char& legalC : legalChars)
 			{
 				if (legalC == c)
 				{
-					isLegal = true;
+					isIllegal = false;
 					break;
 				}
 			}
 
-			return isLegal;
+			return isIllegal;
 		};
 
 		std::replace_if(line.begin(), line.end(), isIllegalChar, replacementChar);
@@ -111,47 +111,49 @@ namespace battleship
 	{
 		const int BUFFER_SIZE = 1024;
 		char systemCommand[BUFFER_SIZE];
+		string pathWithQuotes = '\"' + path + '\"';
 
 		// Use the safer sprintf_s since Visual Studio throws warnings on sprintf due to potential misuse
-		sprintf_s(systemCommand, BUFFER_SIZE, "2>NUL dir /a-d /b %s > filenames.txt", path);
+		sprintf_s(systemCommand, BUFFER_SIZE, "2>NUL dir /a-d /b %s > filenames.txt", pathWithQuotes.c_str());
 		
 		shared_ptr<map<string, string>> inputFileNames = std::make_shared<map<string, string>>();
 		const string pathToDisplay = (path.compare(".") == 0) ? "Working Directory" : path;
 
-		if (system(systemCommand) != 0)
+		if (system(systemCommand) == 0)
 		{
-			bool missingBoardFile = true;
-			bool missingAttackAFile = true;
-			bool missingAttackBFile = true;
+			shared_ptr<bool> missingBoardFile = std::make_shared<bool>(true);
+			shared_ptr<bool> missingAttackAFile = std::make_shared<bool>(true);
+			shared_ptr<bool> missingAttackBFile = std::make_shared<bool>(true);
 
-			auto lineParser = [missingBoardFile, missingAttackAFile, missingAttackBFile, inputFileNames](string& nextLine) mutable
+			auto lineParser = [missingBoardFile, missingAttackAFile, missingAttackBFile,
+							   inputFileNames, path](string& nextLine) mutable
 			{
-				if (missingBoardFile || missingAttackAFile || missingAttackBFile)
+				if ((*missingBoardFile) || (*missingAttackAFile) || (*missingAttackBFile))
 				{
 					if (IOUtil::endsWith(nextLine, BOARD_SUFFIX))
 					{
-						missingBoardFile = false;
-						(*inputFileNames)[BOARD_SUFFIX] = nextLine;
+						*missingBoardFile = false;
+						(*inputFileNames)[BOARD_SUFFIX] = path + '/' + nextLine;
 					}
 					else if (IOUtil::endsWith(nextLine, ATTACK_A_SUFFIX))
 					{
-						missingAttackAFile = false;
-						(*inputFileNames)[ATTACK_A_SUFFIX] = nextLine;
+						*missingAttackAFile = false;
+						(*inputFileNames)[ATTACK_A_SUFFIX] = path + '/' + nextLine;
 					}
 					else if (IOUtil::endsWith(nextLine, ATTACK_B_SUFFIX))
 					{
-						missingAttackBFile = false;
-						(*inputFileNames)[ATTACK_B_SUFFIX] = nextLine;
+						*missingAttackBFile = false;
+						(*inputFileNames)[ATTACK_B_SUFFIX] = path + '/' + nextLine;
 					}
 				}
 			};
 
 			IOUtil::parseFile("filenames.txt", lineParser);
 
-			if (missingBoardFile || missingAttackAFile || missingAttackBFile)
+			if ((*missingBoardFile) || (*missingAttackAFile) || (*missingAttackBFile))
 			{
 				inputFileNames = NULL;
-				IOUtil::printLoadFileErrors(missingBoardFile, missingAttackAFile, missingAttackBFile, pathToDisplay);
+				IOUtil::printLoadFileErrors(*missingBoardFile, *missingAttackAFile, *missingAttackBFile, pathToDisplay);
 			}
 
 			return inputFileNames;

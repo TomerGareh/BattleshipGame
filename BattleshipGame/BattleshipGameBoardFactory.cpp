@@ -9,15 +9,17 @@ namespace battleship
 	// This function assumes that the file exists and the file name is valid
 	shared_ptr<BattleBoard> BattleshipGameBoardFactory::buildBoardFromFile(const string& path)
 	{
-		BoardBuilder builder;
-		int rowCounter = 0;
-		int colCounter = 0;
+		shared_ptr<BoardBuilder> builder = std::make_shared<BoardBuilder>();
+		shared_ptr<int> rowCounter = std::make_shared<int>(0);
+		shared_ptr<int> colCounter = std::make_shared<int>(0);
 
 		auto lineParser = [builder, rowCounter, colCounter](string& nextLine) mutable
 		{
 			// Read at the first BOARD_SIZE rows, ignore the rest
-			if (rowCounter >= BOARD_SIZE)
+			if (*rowCounter >= BOARD_SIZE)
 				return;
+
+			*colCounter = 0;
 
 			auto legalChars =
 				{ 
@@ -36,38 +38,40 @@ namespace battleship
 			// Traverse each character in the row and put into the board
 			for (char& nextChar : nextLine)
 			{
-				builder.addPiece(rowCounter, colCounter, nextChar);
-				colCounter++;
+				builder->addPiece(*rowCounter, *colCounter, nextChar);
+				(*colCounter)++;
 
 				// Read at most BOARD_SIZE characters from each line, skip the rest
-				if (colCounter >= BOARD_SIZE)
+				if (*colCounter >= BOARD_SIZE)
 					break;
 			}
 
 			// For rows missing characters - fill the rest with blanks
-			while (colCounter < BOARD_SIZE)
+			while (*colCounter < BOARD_SIZE)
 			{
-				builder.addPiece(rowCounter, colCounter, (char)BoardSquare::Empty);
-				colCounter++;
+				builder->addPiece(*rowCounter, *colCounter, (char)BoardSquare::Empty);
+				(*colCounter)++;
 			}
 
-			rowCounter++;
+			(*rowCounter)++;
 		};
 
 		// Start parsing the file, line by line
 		IOUtil::parseFile(path, lineParser);
 
 		// For missing rows - fill rows of blank squares
-		while (rowCounter < BOARD_SIZE)
+		while (*rowCounter < BOARD_SIZE)
 		{
-			for (colCounter = 0; colCounter < BOARD_SIZE; colCounter++)
+			for (*colCounter = 0; *colCounter < BOARD_SIZE; (*colCounter)++)
 			{
-				builder.addPiece(rowCounter, colCounter, (char)BoardSquare::Empty);
+				builder->addPiece(*rowCounter, *colCounter, (char)BoardSquare::Empty);
 			}
+
+			(*rowCounter)++;
 		}
 
 		// Finalize the board, perform validation here
-		auto board = builder.build();
+		auto board = builder->build();
 		return board;
 	}
 

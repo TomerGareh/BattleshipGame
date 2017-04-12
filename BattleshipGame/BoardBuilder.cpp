@@ -186,28 +186,48 @@ namespace battleship
 				currMask = tolower(currMask);
 			}
 			
-			if ((!horizontalException) && (board->_matrix[row + i][col + j] == currMask))
+			if (!horizontalException)
 			{
-				if (currMask != (char)BoardSquare::Empty)
+				if (board->_matrix[row + i][col + j] == currMask)
 				{
-					matchSizeHorizontal++;
+					if (currMask != (char)BoardSquare::Empty)
+					{
+						matchSizeHorizontal++;
+					}
+				}
+				else
+				{
+					isHorizontalMask = false;
 				}
 			}
 			else
 			{
-				isHorizontalMask = false;
+				if (currMask != (char)BoardSquare::Empty)
+				{
+					isHorizontalMask = false;
+				}
 			}
 			
-			if ((!verticalException) && (board->_matrix[row + j][col + i] == currMask))
+			if (!verticalException)
 			{
-				if (currMask != (char)BoardSquare::Empty)
+				if (board->_matrix[row + j][col + i] == currMask)
 				{
-					matchSizeVertical++;
+					if (currMask != (char)BoardSquare::Empty)
+					{
+						matchSizeVertical++;
+					}
+				}
+				else
+				{
+					isVerticalMask = false;
 				}
 			}
 			else
 			{
-				isVerticalMask = false;	
+				if (currMask != (char)BoardSquare::Empty)
+				{
+					isVerticalMask = false;
+				}
 			}
 			
 			if ((!horizontalException) && (!verticalException)
@@ -280,7 +300,7 @@ namespace battleship
 				player = (isupper(currSquare)) ? PlayerEnum::A : PlayerEnum::B;
 				const ShipType* shipType = NULL;
 
-				switch (currSquare)
+				switch (toupper(currSquare))
 				{
 				case (char)BoardSquare::RubberBoat:
 				{
@@ -389,6 +409,29 @@ namespace battleship
 					currMask->resetMaskFlags();
 				}
 			}
+		}
+
+		const int numOfShipsA = _board->getPlayerAShipCount();
+		const int numOfShipsB = _board->getPlayerBShipCount();
+		if (numOfShipsA > NUM_OF_SHIPS_PER_PLAYER)
+		{
+			validBoard = false;
+			errorQueue->insert(BoardInitializeError(ErrorPriorityEnum::TOO_MANY_SHIPS_PLAYER_A));
+		}
+		else if (numOfShipsA < NUM_OF_SHIPS_PER_PLAYER)
+		{
+			validBoard = false;
+			errorQueue->insert(BoardInitializeError(ErrorPriorityEnum::TOO_FEW_SHIPS_PLAYER_A));
+		}
+		if (numOfShipsB > NUM_OF_SHIPS_PER_PLAYER)
+		{
+			validBoard = false;
+			errorQueue->insert(BoardInitializeError(ErrorPriorityEnum::TOO_MANY_SHIPS_PLAYER_B));
+		}
+		else if (numOfShipsB < NUM_OF_SHIPS_PER_PLAYER)
+		{
+			validBoard = false;
+			errorQueue->insert(BoardInitializeError(ErrorPriorityEnum::TOO_FEW_SHIPS_PLAYER_B));
 		}
 
 		return validBoard;
