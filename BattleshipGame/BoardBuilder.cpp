@@ -26,60 +26,62 @@ namespace battleship
 	{
 		switch ((int)errorType)
 		{
-		case (int)ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_B_PLAYER_A:
-		{
-			return "Wrong size or shape for ship B for player A";
-		}
-		case (int)ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_P_PLAYER_A:
-		{
-			return "Wrong size or shape for ship P for player A";
-		}
-		case (int)ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_M_PLAYER_A:
-		{
-			return "Wrong size or shape for ship M for player A";
-		}
-		case (int)ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_D_PLAYER_A:
-		{
-			return "Wrong size or shape for ship D for player A";
-		}
-		case (int)ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_B_PLAYER_B:
-		{
-			return "Wrong size or shape for ship b for player B";
-		}
-		case (int)ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_P_PLAYER_B:
-		{
-			return "Wrong size or shape for ship p for player B";
-		}
-		case (int)ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_M_PLAYER_B:
-		{
-			return "Wrong size or shape for ship m for player B";
-		}
-		case (int)ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_D_PLAYER_B:
-		{
-			return "Wrong size or shape for ship d for player B";
-		}
-		case (int)ErrorPriorityEnum::TOO_MANY_SHIPS_PLAYER_A:
-		{
-			return "Too many ships for player A";
-		}
-		case (int)ErrorPriorityEnum::TOO_FEW_SHIPS_PLAYER_A:
-		{
-			return "Too few ships for player A";
-		}
-		case (int)ErrorPriorityEnum::TOO_MANY_SHIPS_PLAYER_B:
-		{
-			return "Too many ships for player B";
-		}
-		case (int)ErrorPriorityEnum::TOO_FEW_SHIPS_PLAYER_B:
-		{
-			return "Too few ships for player B";
-		}
-		case (int)ErrorPriorityEnum::ADJACENT_SHIPS_ON_BOARD:
-		{
-			return "Adjacent Ships on Board";
-		}
-		default:
-			break;
+			case (int)ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_B_PLAYER_A:
+			{
+				return "Wrong size or shape for ship B for player A";
+			}
+			case (int)ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_P_PLAYER_A:
+			{
+				return "Wrong size or shape for ship P for player A";
+			}
+			case (int)ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_M_PLAYER_A:
+			{
+				return "Wrong size or shape for ship M for player A";
+			}
+			case (int)ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_D_PLAYER_A:
+			{
+				return "Wrong size or shape for ship D for player A";
+			}
+			case (int)ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_B_PLAYER_B:
+			{
+				return "Wrong size or shape for ship b for player B";
+			}
+			case (int)ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_P_PLAYER_B:
+			{
+				return "Wrong size or shape for ship p for player B";
+			}
+			case (int)ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_M_PLAYER_B:
+			{
+				return "Wrong size or shape for ship m for player B";
+			}
+			case (int)ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_D_PLAYER_B:
+			{
+				return "Wrong size or shape for ship d for player B";
+			}
+			case (int)ErrorPriorityEnum::TOO_MANY_SHIPS_PLAYER_A:
+			{
+				return "Too many ships for player A";
+			}
+			case (int)ErrorPriorityEnum::TOO_FEW_SHIPS_PLAYER_A:
+			{
+				return "Too few ships for player A";
+			}
+			case (int)ErrorPriorityEnum::TOO_MANY_SHIPS_PLAYER_B:
+			{
+				return "Too many ships for player B";
+			}
+			case (int)ErrorPriorityEnum::TOO_FEW_SHIPS_PLAYER_B:
+			{
+				return "Too few ships for player B";
+			}
+			case (int)ErrorPriorityEnum::ADJACENT_SHIPS_ON_BOARD:
+			{
+				return "Adjacent Ships on Board";
+			}
+			default:
+			{
+				break;
+			}
 		}
 	}
 
