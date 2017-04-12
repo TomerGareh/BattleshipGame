@@ -18,7 +18,9 @@ using std::unique_ptr;
 
 namespace battleship
 {
-	/* Lower index is higher priority */
+	/* List of possible validation error types, with priority values assigned.
+	 * Lower index means higher priority when the errors list is outputted.
+	 */
 	enum class ErrorPriorityEnum: int
 	{
 		WRONG_SIZE_SHAPE_FOR_SHIP_B_PLAYER_A = 0,
@@ -36,40 +38,66 @@ namespace battleship
 		ADJACENT_SHIPS_ON_BOARD = 12
 	};
 
+	/** A Builder pattern class, for creating instances of the BattleBoard class.
+	 *  BoardBuilder is the only class expected to create BattleBoards, and is responsible for vailidating
+	 *	the board before the beginning of a game session.
+	 */
 	class BoardBuilder
 	{
 	public:
+		/** Creates a new BoardBuilder instance */
 		BoardBuilder();
 		virtual ~BoardBuilder();
 
+		/** Represents a validation error that might rise when the board is initialized.
+		 *  This object helps keep the errors sorted by priority order, and output the right error message.
+		 */
 		class BoardInitializeError
 		{
 		public:
+			/** Construct a new error, defined by error type (which determines the message and priority) */
 			BoardInitializeError(ErrorPriorityEnum errorType);
 
 			~BoardInitializeError();
 			
+			/** Returns the error message string stored for this error */
 			const string& getMsg() const { return _msg; };
 			
+			/** Returns the priority enum of the current error */
 			const ErrorPriorityEnum getPriority() const { return _errorPriority; };
 		private:
 			string _msg;
 			ErrorPriorityEnum _errorPriority;
 
-			string getErrorMsg(ErrorPriorityEnum errorType);
+			/** A utility function for creating a message string for each error type.
+			 *  We expect the compiler to perfrom RVO optimization, so we safely return a string here
+			 *	(no copy is expected to be made)
+			 */
+			static string getErrorMsg(ErrorPriorityEnum errorType);
 		};
 
-		// Typedefs
+		// Typedef for error priority function, that compares two errors.
+		// Helps the STL containers stay sorted.
 		using ErrorPriorityFunction = function<bool(const BoardInitializeError&, const BoardInitializeError&)>;
 
+		/** Defines a value for a single game-square on the battle-board.
+		 *  This method will not generate a game-piece in the real BattleBoard object just yet.
+		 */
 		BoardBuilder* addPiece(int row, int col, char type);
 
+		/** Finailize the creation of the BattleBoard.
+		 *	Validation occurs here, and logical game pieces data is initialized for the BattleBoard object.
+		 *	In the end the constructed BattleBoard instance is returned, or NULL if errors have occured in the process.
+		 *	Any validation errors that might occur will be printed by this routine, in descending priority order.
+		 */
 		shared_ptr<BattleBoard> build();
 
 	private:
+		/** A helper class for validating the legal formation of game-pieces on the board. */
 		class ShipMask
 		{
 		public:
+			/** A list of squares that compose the mask*/
 			typedef list<tuple<int, int, char>> ShipMaskList;
 			typedef unique_ptr<ShipMaskList> ShipMaskListPtr;
 			
@@ -80,25 +108,41 @@ namespace battleship
 			bool wrongSize;
 			bool adjacentShips;
 
-			ShipMask(BoardSquare ship);
+			virtual ~ShipMask();
 
-			~ShipMask();
-
+			/** Apply ship mask to the board, and return whether the current formation for the (row, col) square
+			 *	is valid.
+			 */
 			bool applyMask(const shared_ptr<BattleBoard> board, int row, int col, PlayerEnum player);
 
+			/** Clean state and prepare for next comparison */
 			void resetMaskFlags();
 
+		private:
+			/** Constructs a new mask according to ship type (which is represented by the BoardSquare in this case) */
+			ShipMask(BoardSquare ship);
+
+			/** BoardBuilder is the only class which is allowed to instantiate ShipMasks */
 			friend class BoardBuilder;
 		};
 
+		/** The BattleBoard instance being gradually created by this builder object */
 		shared_ptr<BattleBoard> _board;
 
+		/** Mark given squares as already validated */
 		void markVisitedSquares(bool visitedBoard[BOARD_SIZE][BOARD_SIZE], int row, int col, int size, Orientation orient);
 
+		/** Prepares the error queue, calls isValidBoard to validate the board and prints the generated errors
+		 *	in the end of the process.
+		 */
+		bool validate();
+
+		/** Returns true if the BattleBoard contains a legal formation, false if not.
+		 *  This function is used by BoardBuilder::validate()
+		 */
 		bool isValidBoard(set<BoardInitializeError, ErrorPriorityFunction>* errorQueue);
 
+		/** Prints the validation errors in the queue, in descending priority order */
 		void printErrors(set<BoardInitializeError, ErrorPriorityFunction>* errorQueue);
-
-		bool validate();
 	};
 }
