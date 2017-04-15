@@ -80,7 +80,7 @@ namespace battleship
 			}
 			default:
 			{
-				break;
+				return "Unknown board error type";	// Should not reach this line
 			}
 		}
 	}

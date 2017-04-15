@@ -77,6 +77,7 @@ namespace battleship
 	{
 		playerA.setBoard(board->getBoardMatrix(), BOARD_SIZE, BOARD_SIZE);
 		playerB.setBoard(board->getBoardMatrix(), BOARD_SIZE, BOARD_SIZE);
+		visualizer.visualizeBeginGame(board);
 
 		IBattleshipGameAlgo* currentPlayer = &playerA;
 		bool isPlayerAForfeit = false;

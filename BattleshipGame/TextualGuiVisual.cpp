@@ -8,11 +8,11 @@ using std::endl;
 
 namespace battleship
 {
-	void gotoxy(int x, int y)
+	void gotoxy(int row, int col)
 	{
 		COORD coord;
-		coord.X = x;
-		coord.Y = y;
+		coord.X = col;
+		coord.Y = row;
 		SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
 	}
 
@@ -37,11 +37,11 @@ namespace battleship
 
 		if (board->whichPlayerOwnsSquare(row, col) == PlayerEnum::A)
 		{
-			color = PLAYER_A_COLOR_MAPPING.at((BoardSquare)currSquare);
+			color = PLAYER_A_COLOR_MAPPING.at((BoardSquare)toupper(currSquare));
 		}
 		else if (board->whichPlayerOwnsSquare(row, col) == PlayerEnum::B)
 		{
-			color = PLAYER_B_COLOR_MAPPING.at((BoardSquare)currSquare);
+			color = PLAYER_B_COLOR_MAPPING.at((BoardSquare)toupper(currSquare));
 		}
 		else
 		{

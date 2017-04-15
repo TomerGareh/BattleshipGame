@@ -118,7 +118,7 @@ namespace battleship
 			/** Clean state and prepare for next comparison */
 			void resetMaskFlags();
 
-		private:
+		//private:
 			/** Constructs a new mask according to ship type (which is represented by the BoardSquare in this case) */
 			ShipMask(BoardSquare ship);
 
