@@ -8,6 +8,7 @@ using std::endl;
 
 namespace battleship
 {
+	/** Points the cursor at (row,col) in the console output */
 	void gotoxy(int row, int col)
 	{
 		COORD coord;
@@ -16,6 +17,7 @@ namespace battleship
 		SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
 	}
 
+	/** Sets the text color for the console to the given color enum */
 	void setTextColor(ConsoleColor color)
 	{
 		HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);

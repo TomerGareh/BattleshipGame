@@ -35,10 +35,16 @@ namespace battleship
 		 */
 		static void parseFile(const string& filename, function<void(string& nextReadLine)> lineParser);
 
+		/** Returns true if fullString ends with ending as a suffix */
 		static bool endsWith(const string& fullString, const string& ending);
 
+		/** Loads all files needed by the battleship game.
+		 *  Returns a mapping of each of the file suffixes vs their path.
+		 *	If one of the files is missing, NULL is returned.
+		 */
 		static shared_ptr<map<string, string>> loadFilesInPath(const string& path);
 
+		// Suffixes for game files
 		static const string BOARD_SUFFIX;
 		static const string ATTACK_A_SUFFIX;
 		static const string ATTACK_B_SUFFIX;
@@ -46,6 +52,7 @@ namespace battleship
 	private:
 		IOUtil() = default;	// This helper class shouldn't be instantiated
 
+		/** Prints missing files to the console */
 		static void printLoadFileErrors(bool missingBoardFile, bool missingAttackAFile, bool missingAttackBFile,
 										const string& pathToDisplay);
 	};

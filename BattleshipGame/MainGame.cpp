@@ -19,11 +19,16 @@ using std::unique_ptr;
 using std::shared_ptr;
 using std::map;
 
+const int SUCCESS_CODE = 0;
+const int ERROR_CODE = -1;
 const char* BP_CONFIG_PATH = "path";
 const char* BP_CONFIG_DELAY = "-delay";
 const char* BP_CONFIG_QUIET = "-quiet";
 char* BP_CONFIG_FALSE = "false";
 
+/** Fills the configuration dictionary with arguments that arrive from the command line,
+ *	otherwise setting it with the defaults.
+ */
 void parseArgs(int argc, char* argv[], map<const char*, char*>& config)
 {
 	config[BP_CONFIG_PATH] = ".";		// Nameless param, default is working directory
@@ -50,12 +55,13 @@ void parseArgs(int argc, char* argv[], map<const char*, char*>& config)
 
 int main(int argc, char* argv[])
 {
+	// Define configuration
 	map<const char*, char*> configuration;
 	parseArgs(argc, argv, configuration);
 
 	auto inputFileNames = IOUtil::loadFilesInPath(string(configuration[BP_CONFIG_PATH]));
 	if (NULL == inputFileNames)
-		return -1; // TODO: Return some predefined error code
+		return ERROR_CODE;
 
 	string boardFile = (*inputFileNames)[IOUtil::BOARD_SUFFIX];
 	string playerAAttackFile = (*inputFileNames)[IOUtil::ATTACK_A_SUFFIX];
@@ -67,7 +73,7 @@ int main(int argc, char* argv[])
 
 	auto board = BattleshipGameBoardFactory::loadBattleBoard(BattleshipBoardInitTypeEnum::LOAD_BOARD_FROM_FILE, boardFile);
 	if (NULL == board)
-		return -1; // TODO: Return some predefined error code
+		return ERROR_CODE;
 
 	unique_ptr<IGameVisual> visual = NULL;
 
@@ -81,10 +87,10 @@ int main(int argc, char* argv[])
 		visual = std::make_unique<TextualGuiVisual>(delay);
 	}
 
+	// Start a single game session, visualizer is expected to print the results to the screen when the session
+	// is over (or during the session itself)
 	GameManager gameManager;
 	gameManager.startGame(board, playerA, playerB, *visual);
 
-	// TODO: Continue.. Print results do we need to do more..? Organize here according to instructions
-
-	return 0;
+	return SUCCESS_CODE;
 }
