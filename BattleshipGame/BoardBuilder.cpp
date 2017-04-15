@@ -1,5 +1,4 @@
 #include <iostream>
-#include <algorithm>
 #include "BoardBuilder.h"
 
 namespace battleship
@@ -287,7 +286,7 @@ namespace battleship
 		char currSquare;
 		PlayerEnum player;
 		bool visitedBoard[BOARD_SIZE][BOARD_SIZE] = {false};
-		bool isMatch;
+		bool isMatch = false;
 		int matchSize;
 		Orientation orient;
 		for (int i = 0; i < BOARD_SIZE; i++)

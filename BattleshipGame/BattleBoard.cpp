@@ -160,7 +160,7 @@ namespace battleship
 			_playerBShipCount--;
 	}
 
-	const shared_ptr<const GamePiece> BattleBoard::executeAttack(pair<int, int> target)
+	shared_ptr<const GamePiece> BattleBoard::executeAttack(pair<int, int> target)
 	{
 		int coordRow = target.first;
 		int coordCol = target.second;

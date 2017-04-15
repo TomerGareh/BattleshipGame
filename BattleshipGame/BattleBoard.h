@@ -110,7 +110,7 @@ namespace battleship
 		 *  Otherwise returns the status of the game-piece representing the ship that has been hurt,
 		 *	after the attack was taken into consideration.
 		 */
-		const shared_ptr<const GamePiece> executeAttack(pair<int, int> target);
+		shared_ptr<const GamePiece> executeAttack(pair<int, int> target);
 
 		/** Returns the matrix that represents the visual data in each game square on the board.
 		 *  Coordinates are defined in the range [0, BOARD_SIZE-1]
