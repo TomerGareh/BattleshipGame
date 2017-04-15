@@ -25,6 +25,7 @@ const char* BP_CONFIG_PATH = "path";
 const char* BP_CONFIG_DELAY = "-delay";
 const char* BP_CONFIG_QUIET = "-quiet";
 char* BP_CONFIG_FALSE = "false";
+char* BP_CONFIG_TRUE = "true";
 
 /** Fills the configuration dictionary with arguments that arrive from the command line,
  *	otherwise setting it with the defaults.
@@ -35,20 +36,22 @@ void parseArgs(int argc, char* argv[], map<const char*, char*>& config)
 	config[BP_CONFIG_QUIET] = BP_CONFIG_FALSE;  // Default is print to screen
 	config[BP_CONFIG_DELAY] = "500";	// For animations, in ms. Default is half a second.
 
+	// If the first parameter doesn't match any of the configuration keywords this is a path
 	if ((argc >= 2) && strcmp("-quiet", argv[1]) && strcmp("-delay", argv[1]))
 	{
 		config[BP_CONFIG_PATH] = argv[1];
 	}
 
+	// Digest rest of program arguments
 	for (int i = 1; i < argc; i++)
 	{
-		if (!strcmp(argv[i], BP_CONFIG_DELAY))
+		if ((!strcmp(argv[i], BP_CONFIG_DELAY)) && (argc >= i+1))
 		{
-			config[BP_CONFIG_DELAY] = argv[i];
+			config[BP_CONFIG_DELAY] = argv[i+1];
 		}
-		else if(!strcmp(argv[i], BP_CONFIG_DELAY))
+		else if(!strcmp(argv[i], BP_CONFIG_QUIET))
 		{
-			config[BP_CONFIG_DELAY] = argv[i];
+			config[BP_CONFIG_QUIET] = BP_CONFIG_TRUE;
 		}
 	}
 }
@@ -67,7 +70,7 @@ int main(int argc, char* argv[])
 	string playerAAttackFile = (*inputFileNames)[IOUtil::ATTACK_A_SUFFIX];
 	string playerBAttackFile = (*inputFileNames)[IOUtil::ATTACK_B_SUFFIX];
 
-	// Game initialization
+	// Game initialization - players and board are initialized from files
 	GameFromFileAlgo playerA(playerAAttackFile);
 	GameFromFileAlgo playerB(playerBAttackFile);
 
@@ -77,6 +80,7 @@ int main(int argc, char* argv[])
 
 	unique_ptr<IGameVisual> visual = NULL;
 
+	// Choose visualization type, depending on -quiet arg
 	if (strcmp(configuration[BP_CONFIG_QUIET], BP_CONFIG_FALSE))
 	{
 		visual = std::make_unique<ConsoleMessageVisual>();
@@ -88,7 +92,7 @@ int main(int argc, char* argv[])
 	}
 
 	// Start a single game session, visualizer is expected to print the results to the screen when the session
-	// is over (or during the session itself)
+	// is over (or during the session itself if this is a textual visualizer type)
 	GameManager gameManager;
 	gameManager.startGame(board, playerA, playerB, *visual);
 
