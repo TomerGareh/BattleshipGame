@@ -101,14 +101,15 @@ namespace battleship
 		class ShipMask
 		{
 		public:
+			BoardSquare maskType;
+
 			/** A list of squares that compose the mask*/
 			typedef list<tuple<int, int, char>> ShipMaskList;
 			typedef unique_ptr<ShipMaskList> ShipMaskListPtr;
 			
 			ShipMaskListPtr mask;
-
-			int matchSizeHorizontal;
-			int matchSizeVertical;
+			
+			Orientation orient;
 			bool wrongSize;
 			bool adjacentShips;
 
@@ -133,7 +134,7 @@ namespace battleship
 		shared_ptr<BattleBoard> _board;
 
 		/** Mark given squares as already validated */
-		void markVisitedSquares(bool visitedBoard[BOARD_SIZE][BOARD_SIZE], int row, int col, int size, Orientation orient);
+		void markVisitedSquares(bool visitedBoard[BOARD_SIZE][BOARD_SIZE], int row, int col);
 
 		/** Prepares the error queue, calls isValidBoard to validate the board and prints the generated errors
 		 *	in the end of the process.

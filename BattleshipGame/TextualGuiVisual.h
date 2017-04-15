@@ -56,6 +56,8 @@ namespace battleship
 		virtual void visualizeAttackResults(shared_ptr<BattleBoard> board,
 											int row, int col, AttackResult attackResults) override;
 
+		virtual void visualizeEndGame(shared_ptr<BattleBoard> board, int playerAWins, int playerBWins) override;
+
 	private:
 		/** Colors used by Player A pieces */
 		const map<BoardSquare, ConsoleColor> PLAYER_A_COLOR_MAPPING = 

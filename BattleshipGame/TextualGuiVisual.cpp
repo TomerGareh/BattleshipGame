@@ -101,6 +101,11 @@ namespace battleship
 		{
 			printBoard(board);
 		}
+	}
 
+	void TextualGuiVisual::visualizeEndGame(shared_ptr<BattleBoard> board, int playerAPoints, int playerBPoints)
+	{
+		setTextColor(ConsoleColor::WHITE);
+		IGameVisual::visualizeEndGame(board, playerAPoints, playerBPoints);
 	}
 }
