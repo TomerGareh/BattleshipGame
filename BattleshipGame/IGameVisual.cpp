@@ -10,12 +10,6 @@ namespace battleship
 	{
 	}
 
-
-	IGameVisual::~IGameVisual()
-	{
-
-	}
-
 	void IGameVisual::visualizeEndGame(shared_ptr<BattleBoard> board, int playerAWins, int playerBWins)
 	{
 		bool isTie = ((board->getPlayerAShipCount() != 0) && (board->getPlayerBShipCount() != 0));

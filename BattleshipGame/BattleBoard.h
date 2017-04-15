@@ -55,6 +55,8 @@ namespace battleship
 		ShipType(BoardSquare representation, int size, int points);
 		ShipType(ShipType const&) = delete;	// Disable copying
 		ShipType& operator=(ShipType const&) = delete;	// Disable copying (assignment)
+		ShipType(ShipType&& other) noexcept = delete; // Disable moving
+		ShipType& operator= (ShipType&& other) noexcept = delete; // Disable moving (assignment)
 	};
 
 	/** Orientation of the ship on the battle board */
@@ -99,7 +101,9 @@ namespace battleship
 	class BattleBoard
 	{
 	public:
-		virtual ~BattleBoard();
+		BattleBoard(BattleBoard&& other) noexcept; // Move constructor
+		BattleBoard& operator= (BattleBoard&& other) noexcept; // Move assignment operator
+		virtual ~BattleBoard() noexcept;
 
 		/** Apply a player's move on the board, changing a ship's status in case it has been hit.
 		 *  Returns NULL if the attack have missed a ship.
@@ -146,7 +150,19 @@ namespace battleship
 		int _playerAShipCount = 0;
 		int _playerBShipCount = 0;
 
+		// BattleBoard default constructor is private, as only the BoardBuilder is expected to instantiate
+		// this object type.
 		BattleBoard();
+
+		// BattleBoard contains a pointer to a 2d buffer containing the visual data,
+		// we avoid shallow copies of such objects since the new copy will share the same visual data
+		// pointer, which is an error. BattleBoards shouldn't be copied around anyway, so we
+		// simply disable them.
+		BattleBoard(BattleBoard const&) = delete; // Disable copying
+		BattleBoard& operator=(BattleBoard const&) = delete; // Disable copying (assignment)
+
+		/** Safely releases all manually allocated resources by the BattleBoard (e.g: new() )*/
+		void disposeAllocatedResources() noexcept;
 
 		/* Edits the board, without adding any game-pieces. This method affects the visual data only.
 		 * Coordinates are defined in the range [0, BOARD_SIZE-1]
@@ -164,6 +180,6 @@ namespace battleship
 		 *  The game piece will be removed from the board altogether, and the players ship count will be updated
 		 *  accordingly.
 		 */
-		void sinkShip(GamePiece* pieceToRemove);
+		void sinkShip(const GamePiece* pieceToRemove);
 	};
 }

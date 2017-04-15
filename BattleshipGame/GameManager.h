@@ -18,7 +18,7 @@ namespace battleship
 	{
 	public:
 		GameManager();
-		virtual ~GameManager();
+		virtual ~GameManager() = default;
 
 		/** Starts a new game session using the given board, between the 2 players algorithms.
 		 *  The game output will be depicted using the visualizer strategy.
@@ -33,10 +33,10 @@ namespace battleship
 		int _playerBWins = 0;
 
 		/** Helper methods: Are all game pieces of player X gone? */
-		bool isPlayerShipsLeft(BattleBoard* board, PlayerEnum player) const;
+		bool isPlayerShipsLeft(const BattleBoard *const board, PlayerEnum player) const;
 
 		/** Returns if both player forfeit or anybody have won */
-		bool isGameOver(BattleBoard* board, bool isPlayerAForfeit, bool isPlayerBForfeit) const;
+		bool isGameOver(const BattleBoard* board, bool isPlayerAForfeit, bool isPlayerBForfeit) const;
 
 		/** Takes into consideration the current game state and points currPlayer to the next player who
 		 *  should be playing

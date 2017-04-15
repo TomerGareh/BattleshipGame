@@ -10,6 +10,7 @@ namespace battleship
 {
 	class BattleBoard;
 
+	/** Strategies for initializing the BattleBoard */
 	enum class BattleshipBoardInitTypeEnum
 	{
 		LOAD_BOARD_FROM_FILE
@@ -24,6 +25,8 @@ namespace battleship
 	public:
 		~BattleshipGameBoardFactory() = delete;	// Disallow allocation of this object
 												// (more precisely - deallocation)
+												// Any attempt to instantiate a factory by mistake
+												// will result in a compilation error that protects
 
 		/** Creates a BattleBoard using the loadMethod. This overload takes no parameters. */
 		static shared_ptr<BattleBoard> loadBattleBoard(BattleshipBoardInitTypeEnum loadMethod);

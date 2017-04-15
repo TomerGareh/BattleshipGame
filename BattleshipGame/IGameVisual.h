@@ -10,7 +10,7 @@ namespace battleship
 	{
 	public:
 		IGameVisual();
-		virtual ~IGameVisual();
+		virtual ~IGameVisual() = default;
 
 		/** Visualize the beginning of game state */
 		virtual void visualizeBeginGame(shared_ptr<BattleBoard> board) = 0;

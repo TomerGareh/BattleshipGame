@@ -49,6 +49,11 @@ namespace battleship
 		BoardBuilder();
 		virtual ~BoardBuilder();
 
+		BoardBuilder(BoardBuilder const&) = delete;	// Disable copying
+		BoardBuilder& operator=(BoardBuilder const&) = delete;	// Disable copying (assignment)
+		BoardBuilder(BoardBuilder&& other) noexcept = delete; // Disable moving
+		BoardBuilder& operator= (BoardBuilder&& other) noexcept = delete; // Disable moving (assignment)
+
 		/** Represents a validation error that might rise when the board is initialized.
 		 *  This object helps keep the errors sorted by priority order, and output the right error message.
 		 */
@@ -57,7 +62,6 @@ namespace battleship
 		public:
 			/** Construct a new error, defined by error type (which determines the message and priority) */
 			BoardInitializeError(ErrorPriorityEnum errorType);
-
 			~BoardInitializeError();
 			
 			/** Returns the error message string stored for this error */

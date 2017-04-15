@@ -11,6 +11,7 @@ namespace battleship
 
 	BoardBuilder::~BoardBuilder()
 	{
+		// Empty since smart pointers take care of deallocation
 	}
 
 	BoardBuilder::BoardInitializeError::BoardInitializeError(ErrorPriorityEnum errorType) :

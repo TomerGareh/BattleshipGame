@@ -6,19 +6,14 @@ namespace battleship
 	{
 	}
 
-
-	GameManager::~GameManager()
-	{
-	}
-
-	bool GameManager::isPlayerShipsLeft(BattleBoard* board, PlayerEnum player) const
+	bool GameManager::isPlayerShipsLeft(const BattleBoard *const board, PlayerEnum player) const
 	{
 		const int shipsCount = (player == PlayerEnum::A) ?
 								board->getPlayerAShipCount() : board->getPlayerBShipCount();
 		return (shipsCount > 0);
 	}
 
-	bool GameManager::isGameOver(BattleBoard* board, bool isPlayerAForfeit, bool isPlayerBForfeit) const
+	bool GameManager::isGameOver(const BattleBoard *const board, bool isPlayerAForfeit, bool isPlayerBForfeit) const
 	{
 		if ((isPlayerAForfeit && isPlayerBForfeit) ||
 			(!isPlayerShipsLeft(board, PlayerEnum::A)) ||
@@ -32,7 +27,8 @@ namespace battleship
 		}
 	}
 
-	IBattleshipGameAlgo* GameManager::switchPlayerTurns(IBattleshipGameAlgo& playerA, IBattleshipGameAlgo& playerB,
+	IBattleshipGameAlgo* GameManager::switchPlayerTurns(IBattleshipGameAlgo& playerA,
+														IBattleshipGameAlgo& playerB,
 														IBattleshipGameAlgo* currPlayer,
 														bool isPlayerAForfeit, bool isPlayerBForfeit) const
 	{

@@ -47,12 +47,46 @@ namespace battleship
 		}
 	}
 
-	// Dtor
-	BattleBoard::~BattleBoard()
+	// Move Ctor
+	BattleBoard::BattleBoard(BattleBoard&& other) noexcept:
+		_matrix(other._matrix),
+		_gamePieces(std::move(other._gamePieces)),
+		_playerAShipCount(other._playerAShipCount),
+		_playerBShipCount(other._playerBShipCount)
+	{
+		other._matrix = NULL;
+	}
+
+	void BattleBoard::disposeAllocatedResources() noexcept
 	{
 		for (int index = 0; index < BOARD_SIZE; index++)
 			delete[] _matrix[index];
 		delete[] _matrix;
+	}
+
+	// Move assignment operator
+	BattleBoard& BattleBoard::operator= (BattleBoard&& other) noexcept
+	{
+		if (_matrix != NULL)
+		{
+			disposeAllocatedResources();
+		}
+
+		_matrix = other._matrix;
+		_gamePieces = std::move(other._gamePieces);
+		_playerAShipCount = other._playerAShipCount;
+		_playerBShipCount = other._playerBShipCount;
+
+		other._matrix = NULL;
+		other._playerAShipCount = 0;
+		other._playerBShipCount = 0;
+		return *this;
+	}
+
+	// Dtor
+	BattleBoard::~BattleBoard() noexcept
+	{
+		disposeAllocatedResources();
 	}
 
 
@@ -94,7 +128,7 @@ namespace battleship
 		}
 	}
 
-	void BattleBoard::sinkShip(GamePiece* pieceToRemove)
+	void BattleBoard::sinkShip(const GamePiece* pieceToRemove)
 	{
 		int deltaRow = (pieceToRemove->_orient == Orientation::VERTICAL) ? 1 : 0;
 		int deltaCol = (pieceToRemove->_orient == Orientation::HORIZONTAL) ? 1 : 0;
