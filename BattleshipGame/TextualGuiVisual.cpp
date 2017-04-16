@@ -194,6 +194,7 @@ namespace battleship
 			int rowOffset = (attackedGamePiece->_orient == Orientation::VERTICAL) ? 1 : 0;
 			int colOffset = (attackedGamePiece->_orient == Orientation::HORIZONTAL) ? 1 : 0;
 
+			// Show sink animation
 			for (int i = 0; i < attackedGamePiece->_shipType->_size; i++)
 			{
 				gotoxy(currRow, currCol);
@@ -207,6 +208,7 @@ namespace battleship
 
 			Sleep(_delayMs);
 
+			// Show board after sink
 			currRow = attackedGamePiece->_firstRow;
 			currCol = attackedGamePiece->_firstCol;
 
@@ -220,7 +222,6 @@ namespace battleship
 				currCol += colOffset;
 			}
 		}
-
 
 		gotoxy(BOARD_SIZE + 1, 0); // Move cursor in case the rest of the app wants to print something
 		Sleep(_delayMs);
