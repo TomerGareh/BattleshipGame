@@ -188,15 +188,14 @@ namespace battleship
 				if (board->_matrix[row + i][col + j] == currMask)
 				{
 					if (currMask != (char)BoardSquare::Empty)
-					{
 						matchSizeHorizontal++;
-					}
 				}
 				else
 				{
 					if ((board->_matrix[row + i][col + j] != (char)BoardSquare::Empty) && (board->_matrix[row + i][col + j] != currShip))
 					{
-						adjacentShipsHorizontal = true;
+						if (matchSizeHorizontal >= (j+1))
+							adjacentShipsHorizontal = true;
 					}
 					else
 					{
@@ -207,9 +206,7 @@ namespace battleship
 			else
 			{
 				if (currMask != (char)BoardSquare::Empty)
-				{
 					wrongSizeHorizontal = true;
-				}
 			}
 			
 			if (!verticalException)
@@ -217,15 +214,14 @@ namespace battleship
 				if (board->_matrix[row + j][col + i] == currMask)
 				{
 					if (currMask != (char)BoardSquare::Empty)
-					{
 						matchSizeVertical++;
-					}
 				}
 				else
 				{
 					if ((board->_matrix[row + j][col + i] != (char)BoardSquare::Empty) && (board->_matrix[row + j][col + i] != currShip))
 					{
-						adjacentShipsVertical = true;
+						if (matchSizeVertical >= (j+1))
+							adjacentShipsVertical = true;
 					}
 					else
 					{
@@ -236,9 +232,7 @@ namespace battleship
 			else
 			{
 				if (currMask != (char)BoardSquare::Empty)
-				{
 					wrongSizeVertical = true;
-				}
 			}
 		}
 
