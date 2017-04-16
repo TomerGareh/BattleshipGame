@@ -53,7 +53,7 @@ namespace battleship
 
 		virtual void visualizeBeginGame(shared_ptr<BattleBoard> board) override;
 
-		virtual void visualizeAttackResults(shared_ptr<BattleBoard> board,
+		virtual void visualizeAttackResults(shared_ptr<BattleBoard> board, int attackingPlayerNumber,
 											int row, int col, AttackResult attackResults) override;
 
 		virtual void visualizeEndGame(shared_ptr<BattleBoard> board, int playerAWins, int playerBWins) override;
@@ -93,5 +93,9 @@ namespace battleship
 		 *  which player owns the square, which piece is it, is it blank, etc).
 		 */
 		ConsoleColor getColorForSquare(shared_ptr<BattleBoard> board, int row, int col);
+
+		/** Prints the details of the last attack by a player */
+		void printLastMoveDescription(shared_ptr<BattleBoard> board, int attackingPlayerNumber,
+									  int row, int col, AttackResult attackResults);
 	};
 }

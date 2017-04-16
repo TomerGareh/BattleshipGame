@@ -17,7 +17,7 @@ namespace battleship
 		virtual ~ConsoleMessageVisual();
 
 		virtual void visualizeBeginGame(shared_ptr<BattleBoard> board) override;
-		virtual void visualizeAttackResults(shared_ptr<BattleBoard> board,
+		virtual void visualizeAttackResults(shared_ptr<BattleBoard> board, int attackingPlayerNumber,
 											int row, int col, AttackResult attackResults) override;
 	};
 }

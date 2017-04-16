@@ -1,7 +1,8 @@
 #include "TextualGuiVisual.h"
+#include "BattleBoard.h"
 #include <Windows.h>
 #include <iostream>
-#include "BattleBoard.h"
+#include <stdlib.h>
 
 using std::cout;
 using std::endl;
@@ -22,6 +23,22 @@ namespace battleship
 	{
 		HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 		SetConsoleTextAttribute(hConsole, (int)color);
+	}
+
+	/** Clears the console screen */
+	void clearScreen()
+	{
+		system("cls");
+	}
+
+	/** Shows / Hides the console cursor according to isVisible parameter */
+	void setConsoleCursor(bool isVisible)
+	{
+		HANDLE consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+		CONSOLE_CURSOR_INFO info;
+		info.dwSize = 100;
+		info.bVisible = isVisible;
+		SetConsoleCursorInfo(consoleHandle, &info);
 	}
 
 	TextualGuiVisual::TextualGuiVisual(int delayMs):
@@ -75,10 +92,56 @@ namespace battleship
 
 	void TextualGuiVisual::visualizeBeginGame(shared_ptr<BattleBoard> board)
 	{
+		setConsoleCursor(false);
+		clearScreen();
 		printBoard(board);
 	}
 
-	void TextualGuiVisual::visualizeAttackResults(shared_ptr<BattleBoard> board,
+	void TextualGuiVisual::printLastMoveDescription(shared_ptr<BattleBoard> board, int attackingPlayerNumber,
+													int row, int col, AttackResult attackResults)
+	{
+		int titleRow = BOARD_SIZE / 3;
+		int titleCol = BOARD_SIZE + 4;
+		gotoxy(titleRow, titleCol);
+		setTextColor(ConsoleColor::WHITE);
+		cout << "Player ";
+
+		if (attackingPlayerNumber == 0)
+		{ // A = 0
+			setTextColor(ConsoleColor::LIGHT_PURPLE);
+			cout << "A";
+		}
+		else
+		{ // B = 1
+			setTextColor(ConsoleColor::LIGHT_TURQUOISE);
+			cout << "B";
+		}
+
+		setTextColor(ConsoleColor::WHITE);
+		cout << " attacks at (" << row << "," << col << ")       ";
+		gotoxy(titleRow + 1, titleCol);
+		cout << "Results: ";
+
+		if (attackResults == AttackResult::Miss)
+		{
+			setTextColor(ConsoleColor::LIGHT_GREEN);
+			cout << "Miss  ";
+		}
+		else if (attackResults == AttackResult::Hit)
+		{
+			setTextColor(ConsoleColor::LIGHT_YELLOW);
+			cout << "Hit   ";
+		}
+		else
+		{ // Sink
+			setTextColor(ConsoleColor::LIGHT_RED);
+			cout << "Sink   ";
+		}
+
+		setTextColor(ConsoleColor::WHITE);
+	}
+
+	void TextualGuiVisual::visualizeAttackResults(shared_ptr<BattleBoard> board, int attackingPlayerNumber,
 												  int row, int col, AttackResult attackResults)
 	{
 		auto matrix = board->getBoardMatrix();
@@ -101,11 +164,15 @@ namespace battleship
 		{
 			printBoard(board);
 		}
+
+		printLastMoveDescription(board, attackingPlayerNumber, row, col, attackResults);
 	}
 
 	void TextualGuiVisual::visualizeEndGame(shared_ptr<BattleBoard> board, int playerAPoints, int playerBPoints)
 	{
+		gotoxy(BOARD_SIZE + 1, 0);
 		setTextColor(ConsoleColor::WHITE);
+		setConsoleCursor(true);
 		IGameVisual::visualizeEndGame(board, playerAPoints, playerBPoints);
 	}
 }
