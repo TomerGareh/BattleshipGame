@@ -34,7 +34,7 @@ void parseArgs(int argc, char* argv[], map<const char*, char*>& config)
 {
 	config[BP_CONFIG_PATH] = ".";		// Nameless param, default is working directory
 	config[BP_CONFIG_QUIET] = BP_CONFIG_FALSE;  // Default is print to screen
-	config[BP_CONFIG_DELAY] = "500";	// For animations, in ms. Default is half a second.
+	config[BP_CONFIG_DELAY] = "1000";	// For animations, in ms. Default is a second.
 
 	// If the first parameter doesn't match any of the configuration keywords this is a path
 	if ((argc >= 2) && strcmp("-quiet", argv[1]) && strcmp("-delay", argv[1]))

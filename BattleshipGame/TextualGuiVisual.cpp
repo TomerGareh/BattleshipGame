@@ -97,29 +97,29 @@ namespace battleship
 		printBoard(board);
 	}
 
-	void TextualGuiVisual::printLastMoveDescription(shared_ptr<BattleBoard> board, int attackingPlayerNumber,
-													int row, int col, AttackResult attackResults)
+	void TextualGuiVisual::eraseMoveDescription()
 	{
 		int titleRow = BOARD_SIZE / 3;
 		int titleCol = BOARD_SIZE + 4;
 		gotoxy(titleRow, titleCol);
 		setTextColor(ConsoleColor::WHITE);
-		cout << "Player ";
+		string descriptionPlaceholder = "Player A attacks at (10, 10)";
 
-		if (attackingPlayerNumber == 0)
-		{ // A = 0
-			setTextColor(ConsoleColor::LIGHT_PURPLE);
-			cout << "A";
-		}
-		else
-		{ // B = 1
-			setTextColor(ConsoleColor::LIGHT_TURQUOISE);
-			cout << "B";
-		}
+		for (int i = 0; i < descriptionPlaceholder.length(); i++)
+			cout << " ";
 
-		setTextColor(ConsoleColor::WHITE);
-		cout << " attacks at (" << row << "," << col << ")       ";
 		gotoxy(titleRow + 1, titleCol);
+		descriptionPlaceholder = "Results: Miss      ";
+
+		for (int j = 0; j < descriptionPlaceholder.length(); j++)
+			cout << " ";
+	}
+
+	void TextualGuiVisual::printLastAttackResultsDesc(shared_ptr<BattleBoard> board,
+													  int row, int col, AttackResult attackResults)
+	{
+		gotoxy(TITLE_ROW + 1, TITLE_COL);
+		setTextColor(ConsoleColor::WHITE);
 		cout << "Results: ";
 
 		if (attackResults == AttackResult::Miss)
@@ -141,9 +141,34 @@ namespace battleship
 		setTextColor(ConsoleColor::WHITE);
 	}
 
+	void TextualGuiVisual::printLastMoveDescription(shared_ptr<BattleBoard> board, int attackingPlayerNumber,
+													int row, int col)
+	{
+		
+		gotoxy(TITLE_ROW, TITLE_COL);
+		setTextColor(ConsoleColor::WHITE);
+		cout << "Player ";
+
+		if (attackingPlayerNumber == 0)
+		{ // A = 0
+			setTextColor(ConsoleColor::LIGHT_PURPLE);
+			cout << "A";
+		}
+		else
+		{ // B = 1
+			setTextColor(ConsoleColor::LIGHT_TURQUOISE);
+			cout << "B";
+		}
+
+		setTextColor(ConsoleColor::WHITE);
+		cout << " attacks at (" << (row + 1) << "," << (col + 1) << ")       ";
+	}
+
 	void TextualGuiVisual::visualizeAttackResults(shared_ptr<BattleBoard> board, int attackingPlayerNumber,
 												  int row, int col, AttackResult attackResults)
 	{
+		eraseMoveDescription();
+		printLastMoveDescription(board, attackingPlayerNumber, row, col);
 		auto matrix = board->getBoardMatrix();
 		char endOfAnimationChar = matrix[row][col];
 
@@ -165,7 +190,10 @@ namespace battleship
 			printBoard(board);
 		}
 
-		printLastMoveDescription(board, attackingPlayerNumber, row, col, attackResults);
+		printLastAttackResultsDesc(board, row, col, attackResults);
+
+		gotoxy(BOARD_SIZE + 1, 0); // Move cursor in case the rest of the app wants to print something
+		Sleep(_delayMs);
 	}
 
 	void TextualGuiVisual::visualizeEndGame(shared_ptr<BattleBoard> board, int playerAPoints, int playerBPoints)

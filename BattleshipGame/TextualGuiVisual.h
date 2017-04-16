@@ -59,6 +59,10 @@ namespace battleship
 		virtual void visualizeEndGame(shared_ptr<BattleBoard> board, int playerAWins, int playerBWins) override;
 
 	private:
+		/** Position of title on console window */
+		const int TITLE_ROW = BOARD_SIZE / 3;
+		const int TITLE_COL = BOARD_SIZE + 4;
+
 		/** Colors used by Player A pieces */
 		const map<BoardSquare, ConsoleColor> PLAYER_A_COLOR_MAPPING = 
 		{
@@ -96,6 +100,12 @@ namespace battleship
 
 		/** Prints the details of the last attack by a player */
 		void printLastMoveDescription(shared_ptr<BattleBoard> board, int attackingPlayerNumber,
-									  int row, int col, AttackResult attackResults);
+									  int row, int col);
+
+		/** Prints the details of the last attack results by a player */
+		void printLastAttackResultsDesc(shared_ptr<BattleBoard> board,
+										int row, int col, AttackResult attackResults);
+
+		void eraseMoveDescription();
 	};
 }
