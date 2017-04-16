@@ -10,7 +10,7 @@ namespace battleship
 	{
 	}
 
-	void IGameVisual::visualizeEndGame(shared_ptr<BattleBoard> board, int playerAWins, int playerBWins)
+	void IGameVisual::visualizeEndGame(shared_ptr<BattleBoard> board, int playerAPoints, int playerBPoints)
 	{
 		bool isTie = ((board->getPlayerAShipCount() != 0) && (board->getPlayerBShipCount() != 0));
 		if (!isTie)
@@ -20,7 +20,7 @@ namespace battleship
 		}
 
 		cout << "Points:" << endl;
-		cout << "Player A: " << playerAWins << endl;
-		cout << "Player B: " << playerBWins << endl;
+		cout << "Player A: " << playerAPoints << endl;
+		cout << "Player B: " << playerBPoints << endl;
 	}
 }

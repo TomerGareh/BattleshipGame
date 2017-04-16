@@ -84,20 +84,28 @@ namespace battleship
 		auto matrix = board->getBoardMatrix();
 		char endOfAnimationChar = matrix[row][col];
 
-		if ((attackResults == AttackResult::Hit) || (attackResults == AttackResult::Sink))
-		{
-			ConsoleColor color = (board->whichPlayerOwnsSquare(row, col) == PlayerEnum::A) ?
-								  PLAYER_A_COLOR_MAPPING.at(BoardSquare::Bombared) : 
-								  PLAYER_B_COLOR_MAPPING.at(BoardSquare::Bombared);
-			gotoxy(row, col);
-			setTextColor(color);
-			cout << (char)BoardSquare::Bombared;
-			Sleep(_delayMs);
-		}
-
-		ConsoleColor color = getColorForSquare(board, row, col);
+		ConsoleColor color = PLAYER_A_COLOR_MAPPING.at(BoardSquare::Bombared);
 		gotoxy(row, col);
 		setTextColor(color);
-		cout << endOfAnimationChar;
+		cout << (char)BoardSquare::Bombared;
+		Sleep(_delayMs);
+
+		if (attackResults != AttackResult::Sink)
+		{
+			color = getColorForSquare(board, row, col);
+			gotoxy(row, col);
+			setTextColor(color);
+			cout << endOfAnimationChar;
+		}
+		else
+		{
+			printBoard(board);
+		}
+	}
+
+	void TextualGuiVisual::visualizeEndGame(shared_ptr<BattleBoard> board, int playerAPoints, int playerBPoints)
+	{
+		setTextColor(ConsoleColor::WHITE);
+		IGameVisual::visualizeEndGame(board, playerAPoints, playerBPoints);
 	}
 }

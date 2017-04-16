@@ -132,6 +132,6 @@ namespace battleship
 		}
 
 		updateScoreboard(board.get());
-		visualizer.visualizeEndGame(board, _playerAWins, _playerBWins);
+		visualizer.visualizeEndGame(board, playerAPoints, playerBPoints);
 	}
 }

@@ -87,6 +87,8 @@ namespace battleship
 
 	BoardBuilder::ShipMask::ShipMask(BoardSquare ship)
 	{
+		maskType = ship;
+
 		mask = std::make_unique<ShipMaskList>();
 
 		switch (ship)
@@ -146,8 +148,7 @@ namespace battleship
 			}
 		}
 
-		matchSizeHorizontal = 1;
-		matchSizeVertical = 1;
+		orient = Orientation::HORIZONTAL;
 		wrongSize = false;
 		adjacentShips = false;
 	}
@@ -158,10 +159,15 @@ namespace battleship
 
 	bool BoardBuilder::ShipMask::applyMask(const shared_ptr<BattleBoard> board, int row, int col, PlayerEnum player)
 	{
+		char currShip = (player == PlayerEnum::A) ? (char)maskType : tolower((char)maskType);
 		int i, j;
 		char currMask;
-		bool isHorizontalMask = true;
-		bool isVerticalMask = true;
+		int matchSizeHorizontal = 1;
+		int matchSizeVertical = 1;
+		bool wrongSizeHorizontal = false;
+		bool wrongSizeVertical = false;
+		bool adjacentShipsHorizontal = false;
+		bool adjacentShipsVertical = false;
 		bool horizontalException, verticalException;
 
 		for (auto maskItem : *mask)
@@ -171,17 +177,6 @@ namespace battleship
 			currMask = std::get<2>(maskItem);
 			horizontalException = ((row + i < 0) || (row + i >= BOARD_SIZE) || (col + j < 0) || (col + j >= BOARD_SIZE));
 			verticalException = ((row + j < 0) || (row + j >= BOARD_SIZE) || (col + i < 0) || (col + i >= BOARD_SIZE));
-
-			if (horizontalException && verticalException)
-			{
-				if (currMask != (char)BoardSquare::Empty)
-				{
-					isHorizontalMask = false;
-					isVerticalMask = false;
-					wrongSize = true;
-				}
-				continue;
-			}
 
 			if (player == PlayerEnum::B)
 			{
@@ -199,14 +194,21 @@ namespace battleship
 				}
 				else
 				{
-					isHorizontalMask = false;
+					if ((board->_matrix[row + i][col + j] != (char)BoardSquare::Empty) && (board->_matrix[row + i][col + j] != currShip))
+					{
+						adjacentShipsHorizontal = true;
+					}
+					else
+					{
+						wrongSizeHorizontal = true;
+					}
 				}
 			}
 			else
 			{
 				if (currMask != (char)BoardSquare::Empty)
 				{
-					isHorizontalMask = false;
+					wrongSizeHorizontal = true;
 				}
 			}
 			
@@ -221,29 +223,48 @@ namespace battleship
 				}
 				else
 				{
-					isVerticalMask = false;
+					if ((board->_matrix[row + j][col + i] != (char)BoardSquare::Empty) && (board->_matrix[row + j][col + i] != currShip))
+					{
+						adjacentShipsVertical = true;
+					}
+					else
+					{
+						wrongSizeVertical = true;
+					}
 				}
 			}
 			else
 			{
 				if (currMask != (char)BoardSquare::Empty)
 				{
-					isVerticalMask = false;
+					wrongSizeVertical = true;
 				}
 			}
-			
-			if ((!horizontalException) && (!verticalException)
-				&& (board->_matrix[row + i][col + j] != currMask) && (board->_matrix[row + j][col + i] != currMask))
-			{
-				if (currMask != (char)BoardSquare::Empty)
-				{
-					wrongSize = true;
-				}
-				else
-				{
-					adjacentShips = true;
-				}
-			}
+		}
+
+		bool isHorizontalMask = ((!wrongSizeHorizontal) && (!adjacentShipsHorizontal));
+		bool isVerticalMask = ((!wrongSizeVertical) && (!adjacentShipsVertical));
+
+		orient = (matchSizeHorizontal >= matchSizeVertical) ? Orientation::HORIZONTAL : Orientation::VERTICAL;
+		
+		wrongSize = (wrongSizeHorizontal && wrongSizeVertical);
+		
+		if (wrongSizeHorizontal && (!wrongSizeVertical))
+		{
+			adjacentShips = adjacentShipsVertical;
+		}
+		else if ((!wrongSizeHorizontal) && wrongSizeVertical)
+		{
+			adjacentShips = adjacentShipsHorizontal;
+		}
+		else if (((matchSizeHorizontal == 1) && (matchSizeVertical == 1)) 
+				|| ((matchSizeHorizontal > 1) && (matchSizeVertical > 1)))
+		{
+			adjacentShips = adjacentShipsHorizontal || adjacentShipsVertical;
+		}
+		else
+		{
+			adjacentShips = (matchSizeHorizontal > 1) ? adjacentShipsHorizontal : adjacentShipsVertical;
 		}
 
 		return (isHorizontalMask || isVerticalMask);
@@ -251,8 +272,6 @@ namespace battleship
 
 	void BoardBuilder::ShipMask::resetMaskFlags()
 	{
-		matchSizeHorizontal = 1;
-		matchSizeVertical = 1;
 		wrongSize = false;
 		adjacentShips = false;
 	}
@@ -263,13 +282,34 @@ namespace battleship
 		return this;
 	}
 
-	void BoardBuilder::markVisitedSquares(bool visitedBoard[BOARD_SIZE][BOARD_SIZE], int row, int col, int size, Orientation orient)
+	void BoardBuilder::markVisitedSquares(bool visitedBoard[BOARD_SIZE][BOARD_SIZE], int row, int col)
 	{
-		int deltaRow = (orient == Orientation::VERTICAL) ? 1 : 0;
-		int deltaCol = (orient == Orientation::HORIZONTAL) ? 1 : 0;
-		for (int i = 0; i < size; i++)
+		char ship = _board->_matrix[row][col];
+		int i = row;
+		int j = col;
+		bool sameCharInRow = true;
+		bool sameCharInCol = true;
+		while ((j < BOARD_SIZE) && (sameCharInRow))
 		{
-			visitedBoard[row + i*deltaRow][col + i*deltaCol] = true;
+			i = row;
+			sameCharInCol = true;
+			while ((i < BOARD_SIZE) && (sameCharInCol))
+			{
+				if (_board->_matrix[i][j] == ship)
+				{
+					visitedBoard[i][j] = true;
+				}
+				else
+				{
+					sameCharInCol = false;
+					if (i == row)
+					{
+						sameCharInRow = false;
+					}
+				}
+				i++;
+			}
+			j++;
 		}
 	}
 
@@ -287,8 +327,6 @@ namespace battleship
 		PlayerEnum player;
 		bool visitedBoard[BOARD_SIZE][BOARD_SIZE] = {false};
 		bool isMatch = false;
-		int matchSize;
-		Orientation orient;
 		for (int i = 0; i < BOARD_SIZE; i++)
 		{
 			for (int j = 0; j < BOARD_SIZE; j++)
@@ -382,24 +420,14 @@ namespace battleship
 
 				if (currSquare != (char)BoardSquare::Empty)
 				{
-					if (currMask->matchSizeHorizontal >= currMask->matchSizeVertical)
-					{
-						matchSize = currMask->matchSizeHorizontal;
-						orient = Orientation::HORIZONTAL;
-					}
-					else
-					{
-						matchSize = currMask->matchSizeVertical;
-						orient = Orientation::VERTICAL;
-					}
-
-					markVisitedSquares(visitedBoard, i, j, matchSize, orient);
+					markVisitedSquares(visitedBoard, i, j);
 					
-					if (isMatch)
+					if (!currMask->wrongSize)
 					{
-						_board->addGamePiece(i, j, *shipType, player, orient);
+						_board->addGamePiece(i, j, *shipType, player, currMask->orient);
 					}
-					else
+					
+					if (!isMatch)
 					{
 						validBoard = false;
 						if (currMask->adjacentShips)
