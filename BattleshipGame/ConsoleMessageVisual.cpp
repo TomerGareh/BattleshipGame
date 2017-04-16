@@ -18,7 +18,8 @@ namespace battleship
 	}
 
 	void ConsoleMessageVisual::visualizeAttackResults(shared_ptr<BattleBoard> board, int attackingPlayerNumber,
-													  int row, int col, AttackResult attackResults)
+													  int row, int col, AttackResult attackResults,
+											  		  shared_ptr<const GamePiece> attackedGamePiece)
 	{
 		// Console does not notify on attack results
 	}

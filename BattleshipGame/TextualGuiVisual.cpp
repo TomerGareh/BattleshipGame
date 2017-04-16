@@ -165,7 +165,8 @@ namespace battleship
 	}
 
 	void TextualGuiVisual::visualizeAttackResults(shared_ptr<BattleBoard> board, int attackingPlayerNumber,
-												  int row, int col, AttackResult attackResults)
+												  int row, int col, AttackResult attackResults,
+												  shared_ptr<const GamePiece> attackedGamePiece)
 	{
 		eraseMoveDescription();
 		printLastMoveDescription(board, attackingPlayerNumber, row, col);
@@ -184,13 +185,42 @@ namespace battleship
 			gotoxy(row, col);
 			setTextColor(color);
 			cout << endOfAnimationChar;
+			printLastAttackResultsDesc(board, row, col, attackResults);
 		}
 		else
-		{
-			printBoard(board);
+		{ // Sink
+			int currRow = attackedGamePiece->_firstRow;
+			int currCol = attackedGamePiece->_firstCol;
+			int rowOffset = (attackedGamePiece->_orient == Orientation::VERTICAL) ? 1 : 0;
+			int colOffset = (attackedGamePiece->_orient == Orientation::HORIZONTAL) ? 1 : 0;
+
+			for (int i = 0; i < attackedGamePiece->_shipType->_size; i++)
+			{
+				gotoxy(currRow, currCol);
+				setTextColor(ConsoleColor::LIGHT_YELLOW_BLUE_BG);
+				cout << (char)BoardSquare::Sinking;
+				currRow += rowOffset;
+				currCol += colOffset;
+			}
+
+			printLastAttackResultsDesc(board, row, col, attackResults);
+
+			Sleep(_delayMs);
+
+			currRow = attackedGamePiece->_firstRow;
+			currCol = attackedGamePiece->_firstCol;
+
+			for (int j = 0; j < attackedGamePiece->_shipType->_size; j++)
+			{
+				color = getColorForSquare(board, currRow, currCol);
+				gotoxy(currRow, currCol);
+				setTextColor(color);
+				cout << (char)BoardSquare::Empty;
+				currRow += rowOffset;
+				currCol += colOffset;
+			}
 		}
 
-		printLastAttackResultsDesc(board, row, col, attackResults);
 
 		gotoxy(BOARD_SIZE + 1, 0); // Move cursor in case the rest of the app wants to print something
 		Sleep(_delayMs);

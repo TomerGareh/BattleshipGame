@@ -34,6 +34,7 @@ namespace battleship
 		Empty = ' ',
 		Hit = '*',
 		Bombared = '@',
+		Sinking = 'X',
 		RubberBoat = 'B',
 		RocketShip = 'P',
 		Submarine = 'M',

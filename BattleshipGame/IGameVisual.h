@@ -17,7 +17,8 @@ namespace battleship
 
 		/** Visualize the results of one of the player's attacks */
 		virtual void visualizeAttackResults(shared_ptr<BattleBoard> board, int attackingPlayerNumber,
-											int row, int col, AttackResult attackResults) = 0;
+											int row, int col, AttackResult attackResults,
+											shared_ptr<const GamePiece> attackedGamePiece) = 0;
 
 		/** Print the results of the end-game to the console (who won, how many points..) */
 		virtual void visualizeEndGame(shared_ptr<BattleBoard> board,
