@@ -59,6 +59,9 @@ namespace battleship
 
 		virtual void visualizeEndGame(shared_ptr<BattleBoard> board, int playerAWins, int playerBWins) override;
 
+		/** Shows / Hides the console cursor according to isVisible parameter */
+		static void setConsoleCursor(bool isVisible);
+
 	private:
 		/** Position of title on console window */
 		const int TITLE_ROW = BOARD_SIZE / 3;
@@ -118,8 +121,5 @@ namespace battleship
 
 		/** Clears the console screen */
 		static void clearScreen();
-
-		/** Shows / Hides the console cursor according to isVisible parameter */
-		static void setConsoleCursor(bool isVisible);
 	};
 }

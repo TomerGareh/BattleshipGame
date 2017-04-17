@@ -37,10 +37,21 @@ namespace battleship
 		SetConsoleCursorInfo(consoleHandle, &info);
 	}
 
+	BOOL WINAPI closeupHandler(DWORD signal)
+	{
+		// Make sure cursor is restored even if program is quit unexpectedly
+		if (signal == CTRL_C_EVENT)
+			TextualGuiVisual::setConsoleCursor(true);
+
+		return FALSE;
+	}
+
 	TextualGuiVisual::TextualGuiVisual(int delayMs):
 		IGameVisual(),
 		_delayMs(delayMs)
 	{
+		// Activate shutdown callback, to restore console cursor if program quits unexpectedly
+		SetConsoleCtrlHandler(closeupHandler, TRUE);
 	}
 
 	ConsoleColor TextualGuiVisual::getColorForSquare(shared_ptr<BattleBoard> board,
