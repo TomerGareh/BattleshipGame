@@ -17,7 +17,6 @@ void GameFromFileAlgo::populateMovesFromFile(const string& filename)
 	{
 		auto legalChars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', COORDS_DELIM };
 		IOUtil::replaceIllegalCharacters(nextLine, (char)BoardSquare::Empty, legalChars);
-		IOUtil::removeLeadingTrailingSpaces(nextLine);
 
 		// Search for punctuation delimeter, if not found this is an illegal row, skip it (do nothing)
 		size_t delim_pos;
@@ -28,8 +27,22 @@ void GameFromFileAlgo::populateMovesFromFile(const string& filename)
 			nextLine.erase(0, delim_pos + 1);
 			string& secondToken = nextLine;
 
-			if (firstToken.empty() || secondToken.empty() ||
-				!IOUtil::isInteger(firstToken) || !IOUtil::isInteger(secondToken))
+			if ((!firstToken.empty()) && (!secondToken.empty()))
+			{
+				IOUtil::removeLeadingTrailingSpaces(firstToken);
+				IOUtil::removeLeadingTrailingSpaces(secondToken);
+
+				// Deal with whitespaces and other characters after the second number
+				size_t secondTokenLastPos = secondToken.find_first_not_of("0123456789");
+				if (secondTokenLastPos != string::npos)
+					secondToken = secondToken.substr(0, secondTokenLastPos);
+			}
+			else
+			{
+				return; // Illegal line
+			}
+
+			if (!IOUtil::isInteger(firstToken) || !IOUtil::isInteger(secondToken))
 			{
 				return; // Illegal line
 			}
