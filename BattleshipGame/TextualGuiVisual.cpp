@@ -112,13 +112,13 @@ namespace battleship
 		setTextColor(ConsoleColor::WHITE);
 		string descriptionPlaceholder = "Player A attacks at (10, 10)";
 
-		for (int i = 0; i < descriptionPlaceholder.length(); i++)
+		for (size_t i = 0; i < descriptionPlaceholder.length(); i++)
 			cout << " ";
 
 		gotoxy(titleRow + 1, titleCol);
 		descriptionPlaceholder = "Results: Miss      ";
 
-		for (int j = 0; j < descriptionPlaceholder.length(); j++)
+		for (size_t j = 0; j < descriptionPlaceholder.length(); j++)
 			cout << " ";
 	}
 
