@@ -16,6 +16,19 @@ namespace battleship
 	const string IOUtil::ATTACK_A_SUFFIX = ".attack-a";
 	const string IOUtil::ATTACK_B_SUFFIX = ".attack-b";
 
+	bool IOUtil::isInteger(const std::string & s)
+	{
+		if (s.empty() || ((!isdigit(s[0])) && (s[0] != '-') && (s[0] != '+')))
+		{
+			return false;
+		}
+
+		char * p;
+		strtol(s.c_str(), &p, 10);
+
+		return (*p == 0);
+	}
+
 	void IOUtil::replaceIllegalCharacters(string& line, const char replacementChar, initializer_list<char> legalChars)
 	{
 		// This lambda expression replaces all illegal characters with replacementChar

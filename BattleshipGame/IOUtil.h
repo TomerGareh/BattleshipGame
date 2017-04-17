@@ -21,6 +21,9 @@ namespace battleship
 		virtual ~IOUtil() = delete;	// Disallow allocation of this helper object
 									// (more precisely - deallocation)
 
+		/** Returns if the given string can be safely converted to an integer or not */
+		static bool isInteger(const std::string & s);
+
 		/** Replaces all illegal characters - which are all characters that are not specified in legalChars
 		 *  with the replacementChar given in the line string.
 		 */
