@@ -109,5 +109,17 @@ namespace battleship
 
 		/** Erase the previous move and attack result descriptions */
 		void eraseMoveDescription();
+
+		/** Points the cursor at (row,col) in the console output */
+		static void gotoxy(int row, int col);
+
+		/** Sets the text color for the console to the given color enum */
+		static void setTextColor(ConsoleColor color);
+
+		/** Clears the console screen */
+		static void clearScreen();
+
+		/** Shows / Hides the console cursor according to isVisible parameter */
+		static void setConsoleCursor(bool isVisible);
 	};
 }

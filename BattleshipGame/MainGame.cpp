@@ -18,6 +18,9 @@ using namespace battleship;
 using std::unique_ptr;
 using std::shared_ptr;
 using std::map;
+using std::exception;
+using std::cout;
+using std::endl;
 
 const int SUCCESS_CODE = 0;
 const int ERROR_CODE = -1;
@@ -58,43 +61,51 @@ void parseArgs(int argc, char* argv[], map<const char*, char*>& config)
 
 int main(int argc, char* argv[])
 {
-	// Define configuration
-	map<const char*, char*> configuration;
-	parseArgs(argc, argv, configuration);
-
-	auto inputFileNames = IOUtil::loadFilesInPath(string(configuration[BP_CONFIG_PATH]));
-	if (NULL == inputFileNames)
-		return ERROR_CODE;
-
-	string boardFile = (*inputFileNames)[IOUtil::BOARD_SUFFIX];
-	string playerAAttackFile = (*inputFileNames)[IOUtil::ATTACK_A_SUFFIX];
-	string playerBAttackFile = (*inputFileNames)[IOUtil::ATTACK_B_SUFFIX];
-
-	// Game initialization - players and board are initialized from files
-	GameFromFileAlgo playerA(playerAAttackFile);
-	GameFromFileAlgo playerB(playerBAttackFile);
-
-	auto board = BattleshipGameBoardFactory::loadBattleBoard(BattleshipBoardInitTypeEnum::LOAD_BOARD_FROM_FILE, boardFile);
-	if (NULL == board)
-		return ERROR_CODE;
-
-	unique_ptr<IGameVisual> visual = NULL;
-
-	// Choose visualization type, depending on -quiet arg
-	if (strcmp(configuration[BP_CONFIG_QUIET], BP_CONFIG_FALSE))
+	try
 	{
-		visual = std::make_unique<ConsoleMessageVisual>();
-	}
-	else
-	{
-		int delay = atoi(configuration[BP_CONFIG_DELAY]);
-		visual = std::make_unique<TextualGuiVisual>(delay);
-	}
+		// Define configuration
+		map<const char*, char*> configuration;
+		parseArgs(argc, argv, configuration);
 
-	// Start a single game session, visualizer is expected to print the results to the screen when the session
-	// is over (or during the session itself if this is a textual visualizer type)
-	GameManager gameManager;
-	gameManager.startGame(board, playerA, playerB, *visual);
+		auto inputFileNames = IOUtil::loadFilesInPath(string(configuration[BP_CONFIG_PATH]));
+		if (NULL == inputFileNames)
+			return ERROR_CODE;
 
-	return SUCCESS_CODE;
+		string boardFile = (*inputFileNames)[IOUtil::BOARD_SUFFIX];
+		string playerAAttackFile = (*inputFileNames)[IOUtil::ATTACK_A_SUFFIX];
+		string playerBAttackFile = (*inputFileNames)[IOUtil::ATTACK_B_SUFFIX];
+
+		// Game initialization - players and board are initialized from files
+		GameFromFileAlgo playerA(playerAAttackFile);
+		GameFromFileAlgo playerB(playerBAttackFile);
+
+		auto board = BattleshipGameBoardFactory::loadBattleBoard(BattleshipBoardInitTypeEnum::LOAD_BOARD_FROM_FILE, boardFile);
+		if (NULL == board)
+			return ERROR_CODE;
+
+		unique_ptr<IGameVisual> visual = NULL;
+
+		// Choose visualization type, depending on -quiet arg
+		if (strcmp(configuration[BP_CONFIG_QUIET], BP_CONFIG_FALSE))
+		{
+			visual = std::make_unique<ConsoleMessageVisual>();
+		}
+		else
+		{
+			int delay = atoi(configuration[BP_CONFIG_DELAY]);
+			visual = std::make_unique<TextualGuiVisual>(delay);
+		}
+
+		// Start a single game session, visualizer is expected to print the results to the screen when the session
+		// is over (or during the session itself if this is a textual visualizer type)
+		GameManager gameManager;
+		gameManager.startGame(board, playerA, playerB, *visual);
+
+		return SUCCESS_CODE;
+	}
+	catch (const exception& e)
+	{	// This should be the last barrier that stops the app from failing
+		cout << "Error: General error of type " << e.what() << endl;
+		return ERROR_CODE;
+	}
 }

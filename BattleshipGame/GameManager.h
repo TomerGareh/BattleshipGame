@@ -43,6 +43,7 @@ namespace battleship
 		 */
 		IBattleshipGameAlgo* switchPlayerTurns(IBattleshipGameAlgo& playerA, IBattleshipGameAlgo& playerB,
 											   IBattleshipGameAlgo* currPlayer,
+											   shared_ptr<const GamePiece> lastAttackedPiece,
 											   bool isPlayerAForfeit, bool isPlayerBForfeit) const;
 
 		/** Updates the game points when a game piece have been sank */

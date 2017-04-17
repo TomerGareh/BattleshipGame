@@ -30,14 +30,28 @@ namespace battleship
 	IBattleshipGameAlgo* GameManager::switchPlayerTurns(IBattleshipGameAlgo& playerA,
 														IBattleshipGameAlgo& playerB,
 														IBattleshipGameAlgo* currPlayer,
+														shared_ptr<const GamePiece> lastAttackedPiece,
 														bool isPlayerAForfeit, bool isPlayerBForfeit) const
 	{
-		if ((currPlayer == &playerA) && (!isPlayerBForfeit))
-			return &playerB;
-		else if (!isPlayerAForfeit)
-			return &playerA;
+		bool isCurrPlayerA = (currPlayer == &playerA);
+		bool isCurrPlayerB = !isCurrPlayerA;
+
+		// Switch turns only if the player misses or hits himself
+		if ((lastAttackedPiece == NULL) ||
+			((lastAttackedPiece->_player == PlayerEnum::A) && (isCurrPlayerA)) ||
+			((lastAttackedPiece->_player == PlayerEnum::B) && (isCurrPlayerB)))
+		{
+			if (isCurrPlayerA && (!isPlayerBForfeit)) // A just played and B still didn't forfeit
+				return &playerB;
+			else if (!isPlayerAForfeit)	// B forfeited or B just played now
+				return &playerA;
+			else
+				return &playerB;
+		}
 		else
-			return &playerB;
+		{
+			return currPlayer;
+		}
 	}
 
 	void GameManager::updateCurrentGamePoints(const GamePiece *const sankPiece,
@@ -93,7 +107,7 @@ namespace battleship
 				else
 					isPlayerBForfeit = true;
 
-				currentPlayer = switchPlayerTurns(playerA, playerB, currentPlayer,
+				currentPlayer = switchPlayerTurns(playerA, playerB, currentPlayer, NULL,
 												  isPlayerAForfeit, isPlayerBForfeit);
 				continue;
 			}
@@ -113,8 +127,6 @@ namespace battleship
 			if (attackedGamePiece == NULL)
 			{	// Miss
 				attackResult = AttackResult::Miss;
-				currentPlayer = switchPlayerTurns(playerA, playerB, currentPlayer,
-												  isPlayerAForfeit, isPlayerBForfeit);
 			}
 			else if (attackedGamePiece->_lifeLeft == 0)
 			{	// Sink
@@ -125,6 +137,9 @@ namespace battleship
 			{	// Hit
 				attackResult = AttackResult::Hit;
 			}
+
+			currentPlayer = switchPlayerTurns(playerA, playerB, currentPlayer, attackedGamePiece,
+											  isPlayerAForfeit, isPlayerBForfeit);
 
 			playerA.notifyOnAttackResult(attackingPlayerNumber, target.first, target.second, attackResult);
 			playerB.notifyOnAttackResult(attackingPlayerNumber, target.first, target.second, attackResult);

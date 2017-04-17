@@ -9,8 +9,7 @@ using std::endl;
 
 namespace battleship
 {
-	/** Points the cursor at (row,col) in the console output */
-	void gotoxy(int row, int col)
+	void TextualGuiVisual::gotoxy(int row, int col)
 	{
 		COORD coord;
 		coord.X = col;
@@ -18,21 +17,18 @@ namespace battleship
 		SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
 	}
 
-	/** Sets the text color for the console to the given color enum */
-	void setTextColor(ConsoleColor color)
+	void TextualGuiVisual::setTextColor(ConsoleColor color)
 	{
 		HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 		SetConsoleTextAttribute(hConsole, (int)color);
 	}
 
-	/** Clears the console screen */
-	void clearScreen()
+	void TextualGuiVisual::clearScreen()
 	{
 		system("cls");
 	}
 
-	/** Shows / Hides the console cursor according to isVisible parameter */
-	void setConsoleCursor(bool isVisible)
+	void TextualGuiVisual::setConsoleCursor(bool isVisible)
 	{
 		HANDLE consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 		CONSOLE_CURSOR_INFO info;
