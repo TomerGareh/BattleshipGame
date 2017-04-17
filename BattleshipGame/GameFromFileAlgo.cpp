@@ -28,6 +28,12 @@ void GameFromFileAlgo::populateMovesFromFile(const string& filename)
 			nextLine.erase(0, delim_pos + 1);
 			string& secondToken = nextLine;
 
+			if (firstToken.empty() || secondToken.empty() ||
+				!IOUtil::isInteger(firstToken) || !IOUtil::isInteger(secondToken))
+			{
+				return; // Illegal line
+			}
+
 			// Attempt to convert to numbers
 			int firstNum = stoi(firstToken);
 			int secondNum = stoi(secondToken);
