@@ -54,11 +54,12 @@ namespace battleship
 
 	void IOUtil::removeLeadingTrailingSpaces(string& line)
 	{
-		// Remove all leading, trailing and in-between spaces
-		std::string::iterator end_pos = std::remove(line.begin(), line.end(), ' ');
-		line.erase(end_pos, line.end());
-		end_pos = std::remove(line.begin(), line.end(), '\t');
-		line.erase(end_pos, line.end());
+		// Remove all leading and trailing spaces
+		size_t first = line.find_first_not_of("\t ");
+		first = (first == string::npos) ? 1 : first;
+		size_t last = line.find_last_not_of("\t ");
+		last = (last == string::npos) ? 1 : (last + 1);
+		line = line.substr(first, (last - first));
 	}
 
 	void IOUtil::parseFile(const string& filename, function<void(string& nextReadLine)> lineParser)
