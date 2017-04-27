@@ -24,7 +24,11 @@ public:
 	virtual ~GameFromFileAlgo() = default;
 
 	/** Ignored by this algorithm (empty implementation) */
-	void setBoard(const char** board, int numRows, int numCols) override;
+	void setBoard(int player, const char** board, int numRows, int numCols) override;
+
+	/** Called once to allow init from files if needed
+	 *  returns whether the init succeeded or failed */
+	bool init(const string& path);
 
 	/** Returns the next move stored in the attacks move file.
 	 *	If no moves are left for the player to execute, FORFEIT is returned for each subsequent call.

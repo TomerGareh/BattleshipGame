@@ -54,13 +54,18 @@ void GameFromFileAlgo::populateMovesFromFile(const string& filename)
 
 GameFromFileAlgo::GameFromFileAlgo(const string& attackFile): IBattleshipGameAlgo()
 {
-	// Build player move list from attack file contents
-	populateMovesFromFile(attackFile);
+
 }
 
-void GameFromFileAlgo::setBoard(const char** board, int numRows, int numCols)
+void GameFromFileAlgo::setBoard(int player, const char** board, int numRows, int numCols)
 {
 	// Ignored by the read from file logic
+}
+
+bool GameFromFileAlgo::init(const string& path)
+{
+	// Build player move list from attack file contents
+	populateMovesFromFile(path);
 }
 
 std::pair<int, int> GameFromFileAlgo::attack()
