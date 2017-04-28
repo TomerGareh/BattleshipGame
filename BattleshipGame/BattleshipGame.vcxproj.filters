@@ -48,10 +48,16 @@
     <ClInclude Include="TextualGuiVisual.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="HuntTargetAlgo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="NaiveAlgo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AlgoCommon.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NaiveAlgo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -84,6 +90,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TextualGuiVisual.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HuntTargetAlgo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="NaiveAlgo.cpp">

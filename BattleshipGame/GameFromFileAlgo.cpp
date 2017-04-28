@@ -67,7 +67,6 @@ void GameFromFileAlgo::populateMovesFromFile(const string& filename)
 
 GameFromFileAlgo::GameFromFileAlgo(const string& attackFile): IBattleshipGameAlgo()
 {
-
 }
 
 void GameFromFileAlgo::setBoard(int player, const char** board, int numRows, int numCols)
@@ -79,6 +78,7 @@ bool GameFromFileAlgo::init(const string& path)
 {
 	// Build player move list from attack file contents
 	populateMovesFromFile(path);
+	return true;	// ***** TODO: return the result from parseFile *****
 }
 
 std::pair<int, int> GameFromFileAlgo::attack()

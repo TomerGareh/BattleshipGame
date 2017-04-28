@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <utility> // for std::pair
 
 enum class AttackResult {

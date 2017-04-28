@@ -117,6 +117,7 @@
     <ClInclude Include="ConsoleMessageVisual.h" />
     <ClInclude Include="GameFromFileAlgo.h" />
     <ClInclude Include="GameManager.h" />
+    <ClInclude Include="HuntTargetAlgo.h" />
     <ClInclude Include="IBattleshipGameAlgo.h" />
     <ClInclude Include="IGameVisual.h" />
     <ClInclude Include="IOUtil.h" />
@@ -131,6 +132,7 @@
     <ClCompile Include="ConsoleMessageVisual.cpp" />
     <ClCompile Include="GameFromFileAlgo.cpp" />
     <ClCompile Include="GameManager.cpp" />
+    <ClCompile Include="HuntTargetAlgo.cpp" />
     <ClCompile Include="IGameVisual.cpp" />
     <ClCompile Include="IOUtil.cpp" />
     <ClCompile Include="MainGame.cpp" />
