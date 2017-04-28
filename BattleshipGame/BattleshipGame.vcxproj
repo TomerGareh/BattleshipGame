@@ -110,6 +110,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AlgoCommon.h" />
     <ClInclude Include="BattleBoard.h" />
     <ClInclude Include="BattleshipGameBoardFactory.h" />
     <ClInclude Include="BoardBuilder.h" />
@@ -120,6 +121,7 @@
     <ClInclude Include="IGameVisual.h" />
     <ClInclude Include="IOUtil.h" />
     <ClInclude Include="MainGame.h" />
+    <ClInclude Include="NaiveAlgo.h" />
     <ClInclude Include="TextualGuiVisual.h" />
   </ItemGroup>
   <ItemGroup>
@@ -132,6 +134,7 @@
     <ClCompile Include="IGameVisual.cpp" />
     <ClCompile Include="IOUtil.cpp" />
     <ClCompile Include="MainGame.cpp" />
+    <ClCompile Include="NaiveAlgo.cpp" />
     <ClCompile Include="TextualGuiVisual.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

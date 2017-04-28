@@ -22,17 +22,17 @@ namespace battleship
 
 			auto legalChars =
 				{ 
-					(char)toupper((char)BoardSquare::Empty),
-					(char)toupper((char)BoardSquare::RubberBoat),
-					(char)toupper((char)BoardSquare::RocketShip),
-					(char)toupper((char)BoardSquare::Submarine),
-					(char)toupper((char)BoardSquare::Battleship),
-					(char)tolower((char)BoardSquare::RubberBoat),
-					(char)tolower((char)BoardSquare::RocketShip),
-					(char)tolower((char)BoardSquare::Submarine),
-					(char)tolower((char)BoardSquare::Battleship)
+					(char)toupper((char)BattleBoardSquare::Empty),
+					(char)toupper((char)BattleBoardSquare::RubberBoat),
+					(char)toupper((char)BattleBoardSquare::RocketShip),
+					(char)toupper((char)BattleBoardSquare::Submarine),
+					(char)toupper((char)BattleBoardSquare::Battleship),
+					(char)tolower((char)BattleBoardSquare::RubberBoat),
+					(char)tolower((char)BattleBoardSquare::RocketShip),
+					(char)tolower((char)BattleBoardSquare::Submarine),
+					(char)tolower((char)BattleBoardSquare::Battleship)
 				};
-			IOUtil::replaceIllegalCharacters(nextLine, (char)BoardSquare::Empty, legalChars);
+			IOUtil::replaceIllegalCharacters(nextLine, (char)BattleBoardSquare::Empty, legalChars);
 
 			// Traverse each character in the row and put into the board
 			for (char& nextChar : nextLine)
@@ -48,7 +48,7 @@ namespace battleship
 			// For rows missing characters - fill the rest with blanks
 			while (*colCounter < BOARD_SIZE)
 			{
-				builder->addPiece(*rowCounter, *colCounter, (char)BoardSquare::Empty);
+				builder->addPiece(*rowCounter, *colCounter, (char)BattleBoardSquare::Empty);
 				(*colCounter)++;
 			}
 
@@ -63,7 +63,7 @@ namespace battleship
 		{
 			for (*colCounter = 0; *colCounter < BOARD_SIZE; (*colCounter)++)
 			{
-				builder->addPiece(*rowCounter, *colCounter, (char)BoardSquare::Empty);
+				builder->addPiece(*rowCounter, *colCounter, (char)BattleBoardSquare::Empty);
 			}
 
 			(*rowCounter)++;

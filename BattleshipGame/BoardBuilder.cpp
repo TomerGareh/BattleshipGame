@@ -85,7 +85,7 @@ namespace battleship
 		}
 	}
 
-	BoardBuilder::ShipMask::ShipMask(BoardSquare ship)
+	BoardBuilder::ShipMask::ShipMask(BattleBoardSquare ship)
 	{
 		maskType = ship;
 
@@ -93,52 +93,52 @@ namespace battleship
 
 		switch (ship)
 		{
-			case BoardSquare::RubberBoat:
+			case BattleBoardSquare::RubberBoat:
 			{
-				mask->insert(mask->end(), { std::make_tuple(-1, 0, (char)BoardSquare::Empty), std::make_tuple(0, 1, (char)BoardSquare::Empty),
-										    std::make_tuple(1, 0, (char)BoardSquare::Empty), std::make_tuple(0, -1, (char)BoardSquare::Empty) });
+				mask->insert(mask->end(), { std::make_tuple(-1, 0, (char)BattleBoardSquare::Empty), std::make_tuple(0, 1, (char)BattleBoardSquare::Empty),
+										    std::make_tuple(1, 0, (char)BattleBoardSquare::Empty), std::make_tuple(0, -1, (char)BattleBoardSquare::Empty) });
 				break;
 			}
-			case BoardSquare::RocketShip:
+			case BattleBoardSquare::RocketShip:
 			{
-				mask->insert(mask->end(), { std::make_tuple(0, 1, (char)BoardSquare::RocketShip),
-											std::make_tuple(-1, 0, (char)BoardSquare::Empty),
-											std::make_tuple(-1, 1, (char)BoardSquare::Empty),
-											std::make_tuple(0, 2, (char)BoardSquare::Empty),
-											std::make_tuple(1, 1, (char)BoardSquare::Empty),
-											std::make_tuple(1, 0, (char)BoardSquare::Empty),
-											std::make_tuple(0, -1, (char)BoardSquare::Empty) });
+				mask->insert(mask->end(), { std::make_tuple(0, 1, (char)BattleBoardSquare::RocketShip),
+											std::make_tuple(-1, 0, (char)BattleBoardSquare::Empty),
+											std::make_tuple(-1, 1, (char)BattleBoardSquare::Empty),
+											std::make_tuple(0, 2, (char)BattleBoardSquare::Empty),
+											std::make_tuple(1, 1, (char)BattleBoardSquare::Empty),
+											std::make_tuple(1, 0, (char)BattleBoardSquare::Empty),
+											std::make_tuple(0, -1, (char)BattleBoardSquare::Empty) });
 				break;
 			}
-			case BoardSquare::Submarine:
+			case BattleBoardSquare::Submarine:
 			{
-				mask->insert(mask->end(), { std::make_tuple(0, 1, (char)BoardSquare::Submarine),
-											std::make_tuple(0, 2, (char)BoardSquare::Submarine),
-											std::make_tuple(-1, 0, (char)BoardSquare::Empty),
-											std::make_tuple(-1, 1, (char)BoardSquare::Empty),
-											std::make_tuple(-1, 2, (char)BoardSquare::Empty),
-											std::make_tuple(0, 3, (char)BoardSquare::Empty),
-											std::make_tuple(1, 2, (char)BoardSquare::Empty),
-											std::make_tuple(1, 1, (char)BoardSquare::Empty),
-											std::make_tuple(1, 0, (char)BoardSquare::Empty),
-											std::make_tuple(0, -1, (char)BoardSquare::Empty) });
+				mask->insert(mask->end(), { std::make_tuple(0, 1, (char)BattleBoardSquare::Submarine),
+											std::make_tuple(0, 2, (char)BattleBoardSquare::Submarine),
+											std::make_tuple(-1, 0, (char)BattleBoardSquare::Empty),
+											std::make_tuple(-1, 1, (char)BattleBoardSquare::Empty),
+											std::make_tuple(-1, 2, (char)BattleBoardSquare::Empty),
+											std::make_tuple(0, 3, (char)BattleBoardSquare::Empty),
+											std::make_tuple(1, 2, (char)BattleBoardSquare::Empty),
+											std::make_tuple(1, 1, (char)BattleBoardSquare::Empty),
+											std::make_tuple(1, 0, (char)BattleBoardSquare::Empty),
+											std::make_tuple(0, -1, (char)BattleBoardSquare::Empty) });
 				break;
 			}
-			case BoardSquare::Battleship:
+			case BattleBoardSquare::Battleship:
 			{
-				mask->insert(mask->end(), { std::make_tuple(0, 1, (char)BoardSquare::Battleship),
-											std::make_tuple(0, 2, (char)BoardSquare::Battleship),
-											std::make_tuple(0, 3, (char)BoardSquare::Battleship),
-											std::make_tuple(-1, 0, (char)BoardSquare::Empty),
-											std::make_tuple(-1, 1, (char)BoardSquare::Empty),
-											std::make_tuple(-1, 2, (char)BoardSquare::Empty),
-											std::make_tuple(-1, 3, (char)BoardSquare::Empty),
-										    std::make_tuple(0, 4, (char)BoardSquare::Empty),
-											std::make_tuple(1, 3, (char)BoardSquare::Empty),
-											std::make_tuple(1, 2, (char)BoardSquare::Empty),
-										    std::make_tuple(1, 1, (char)BoardSquare::Empty),
-											std::make_tuple(1, 0, (char)BoardSquare::Empty),
-											std::make_tuple(0, -1, (char)BoardSquare::Empty) });
+				mask->insert(mask->end(), { std::make_tuple(0, 1, (char)BattleBoardSquare::Battleship),
+											std::make_tuple(0, 2, (char)BattleBoardSquare::Battleship),
+											std::make_tuple(0, 3, (char)BattleBoardSquare::Battleship),
+											std::make_tuple(-1, 0, (char)BattleBoardSquare::Empty),
+											std::make_tuple(-1, 1, (char)BattleBoardSquare::Empty),
+											std::make_tuple(-1, 2, (char)BattleBoardSquare::Empty),
+											std::make_tuple(-1, 3, (char)BattleBoardSquare::Empty),
+										    std::make_tuple(0, 4, (char)BattleBoardSquare::Empty),
+											std::make_tuple(1, 3, (char)BattleBoardSquare::Empty),
+											std::make_tuple(1, 2, (char)BattleBoardSquare::Empty),
+										    std::make_tuple(1, 1, (char)BattleBoardSquare::Empty),
+											std::make_tuple(1, 0, (char)BattleBoardSquare::Empty),
+											std::make_tuple(0, -1, (char)BattleBoardSquare::Empty) });
 				break;
 			}
 			default:
@@ -187,12 +187,12 @@ namespace battleship
 			{
 				if (board->_matrix[row + i][col + j] == currMask)
 				{
-					if (currMask != (char)BoardSquare::Empty)
+					if (currMask != (char)BattleBoardSquare::Empty)
 						matchSizeHorizontal++;
 				}
 				else
 				{
-					if ((board->_matrix[row + i][col + j] != (char)BoardSquare::Empty) && (board->_matrix[row + i][col + j] != currShip))
+					if ((board->_matrix[row + i][col + j] != (char)BattleBoardSquare::Empty) && (board->_matrix[row + i][col + j] != currShip))
 					{
 						if (matchSizeHorizontal >= (j+1))
 							adjacentShipsHorizontal = true;
@@ -205,7 +205,7 @@ namespace battleship
 			}
 			else
 			{
-				if (currMask != (char)BoardSquare::Empty)
+				if (currMask != (char)BattleBoardSquare::Empty)
 					wrongSizeHorizontal = true;
 			}
 			
@@ -213,12 +213,12 @@ namespace battleship
 			{
 				if (board->_matrix[row + j][col + i] == currMask)
 				{
-					if (currMask != (char)BoardSquare::Empty)
+					if (currMask != (char)BattleBoardSquare::Empty)
 						matchSizeVertical++;
 				}
 				else
 				{
-					if ((board->_matrix[row + j][col + i] != (char)BoardSquare::Empty) && (board->_matrix[row + j][col + i] != currShip))
+					if ((board->_matrix[row + j][col + i] != (char)BattleBoardSquare::Empty) && (board->_matrix[row + j][col + i] != currShip))
 					{
 						if (matchSizeVertical >= (j+1))
 							adjacentShipsVertical = true;
@@ -231,7 +231,7 @@ namespace battleship
 			}
 			else
 			{
-				if (currMask != (char)BoardSquare::Empty)
+				if (currMask != (char)BattleBoardSquare::Empty)
 					wrongSizeVertical = true;
 			}
 		}
@@ -310,10 +310,10 @@ namespace battleship
 	// This function assumes that the board contains only ship characters or space, and not any other character
 	bool BoardBuilder::isValidBoard(set<BoardInitializeError, ErrorPriorityFunction>* errorQueue)
 	{
-		shared_ptr<ShipMask> rubberMask = std::make_shared<ShipMask>(BoardSquare::RubberBoat);
-		shared_ptr<ShipMask> rocketMask = std::make_shared<ShipMask>(BoardSquare::RocketShip);
-		shared_ptr<ShipMask> submarineMask = std::make_shared<ShipMask>(BoardSquare::Submarine);
-		shared_ptr<ShipMask> battleshipMask = std::make_shared<ShipMask>(BoardSquare::Battleship);
+		shared_ptr<ShipMask> rubberMask = std::make_shared<ShipMask>(BattleBoardSquare::RubberBoat);
+		shared_ptr<ShipMask> rocketMask = std::make_shared<ShipMask>(BattleBoardSquare::RocketShip);
+		shared_ptr<ShipMask> submarineMask = std::make_shared<ShipMask>(BattleBoardSquare::Submarine);
+		shared_ptr<ShipMask> battleshipMask = std::make_shared<ShipMask>(BattleBoardSquare::Battleship);
 		shared_ptr<ShipMask> currMask = NULL;
 
 		bool validBoard = true;
@@ -336,7 +336,7 @@ namespace battleship
 
 				switch (toupper(currSquare))
 				{
-				case (char)BoardSquare::RubberBoat:
+				case (char)BattleBoardSquare::RubberBoat:
 				{
 					shipType = &BattleBoard::RUBBER_BOAT;
 					isMatch = rubberMask->applyMask(_board, i, j, player);
@@ -354,7 +354,7 @@ namespace battleship
 					currMask = rubberMask;
 					break;
 				}
-				case (char)BoardSquare::RocketShip:
+				case (char)BattleBoardSquare::RocketShip:
 				{
 					shipType = &BattleBoard::ROCKET_SHIP;
 					isMatch = rocketMask->applyMask(_board, i, j, player);
@@ -372,7 +372,7 @@ namespace battleship
 					currMask = rocketMask;
 					break;
 				}
-				case (char)BoardSquare::Submarine:
+				case (char)BattleBoardSquare::Submarine:
 				{
 					shipType = &BattleBoard::SUBMARINE;
 					isMatch = submarineMask->applyMask(_board, i, j, player);
@@ -390,7 +390,7 @@ namespace battleship
 					currMask = submarineMask;
 					break;
 				}
-				case (char)BoardSquare::Battleship:
+				case (char)BattleBoardSquare::Battleship:
 				{
 					shipType = &BattleBoard::BATTLESHIP;
 					isMatch = battleshipMask->applyMask(_board, i, j, player);
@@ -412,7 +412,7 @@ namespace battleship
 					break;
 				}
 
-				if (currSquare != (char)BoardSquare::Empty)
+				if (currSquare != (char)BattleBoardSquare::Empty)
 				{
 					markVisitedSquares(visitedBoard, i, j);
 					

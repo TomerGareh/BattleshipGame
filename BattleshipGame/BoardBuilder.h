@@ -101,7 +101,7 @@ namespace battleship
 		class ShipMask
 		{
 		public:
-			BoardSquare maskType;
+			BattleBoardSquare maskType;
 
 			/** A list of squares that compose the mask*/
 			typedef list<tuple<int, int, char>> ShipMaskList;
@@ -123,8 +123,8 @@ namespace battleship
 			/** Clean state and prepare for next comparison */
 			void resetMaskFlags();
 
-			/** Constructs a new mask according to ship type (which is represented by the BoardSquare in this case) */
-			ShipMask(BoardSquare ship);
+			/** Constructs a new mask according to ship type (which is represented by the BattleBoardSquare in this case) */
+			ShipMask(BattleBoardSquare ship);
 
 			/** BoardBuilder is the only class which is allowed to instantiate ShipMasks */
 			friend class BoardBuilder;
