@@ -4,7 +4,7 @@ namespace battleship
 {
 	#pragma region GamePiece
 
-	ShipType::ShipType(BoardSquare representation, int size, int points):
+	ShipType::ShipType(BattleBoardSquare representation, int size, int points):
 		_representation(representation),
 		_size(size),
 		_points(points)
@@ -29,10 +29,10 @@ namespace battleship
 	#pragma region BattleBoard
 
 	// Static members initialization
-	const ShipType BattleBoard::RUBBER_BOAT(BoardSquare::RubberBoat, 1, 2);
-	const ShipType BattleBoard::ROCKET_SHIP(BoardSquare::RocketShip, 2, 3);
-	const ShipType BattleBoard::SUBMARINE(BoardSquare::Submarine, 3, 7 );
-	const ShipType BattleBoard::BATTLESHIP(BoardSquare::Battleship, 4, 8 );
+	const ShipType BattleBoard::RUBBER_BOAT(BattleBoardSquare::RubberBoat, 1, 2);
+	const ShipType BattleBoard::ROCKET_SHIP(BattleBoardSquare::RocketShip, 2, 3);
+	const ShipType BattleBoard::SUBMARINE(BattleBoardSquare::Submarine, 3, 7 );
+	const ShipType BattleBoard::BATTLESHIP(BattleBoardSquare::Battleship, 4, 8 );
 
 	// Ctor
 	BattleBoard::BattleBoard()
@@ -172,7 +172,7 @@ namespace battleship
 			gamePiece = dictIter->second;
 
 			// Ship got hit in this part for the first time, reduce life
-			if (_matrix[coordRow][coordCol] != (char)BoardSquare::Hit)
+			if (_matrix[coordRow][coordCol] != (char)BattleBoardSquare::Hit)
 				gamePiece->_lifeLeft--;
 
 			if (gamePiece->_lifeLeft == 0)
@@ -181,7 +181,7 @@ namespace battleship
 			}
 			else
 			{	// Ship hit, but not sinked
-				_matrix[coordRow][coordCol] = (char)BoardSquare::Hit;
+				_matrix[coordRow][coordCol] = (char)BattleBoardSquare::Hit;
 			}
 		}
 

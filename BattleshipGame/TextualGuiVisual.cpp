@@ -63,15 +63,15 @@ namespace battleship
 
 		if (board->whichPlayerOwnsSquare(row, col) == PlayerEnum::A)
 		{
-			color = PLAYER_A_COLOR_MAPPING.at((BoardSquare)toupper(currSquare));
+			color = PLAYER_A_COLOR_MAPPING.at((BattleBoardSquare)toupper(currSquare));
 		}
 		else if (board->whichPlayerOwnsSquare(row, col) == PlayerEnum::B)
 		{
-			color = PLAYER_B_COLOR_MAPPING.at((BoardSquare)toupper(currSquare));
+			color = PLAYER_B_COLOR_MAPPING.at((BattleBoardSquare)toupper(currSquare));
 		}
 		else
 		{
-			color = PLAYER_A_COLOR_MAPPING.at(BoardSquare::Empty);
+			color = PLAYER_A_COLOR_MAPPING.at(BattleBoardSquare::Empty);
 		}
 
 		return color;
@@ -180,10 +180,10 @@ namespace battleship
 		auto matrix = board->getBoardMatrix();
 		char endOfAnimationChar = matrix[row][col];
 
-		ConsoleColor color = PLAYER_A_COLOR_MAPPING.at(BoardSquare::Bombared);
+		ConsoleColor color = PLAYER_A_COLOR_MAPPING.at(BattleBoardSquare::Bombared);
 		gotoxy(row, col);
 		setTextColor(color);
-		cout << (char)BoardSquare::Bombared;
+		cout << (char)BattleBoardSquare::Bombared;
 		Sleep(_delayMs);
 
 		if (attackResults != AttackResult::Sink)
@@ -206,7 +206,7 @@ namespace battleship
 			{
 				gotoxy(currRow, currCol);
 				setTextColor(ConsoleColor::LIGHT_YELLOW_BLUE_BG);
-				cout << (char)BoardSquare::Sinking;
+				cout << (char)BattleBoardSquare::Sinking;
 				currRow += rowOffset;
 				currCol += colOffset;
 			}

@@ -69,11 +69,11 @@ namespace battleship
 	};
 
 	/** An enum to differentiate the players who put pieces on the board */
-	enum class PlayerEnum : bool
+	enum class PlayerEnum : int
 	{
-		A,
-		B,
-		NONE
+		A = 0,
+		B = 1,
+		NONE = 2
 	};
 
 	/** 

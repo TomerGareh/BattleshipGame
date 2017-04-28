@@ -55,32 +55,32 @@ bool HuntTargetAlgo::init(const string& path)
 }
 
 // row and col are in the range 1 to board size
-bool HuntTargetAlgo::calcHitNext(int& row, int& col, int direction, int size)
+bool HuntTargetAlgo::calcHitNext(int& row, int& col, AttackDirection direction, int size)
 {
 	switch (direction)
 	{
-	case static_cast<int>(AttackDirection::Right):
+	case AttackDirection::Right:
 	{
 		if ((col + size > boardSize.second) || visitedBoard[row-1][col-1+size])
 			return false;
 		col += size;
 		return true;
 	}
-	case static_cast<int>(AttackDirection::Left):
+	case AttackDirection::Left:
 	{
 		if ((col - size < 1) || visitedBoard[row-1][col-1-size])
 			return false;
 		col -= size;
 		return true;
 	}
-	case static_cast<int>(AttackDirection::Up):
+	case AttackDirection::Up:
 	{
 		if ((row - size < 1) || visitedBoard[row-1-size][col-1])
 			return false;
 		row -= size;
 		return true;
 	}
-	case static_cast<int>(AttackDirection::Down):
+	case AttackDirection::Down:
 	{
 		if ((row + size > boardSize.first) || visitedBoard[row-1+size][col-1])
 			return false;
@@ -114,12 +114,11 @@ pair<int, int> HuntTargetAlgo::attack()
 			{					// If this happens, apparently we have a bug
 				vector<int>& directionVec = currHit->second;
 				vector<int>::iterator maxDirection = std::max_element(directionVec.begin() + 1, directionVec.end());
-				int direction = std::distance(directionVec.begin(), maxDirection);
-				foundMove = calcHitNext(row, col, direction, (directionVec[direction] + 1));
+				size_t direction = std::distance(directionVec.begin(), maxDirection);
+				lastAttackDirection = static_cast<AttackDirection>(direction);
+				foundMove = calcHitNext(row, col, lastAttackDirection, (directionVec[direction] + 1));
 				if (!foundMove)	// This direction is no longer applicable
 					directionVec[direction] = -1;
-				else
-					lastAttackDirection = static_cast<AttackDirection>(direction);
 			}
 		}
 		else if (visitedBoard[row-1][col-1])	// If we already visited the square, it means that currHit is a

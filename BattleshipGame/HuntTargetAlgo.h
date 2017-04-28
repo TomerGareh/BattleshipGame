@@ -59,5 +59,5 @@ private:
 
 	// Check if the try to attack around a hit is a valid attack, i.e. doesn't exceed the borders of the board
 	// and not yet visited
-	bool calcHitNext(int& row, int& col, int direction, int size);
+	bool calcHitNext(int& row, int& col, AttackDirection direction, int size);
 };

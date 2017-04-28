@@ -68,27 +68,27 @@ namespace battleship
 		const int TITLE_COL = BOARD_SIZE + 4;
 
 		/** Colors used by Player A pieces */
-		const map<BoardSquare, ConsoleColor> PLAYER_A_COLOR_MAPPING = 
+		const map<BattleBoardSquare, ConsoleColor> PLAYER_A_COLOR_MAPPING =
 		{
-			{ BoardSquare::Empty, ConsoleColor::BLUE_BLUE_BG },
-			{ BoardSquare::Hit, ConsoleColor::WHITE_BLUE_BG },
-			{ BoardSquare::Bombared, ConsoleColor::WHITE },
-			{ BoardSquare::RubberBoat, ConsoleColor::LIGHT_TURQUOISE_BLUE_BG },
-			{ BoardSquare::RocketShip, ConsoleColor::LIGHT_GREEN_BLUE_BG },
-			{ BoardSquare::Submarine, ConsoleColor::LIGHT_YELLOW_BLUE_BG },
-			{ BoardSquare::Battleship, ConsoleColor::LIGHT_RED_BLUE_BG },
+			{ BattleBoardSquare::Empty, ConsoleColor::BLUE_BLUE_BG },
+			{ BattleBoardSquare::Hit, ConsoleColor::WHITE_BLUE_BG },
+			{ BattleBoardSquare::Bombared, ConsoleColor::WHITE },
+			{ BattleBoardSquare::RubberBoat, ConsoleColor::LIGHT_TURQUOISE_BLUE_BG },
+			{ BattleBoardSquare::RocketShip, ConsoleColor::LIGHT_GREEN_BLUE_BG },
+			{ BattleBoardSquare::Submarine, ConsoleColor::LIGHT_YELLOW_BLUE_BG },
+			{ BattleBoardSquare::Battleship, ConsoleColor::LIGHT_RED_BLUE_BG },
 		};
 
 		/** Colors used by Player B pieces */
-		const map<BoardSquare, ConsoleColor> PLAYER_B_COLOR_MAPPING =
+		const map<BattleBoardSquare, ConsoleColor> PLAYER_B_COLOR_MAPPING =
 		{
-			{ BoardSquare::Empty, ConsoleColor::BLUE_BLUE_BG },
-			{ BoardSquare::Hit, ConsoleColor::WHITE_BLUE_BG },
-			{ BoardSquare::Bombared, ConsoleColor::WHITE },
-			{ BoardSquare::RubberBoat, ConsoleColor::DARK_TURQUOISE_BLUE_BG },
-			{ BoardSquare::RocketShip, ConsoleColor::DARK_GREEN_BLUE_BG },
-			{ BoardSquare::Submarine, ConsoleColor::DARK_YELLOW_BLUE_BG },
-			{ BoardSquare::Battleship, ConsoleColor::DARK_RED_BLUE_BG },
+			{ BattleBoardSquare::Empty, ConsoleColor::BLUE_BLUE_BG },
+			{ BattleBoardSquare::Hit, ConsoleColor::WHITE_BLUE_BG },
+			{ BattleBoardSquare::Bombared, ConsoleColor::WHITE },
+			{ BattleBoardSquare::RubberBoat, ConsoleColor::DARK_TURQUOISE_BLUE_BG },
+			{ BattleBoardSquare::RocketShip, ConsoleColor::DARK_GREEN_BLUE_BG },
+			{ BattleBoardSquare::Submarine, ConsoleColor::DARK_YELLOW_BLUE_BG },
+			{ BattleBoardSquare::Battleship, ConsoleColor::DARK_RED_BLUE_BG },
 		};
 
 		/** Delay between animations, in milliseconds */
