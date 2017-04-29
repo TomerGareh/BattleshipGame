@@ -1,6 +1,7 @@
 #pragma once
 
-#include "string"
+#include <memory>
+#include <string>
 #include <vector>
 #include <map>
 #include "IBattleshipGameAlgo.h"
@@ -49,15 +50,24 @@ private:
 	// Our last attack direction. If the last attack was in Hunt mode this field is not relevant
 	AttackDirection lastAttackDirection;
 
-	// A map from the pending hits to their surrounding. 
-	// The surrounding is a vector of ints, representing the hit square itself and the four directions according
+	// A map from the pending targets to their surrounding. 
+	// The surrounding is a vector of ints, representing the target square itself and the four directions according
 	// to AttackDirection enum. In each cell we keep the size of progression in that direction. Size of -1 is
 	// indicating that we failed to attack in that direction.
-	map<pair<int, int>, vector<int>> hitsMap;
+	map<pair<int, int>, vector<int>> targetsMap;
 
 	void allocateVisitedBoard();
 
-	// Check if the try to attack around a hit is a valid attack, i.e. doesn't exceed the borders of the board
-	// and not yet visited
-	bool calcHitNext(int& row, int& col, AttackDirection direction, int size);
+	// row and col are in the range 0 to board size - 1
+	void markRightLeftAsVisited(int row, int col);
+	
+	// row and col are in the range 0 to board size - 1
+	void markUpDownAsVisited(int row, int col);
+
+	// Check if the try to attack around a target is a valid attack, i.e. doesn't exceed the borders of the board
+	// and not yet visited.
+	// row and col are in the range 1 to board size
+	bool calcTargetNext(int& row, int& col, AttackDirection direction, int size);
+
+	int getTargetSize(vector<int>* targetSurround);
 };

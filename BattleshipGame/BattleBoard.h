@@ -114,7 +114,7 @@ namespace battleship
 		/** Returns the matrix that represents the visual data in each game square on the board.
 		 *  Coordinates are defined in the range [0, BOARD_SIZE-1]
 		 */
-		const char** getBoardMatrix() const;
+		const char** getBoardPerPlayer(PlayerEnum player) const;
 
 		/** Returns the number of ships for player A */
 		const int getPlayerAShipCount() const;
@@ -142,6 +142,8 @@ namespace battleship
 
 		// The matrix which holds the visual data of the board game squares
 		char** _matrix = NULL;
+		char** _matrixA = NULL;
+		char** _matrixB = NULL;
 
 		// List of game pieces in the game (active pieces only, sank pieces are removed).
 		// Game pieces are indexed in this dictionary by their index on the game board.

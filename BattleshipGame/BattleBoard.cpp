@@ -38,46 +38,68 @@ namespace battleship
 	BattleBoard::BattleBoard()
 	{
 		_matrix = new char*[BOARD_SIZE];
+		_matrixA = new char*[BOARD_SIZE];
+		_matrixB = new char*[BOARD_SIZE];
 		for (int index = 0; index < BOARD_SIZE; index++)
 		{
 			_matrix[index] = new char[BOARD_SIZE];
+			_matrixA[index] = new char[BOARD_SIZE];
+			_matrixB[index] = new char[BOARD_SIZE];
 
 			for (int subIndex = 0; subIndex < BOARD_SIZE; subIndex++)
+			{
 				_matrix[index][subIndex] = (char)(BattleBoardSquare::Empty);
+				_matrixA[index][subIndex] = (char)(BattleBoardSquare::Empty);
+				_matrixB[index][subIndex] = (char)(BattleBoardSquare::Empty);
+			}
 		}
 	}
 
 	// Move Ctor
 	BattleBoard::BattleBoard(BattleBoard&& other) noexcept:
 		_matrix(other._matrix),
+		_matrixA(other._matrixA),
+		_matrixB(other._matrixB),
 		_gamePieces(std::move(other._gamePieces)),
 		_playerAShipCount(other._playerAShipCount),
 		_playerBShipCount(other._playerBShipCount)
 	{
 		other._matrix = NULL;
+		other._matrixA = NULL;
+		other._matrixB = NULL;
 	}
 
 	void BattleBoard::disposeAllocatedResources() noexcept
 	{
 		for (int index = 0; index < BOARD_SIZE; index++)
-			delete[] _matrix[index];
+		{
+			if (_matrix != NULL)
+				delete[] _matrix[index];
+			if (_matrixA != NULL)
+				delete[] _matrixA[index];
+			if (_matrixB != NULL)
+				delete[] _matrixB[index];
+		}
 		delete[] _matrix;
+		delete[] _matrixA;
+		delete[] _matrixB;
 	}
 
 	// Move assignment operator
 	BattleBoard& BattleBoard::operator= (BattleBoard&& other) noexcept
 	{
-		if (_matrix != NULL)
-		{
-			disposeAllocatedResources();
-		}
+		disposeAllocatedResources();
 
 		_matrix = other._matrix;
+		_matrixA = other._matrixA;
+		_matrixB = other._matrixB;
 		_gamePieces = std::move(other._gamePieces);
 		_playerAShipCount = other._playerAShipCount;
 		_playerBShipCount = other._playerBShipCount;
 
 		other._matrix = NULL;
+		other._matrixA = NULL;
+		other._matrixB = NULL;
 		other._playerAShipCount = 0;
 		other._playerBShipCount = 0;
 		return *this;
@@ -95,6 +117,20 @@ namespace battleship
 	void BattleBoard::initSquare(int row, int col, char type)
 	{
 		_matrix[row][col] = type;
+
+		if (type == static_cast<char>(BattleBoardSquare::Empty))
+		{
+			_matrixA[row][col] = type;
+			_matrixB[row][col] = type;
+		}
+		else if (isupper(type))	// Player A
+		{
+			_matrixA[row][col] = type;
+		}
+		else	// Player B
+		{
+			_matrixB[row][col] = type;
+		}
 	}
 
 	void BattleBoard::addGamePiece(int firstRow, int firstCol, const ShipType& shipType,
@@ -191,9 +227,17 @@ namespace battleship
 
 	// Getters & Setters
 
-	const char** BattleBoard::getBoardMatrix() const
+	const char** BattleBoard::getBoardPerPlayer(PlayerEnum player) const
 	{
-		return const_cast<const char**>(_matrix);
+		switch (player)
+		{
+		case PlayerEnum::A:
+			return const_cast<const char**>(_matrixA);
+		case PlayerEnum::B:
+			return const_cast<const char**>(_matrixB);
+		default:
+			return const_cast<const char**>(_matrix);
+		}
 	}
 
 	const int BattleBoard::getPlayerAShipCount() const

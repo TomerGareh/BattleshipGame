@@ -86,8 +86,8 @@ namespace battleship
 								IBattleshipGameAlgo& playerA, IBattleshipGameAlgo& playerB,
 								IGameVisual& visualizer)
 	{
-		playerA.setBoard(static_cast<int>(PlayerEnum::A), board->getBoardMatrix(), BOARD_SIZE, BOARD_SIZE);
-		playerB.setBoard(static_cast<int>(PlayerEnum::B), board->getBoardMatrix(), BOARD_SIZE, BOARD_SIZE);
+		playerA.setBoard(static_cast<int>(PlayerEnum::A), board->getBoardPerPlayer(PlayerEnum::A), BOARD_SIZE, BOARD_SIZE);
+		playerB.setBoard(static_cast<int>(PlayerEnum::B), board->getBoardPerPlayer(PlayerEnum::B), BOARD_SIZE, BOARD_SIZE);
 		visualizer.visualizeBeginGame(board);
 
 		IBattleshipGameAlgo* currentPlayer = &playerA;
