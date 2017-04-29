@@ -27,7 +27,7 @@ pair<int, int> NaiveAlgo::getNextTarget()
 		}
 	}
 
-	return std::make_pair(_nextRow, _nextCol);
+	return std::make_pair(_nextRow + 1, _nextCol + 1);
 }
 
 NaiveAlgo::NaiveAlgo():
@@ -87,6 +87,9 @@ NaiveAlgo::~NaiveAlgo()
 
 void NaiveAlgo::setBoard(int player, const char** board, int numRows, int numCols)
 {
+	_numOfCols = numCols;
+	_numOfRows = numRows;
+
 	// Keep a temporary list of occupied squares.
 	// Due to game rules neighboring squares can't harbor enemy ships so using this vector we'll
 	// mark them also as visited
@@ -141,14 +144,14 @@ void NaiveAlgo::setBoard(int player, const char** board, int numRows, int numCol
 
 bool NaiveAlgo::init(const string& path)
 {
-	// TODO: Implement
+	// No initialization needed by this algorithm
 	return true;
 }
 
 std::pair<int, int> NaiveAlgo::attack()
 {
 	auto target = getNextTarget();
-	_visitedSquares[target.first][target.second] = static_cast<char>(NaiveSquareStatus::Visited);
+	_visitedSquares[target.first - 1][target.second - 1] = static_cast<char>(NaiveSquareStatus::Visited);
 
 	return target;
 }

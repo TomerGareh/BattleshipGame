@@ -18,9 +18,9 @@ public:
 };
 
 #ifdef ALGO_EXPORTS										// A flag defined in this project's Preprocessor's Definitions
-	#define ALGO_API extern "C" __declspec(dllexport)	// If we build - export
+#define ALGO_API extern "C" __declspec(dllexport)	// If we build - export
 #else
-	#define ALGO_API extern "C" __declspec(dllimport)	// If someone else includes this .h - import
+#define ALGO_API extern "C" __declspec(dllimport)	// If someone else includes this .h - import
 #endif
 
 ALGO_API IBattleshipGameAlgo* GetAlgorithm();			// This method must be implemented in each player(algorithm) .cpp file

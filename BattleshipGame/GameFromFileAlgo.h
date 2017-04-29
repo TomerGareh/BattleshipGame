@@ -1,9 +1,9 @@
 #pragma once
 
-#include "IBattleshipGameAlgo.h"
+#include <string>
 #include <vector>
 #include <utility>
-#include <string>
+#include "IBattleshipGameAlgo.h"
 
 using std::vector;
 using std::string;

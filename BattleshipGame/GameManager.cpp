@@ -142,8 +142,8 @@ namespace battleship
 			currentPlayer = switchPlayerTurns(playerA, playerB, currentPlayer, attackedGamePiece,
 											  isPlayerAForfeit, isPlayerBForfeit);
 
-			playerA.notifyOnAttackResult(attackingPlayerNumber, target.first, target.second, attackResult);
-			playerB.notifyOnAttackResult(attackingPlayerNumber, target.first, target.second, attackResult);
+			playerA.notifyOnAttackResult(attackingPlayerNumber, target.first + 1, target.second + 1, attackResult);
+			playerB.notifyOnAttackResult(attackingPlayerNumber, target.first + 1, target.second + 1, attackResult);
 			visualizer.visualizeAttackResults(board, attackingPlayerNumber,
 											  target.first, target.second, attackResult, attackedGamePiece);
 		}

@@ -1,8 +1,8 @@
 #pragma once
 
 #include <string>
-#include "IBattleshipGameAlgo.h"
 #include <utility>
+#include "IBattleshipGameAlgo.h"
 
 using std::string;
 using std::pair;
