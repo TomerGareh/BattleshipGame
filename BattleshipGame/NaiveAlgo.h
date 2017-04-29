@@ -10,8 +10,6 @@ using std::pair;
 class NaiveAlgo : public IBattleshipGameAlgo
 {
 public:
-	const pair<int, int> NO_MORE_MOVES = std::make_pair(-1, -1);
-
 	NaiveAlgo();
 	NaiveAlgo(NaiveAlgo const&) = delete;	// Disable copying
 	NaiveAlgo& operator=(NaiveAlgo const&) = delete;	// Disable copying (assignment)

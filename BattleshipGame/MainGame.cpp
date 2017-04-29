@@ -8,6 +8,7 @@
 #include "ConsoleMessageVisual.h"
 #include "TextualGuiVisual.h"
 #include "IOUtil.h"
+#include "AlgoLoader.h"
 
 #include <cstdlib>
 #include <memory>
@@ -105,6 +106,8 @@ int main(int argc, char* argv[])
 			return ERROR_CODE;
 
 		string boardFile = (*inputFileNames)[IOUtil::BOARD_SUFFIX];
+
+		// TODO: Move this into init()
 		string playerAAttackFile = (*inputFileNames)[IOUtil::ATTACK_A_SUFFIX];
 		string playerBAttackFile = (*inputFileNames)[IOUtil::ATTACK_B_SUFFIX];
 
@@ -114,8 +117,11 @@ int main(int argc, char* argv[])
 		if (NULL == board)	// Invalid board setup
 			return ERROR_CODE;
 
-		GameFromFileAlgo playerA(playerAAttackFile);
-		GameFromFileAlgo playerB(playerBAttackFile);
+		AlgoLoader algoLoader;
+		string absolutePath = string(configuration[BP_CONFIG_PATH]); // TODO: Convert to absolute
+		algoLoader.loadDLLs(absolutePath);
+		shared_ptr<IBattleshipGameAlgo> playerA = algoLoader.getAlgoByLexicalOrder(0);
+		shared_ptr<IBattleshipGameAlgo> playerB = algoLoader.getAlgoByLexicalOrder(1);
 
 		unique_ptr<IGameVisual> visual = NULL;
 
@@ -133,7 +139,7 @@ int main(int argc, char* argv[])
 		// Start a single game session, visualizer is expected to print the results to the screen when the session
 		// is over (or during the session itself if this is a textual visualizer type)
 		GameManager gameManager;
-		gameManager.startGame(board, playerA, playerB, *visual);
+		gameManager.startGame(board, *playerA, *playerB, *visual);
 
 		return SUCCESS_CODE;
 	}

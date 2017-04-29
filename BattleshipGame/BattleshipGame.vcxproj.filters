@@ -27,19 +27,10 @@
     <ClInclude Include="ConsoleMessageVisual.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GameFromFileAlgo.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="GameManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="IBattleshipGameAlgo.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="IGameVisual.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="IOUtil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MainGame.h">
@@ -48,16 +39,10 @@
     <ClInclude Include="TextualGuiVisual.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="HuntTargetAlgo.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="NaiveAlgo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="AlgoCommon.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NaiveAlgo.h">
+    <ClInclude Include="AlgoLoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -74,16 +59,10 @@
     <ClCompile Include="ConsoleMessageVisual.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GameFromFileAlgo.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GameManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="IGameVisual.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="IOUtil.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MainGame.cpp">
@@ -92,10 +71,7 @@
     <ClCompile Include="TextualGuiVisual.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="HuntTargetAlgo.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NaiveAlgo.cpp">
+    <ClCompile Include="AlgoLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -5,7 +5,6 @@
 
 using namespace battleship;
 
-// TODO: Change to coordinates of 1 to 10!
 void GameFromFileAlgo::populateMovesFromFile(const string& filename)
 {
 	// This line-parser logic will clean the line string from illegal characters and spaces,

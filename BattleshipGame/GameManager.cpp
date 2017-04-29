@@ -1,4 +1,5 @@
 #include "GameManager.h"
+#include "AlgoCommon.h"
 
 namespace battleship
 {
@@ -100,7 +101,7 @@ namespace battleship
 			// Attack
 			auto target = currentPlayer->attack();
 
-			if (target == FORFEIT)
+			if (target == NO_MORE_MOVES)
 			{	// Player chose not to attack - from now on this player forfeits the game
 				if (currentPlayer == &playerA)
 					isPlayerAForfeit = true;

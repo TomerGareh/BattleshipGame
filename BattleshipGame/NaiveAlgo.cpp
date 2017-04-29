@@ -21,8 +21,8 @@ pair<int, int> NaiveAlgo::getNextTarget()
 			// End of board
 			if (_numOfRows >= _numOfRows)
 			{
-				return NO_MORE_MOVES; // Fail safe mechanism,
-									  // Shouldn't happen, since it means the game should be over by then.
+				return battleship::NO_MORE_MOVES; // Fail safe mechanism,
+												  // Shouldn't happen, since it means the game should be over by then.
 			}
 		}
 	}
@@ -100,7 +100,7 @@ void NaiveAlgo::setBoard(int player, const char** board, int numRows, int numCol
 
 		for (int subIndex = 0; subIndex < numCols; subIndex++)
 		{
-			if (board[index][subIndex] != static_cast<char>(BoardSquare::Empty))
+			if (board[index][subIndex] != static_cast<char>(battleship::BoardSquare::Empty))
 			{	// Ship encountered, don't visit those squares later on
 				_visitedSquares[index][subIndex] = static_cast<char>(NaiveSquareStatus::Visited);
 				occupiedSquares.push_back(std::make_pair(index, subIndex));
@@ -155,6 +155,11 @@ std::pair<int, int> NaiveAlgo::attack()
 
 void NaiveAlgo::notifyOnAttackResult(int player, int row, int col, AttackResult result)
 {
-	// TODO: Should Naive algorithm ignore attack results?
-	_visitedSquares[row - 1][col - 1] = static_cast<char>(NaiveSquareStatus::Visited);
+	// Naive algorithm is oblivious to attack results
+}
+
+
+ALGO_API IBattleshipGameAlgo* GetAlgorithm()
+{
+	return new NaiveAlgo();
 }

@@ -3,7 +3,7 @@
 #include "HuntTargetAlgo.h"
 #include "AlgoCommon.h"
 
-HuntTargetAlgo::HuntTargetAlgo() : playerId(-1), boardSize(std::make_pair<int, int>(-1, -1)), visitedBoard(NULL),
+HuntTargetAlgo::HuntTargetAlgo() : playerId(-1), boardSize(battleship::NO_MORE_MOVES), visitedBoard(NULL),
 								   lastAttackDirection(AttackDirection::InPlace)
 {
 }
@@ -34,7 +34,7 @@ void HuntTargetAlgo::setBoard(int player, const char ** board, int numRows, int 
 {
 	playerId = player;
 	boardSize.first = numRows;
-	boardSize.first = numCols;
+	boardSize.second = numCols;
 	allocateVisitedBoard();
 
 	// Mark our ships as visited
@@ -42,7 +42,7 @@ void HuntTargetAlgo::setBoard(int player, const char ** board, int numRows, int 
 	{
 		for (int j = 0; j < numCols; ++j)
 		{
-			if (board[i][j] != static_cast<char>(BoardSquare::Empty))
+			if (board[i][j] != static_cast<char>(battleship::BoardSquare::Empty))
 				visitedBoard[i][j] = true;
 		}
 	}
@@ -171,4 +171,9 @@ void HuntTargetAlgo::notifyOnAttackResult(int player, int row, int col, AttackRe
 			hitsMap.emplace(pair<int, int>(row, col), newHitSurround);
 		}
 	}
+}
+
+ALGO_API IBattleshipGameAlgo* GetAlgorithm()
+{
+	return new HuntTargetAlgo();
 }

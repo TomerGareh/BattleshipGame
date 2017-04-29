@@ -19,8 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{B1BD9C91-E25E-4F60-9CE5-C40B3D230B6A}</ProjectGuid>
-    <RootNamespace>BattleshipGame</RootNamespace>
+    <ProjectGuid>{94D05845-3D17-42F9-B831-BECD46474D30}</ProjectGuid>
+    <RootNamespace>GameFromFileAlgoProj</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -38,7 +38,7 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
@@ -81,6 +81,8 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions); ALGO_EXPORTS</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -110,26 +112,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="AlgoLoader.h" />
-    <ClInclude Include="BattleBoard.h" />
-    <ClInclude Include="BattleshipGameBoardFactory.h" />
-    <ClInclude Include="BoardBuilder.h" />
-    <ClInclude Include="ConsoleMessageVisual.h" />
-    <ClInclude Include="GameManager.h" />
-    <ClInclude Include="IGameVisual.h" />
-    <ClInclude Include="MainGame.h" />
-    <ClInclude Include="TextualGuiVisual.h" />
+    <ClCompile Include="..\BattleshipGame\GameFromFileAlgo.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AlgoLoader.cpp" />
-    <ClCompile Include="BattleBoard.cpp" />
-    <ClCompile Include="BattleshipGameBoardFactory.cpp" />
-    <ClCompile Include="BoardBuilder.cpp" />
-    <ClCompile Include="ConsoleMessageVisual.cpp" />
-    <ClCompile Include="GameManager.cpp" />
-    <ClCompile Include="IGameVisual.cpp" />
-    <ClCompile Include="MainGame.cpp" />
-    <ClCompile Include="TextualGuiVisual.cpp" />
+    <ClInclude Include="..\BattleshipGame\GameFromFileAlgo.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AlgoCommonsProj\AlgoCommonsProj.vcxproj">

@@ -16,9 +16,6 @@ namespace battleship
 	/* -- Constants -- */
 	const size_t BOARD_SIZE = 10;
 	const int NUM_OF_SHIPS_PER_PLAYER = 5;
-	
-	/** A special move returned by players when they choose to forfeit the game (no more moves) */
-	const pair<int, int> FORFEIT = std::make_pair<int, int>(-1, -1);
 
 	/* -- Forward Declarations -- */
 	class BoardBuilder;

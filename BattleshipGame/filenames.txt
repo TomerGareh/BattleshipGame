@@ -1,3 +1,24 @@
-board.sboard
-movesA.attack-a
-movesB.attack-b
+0.dll
+AlgoCommonsProj.lib
+AlgoCommonsProj.pdb
+BattleshipGame.exe
+BattleshipGame.ilk
+BattleshipGame.pdb
+custom moves A.attack-a
+custom moves B.attack-b
+filenames.txt
+GameFromFileAlgoProj.dll
+GameFromFileAlgoProj.exp
+GameFromFileAlgoProj.ilk
+GameFromFileAlgoProj.lib
+GameFromFileAlgoProj.pdb
+good_board_0.sboard
+HuntTargetAlgoProj.dll
+HuntTargetAlgoProj.exp
+HuntTargetAlgoProj.ilk
+HuntTargetAlgoProj.lib
+HuntTargetAlgoProj.pdb
+NaiveAlgoProj.exp
+NaiveAlgoProj.ilk
+NaiveAlgoProj.lib
+NaiveAlgoProj.pdb
