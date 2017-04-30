@@ -6,6 +6,7 @@ BattleshipGame.pdb
 custom moves A.attack-a
 custom moves B.attack-b
 filenames.txt
+GameFromFileAlgoProj.dll
 GameFromFileAlgoProj.exp
 GameFromFileAlgoProj.ilk
 GameFromFileAlgoProj.lib

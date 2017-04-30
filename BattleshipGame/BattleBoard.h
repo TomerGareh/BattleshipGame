@@ -4,12 +4,15 @@
 #include <string>
 #include <map>
 #include <utility>
+#include <functional>
 #include "AlgoCommon.h"
 
 using std::string;
 using std::map;
 using std::pair;
+using std::unique_ptr;
 using std::shared_ptr;
+using std::function;
 
 namespace battleship
 {
@@ -22,7 +25,13 @@ namespace battleship
 	struct GamePiece;
 
 	/* -- Type defs -- */
+
+	// A mapping type for game pieces by 2d coordinates.
 	using GamePiecesDict = map<pair<int, int>, shared_ptr<GamePiece>>;
+
+	// A pointer to a temporary view of the board.
+	// The board allocated mem will be freed when this smart pointer is destroyed.
+	using TempBoardView = unique_ptr<const char*, function<void(const char**)>>;
 
 	/* -- Enums & consts -- */
 
@@ -100,6 +109,7 @@ namespace battleship
 	class BattleBoard
 	{
 	public:
+
 		BattleBoard(BattleBoard&& other) noexcept; // Move constructor
 		BattleBoard& operator= (BattleBoard&& other) noexcept; // Move assignment operator
 		virtual ~BattleBoard() noexcept;
@@ -114,7 +124,14 @@ namespace battleship
 		/** Returns the matrix that represents the visual data in each game square on the board.
 		 *  Coordinates are defined in the range [0, BOARD_SIZE-1]
 		 */
-		const char** getBoardPerPlayer(PlayerEnum player) const;
+		const char** BattleBoard::getBoard() const;
+
+		/** Returns a view of the board as the player sees it.
+		 *	The view is temporary and should not be held by consumers.
+		 *	When the view is done being used (object is no longer referenced), it will get automatically
+		 *	deallocated
+		 */
+		TempBoardView getBoardPlayerView(PlayerEnum player) const;
 
 		/** Returns the number of ships for player A */
 		const int getPlayerAShipCount() const;
@@ -142,8 +159,6 @@ namespace battleship
 
 		// The matrix which holds the visual data of the board game squares
 		char** _matrix = NULL;
-		char** _matrixA = NULL;
-		char** _matrixB = NULL;
 
 		// List of game pieces in the game (active pieces only, sank pieces are removed).
 		// Game pieces are indexed in this dictionary by their index on the game board.
@@ -163,7 +178,7 @@ namespace battleship
 		BattleBoard& operator=(BattleBoard const&) = delete; // Disable copying (assignment)
 
 		/** Safely releases all manually allocated resources by the BattleBoard (e.g: new() )*/
-		void disposeAllocatedResources() noexcept;
+		static void disposeAllocatedResource(const char* const* resource) noexcept;
 
 		/* Edits the board, without adding any game-pieces. This method affects the visual data only.
 		 * Coordinates are defined in the range [0, BOARD_SIZE-1]

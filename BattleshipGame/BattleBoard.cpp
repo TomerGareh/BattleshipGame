@@ -38,19 +38,13 @@ namespace battleship
 	BattleBoard::BattleBoard()
 	{
 		_matrix = new char*[BOARD_SIZE];
-		_matrixA = new char*[BOARD_SIZE];
-		_matrixB = new char*[BOARD_SIZE];
 		for (int index = 0; index < BOARD_SIZE; index++)
 		{
 			_matrix[index] = new char[BOARD_SIZE];
-			_matrixA[index] = new char[BOARD_SIZE];
-			_matrixB[index] = new char[BOARD_SIZE];
 
 			for (int subIndex = 0; subIndex < BOARD_SIZE; subIndex++)
 			{
 				_matrix[index][subIndex] = (char)(BattleBoardSquare::Empty);
-				_matrixA[index][subIndex] = (char)(BattleBoardSquare::Empty);
-				_matrixB[index][subIndex] = (char)(BattleBoardSquare::Empty);
 			}
 		}
 	}
@@ -58,48 +52,35 @@ namespace battleship
 	// Move Ctor
 	BattleBoard::BattleBoard(BattleBoard&& other) noexcept:
 		_matrix(other._matrix),
-		_matrixA(other._matrixA),
-		_matrixB(other._matrixB),
 		_gamePieces(std::move(other._gamePieces)),
 		_playerAShipCount(other._playerAShipCount),
 		_playerBShipCount(other._playerBShipCount)
 	{
 		other._matrix = NULL;
-		other._matrixA = NULL;
-		other._matrixB = NULL;
 	}
 
-	void BattleBoard::disposeAllocatedResources() noexcept
+	void BattleBoard::disposeAllocatedResource(const char* const* resource) noexcept
 	{
 		for (int index = 0; index < BOARD_SIZE; index++)
 		{
-			if (_matrix != NULL)
-				delete[] _matrix[index];
-			if (_matrixA != NULL)
-				delete[] _matrixA[index];
-			if (_matrixB != NULL)
-				delete[] _matrixB[index];
+			if (resource != NULL)
+				delete[] resource[index];
 		}
-		delete[] _matrix;
-		delete[] _matrixA;
-		delete[] _matrixB;
+		delete[] resource;
 	}
 
 	// Move assignment operator
 	BattleBoard& BattleBoard::operator= (BattleBoard&& other) noexcept
 	{
-		disposeAllocatedResources();
+		// Add const to type to cope with strict dispose-resource signature
+		disposeAllocatedResource(_matrix);
 
 		_matrix = other._matrix;
-		_matrixA = other._matrixA;
-		_matrixB = other._matrixB;
 		_gamePieces = std::move(other._gamePieces);
 		_playerAShipCount = other._playerAShipCount;
 		_playerBShipCount = other._playerBShipCount;
 
 		other._matrix = NULL;
-		other._matrixA = NULL;
-		other._matrixB = NULL;
 		other._playerAShipCount = 0;
 		other._playerBShipCount = 0;
 		return *this;
@@ -108,7 +89,8 @@ namespace battleship
 	// Dtor
 	BattleBoard::~BattleBoard() noexcept
 	{
-		disposeAllocatedResources();
+		// Add const to type to cope with strict dispose-resource signature
+		disposeAllocatedResource(_matrix);
 	}
 
 
@@ -117,20 +99,6 @@ namespace battleship
 	void BattleBoard::initSquare(int row, int col, char type)
 	{
 		_matrix[row][col] = type;
-
-		if (type == static_cast<char>(BattleBoardSquare::Empty))
-		{
-			_matrixA[row][col] = type;
-			_matrixB[row][col] = type;
-		}
-		else if (isupper(type))	// Player A
-		{
-			_matrixA[row][col] = type;
-		}
-		else	// Player B
-		{
-			_matrixB[row][col] = type;
-		}
 	}
 
 	void BattleBoard::addGamePiece(int firstRow, int firstCol, const ShipType& shipType,
@@ -227,17 +195,52 @@ namespace battleship
 
 	// Getters & Setters
 
-	const char** BattleBoard::getBoardPerPlayer(PlayerEnum player) const
+	const char** BattleBoard::getBoard() const
 	{
-		switch (player)
+		return const_cast<const char**>(_matrix);
+	}
+
+	TempBoardView BattleBoard::getBoardPlayerView(PlayerEnum player) const
+	{
+		bool isPlayerA = false;
+
+		if (player == PlayerEnum::A)
+			isPlayerA = true;
+		else if (player == PlayerEnum::B)
+			isPlayerA = false;
+		else
+			return NULL;
+
+		char** playerMat = new char*[BOARD_SIZE];
+		
+		for (int index = 0; index < BOARD_SIZE; index++)
 		{
-		case PlayerEnum::A:
-			return const_cast<const char**>(_matrixA);
-		case PlayerEnum::B:
-			return const_cast<const char**>(_matrixB);
-		default:
-			return const_cast<const char**>(_matrix);
+			playerMat[index] = new char[BOARD_SIZE];
+
+			for (int subIndex = 0; subIndex < BOARD_SIZE; subIndex++)
+			{
+				char val = _matrix[index][subIndex];
+
+				if ((val != static_cast<char>(BattleBoardSquare::Empty)) &&
+					((!isPlayerA && isupper(val)) || (isPlayerA && !isupper(val))))
+				{ // Hide enemy ships
+					playerMat[index][subIndex] = static_cast<char>(BattleBoardSquare::Empty);
+				}
+				else
+				{
+					playerMat[index][subIndex] = val;
+				}
+			}
 		}
+
+		// Cast the raw pointer to a unique_ptr with custom deleter.
+		// When consumers are done copying data from this board it will be automatically freed,
+		// which will dispose the matrix resource allocated by this function.
+		// This way we don't have to rely on an external consumer to manage this piece of allocated mem.
+		auto deleter = [](const char** ptr) { disposeAllocatedResource(ptr); };
+		TempBoardView playerSmartMat(const_cast<const char**>(playerMat), deleter);
+
+		return playerSmartMat;	// Compiler expected to performs auto move
 	}
 
 	const int BattleBoard::getPlayerAShipCount() const

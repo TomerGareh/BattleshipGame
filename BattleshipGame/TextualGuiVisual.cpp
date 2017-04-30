@@ -57,7 +57,7 @@ namespace battleship
 	ConsoleColor TextualGuiVisual::getColorForSquare(shared_ptr<BattleBoard> board,
 													 int row, int col)
 	{
-		auto matrix = board->getBoardPerPlayer(PlayerEnum::NONE);
+		auto matrix = board->getBoard();
 		char currSquare = matrix[row][col];
 		ConsoleColor color;
 
@@ -79,7 +79,7 @@ namespace battleship
 
 	void TextualGuiVisual::printBoard(shared_ptr<BattleBoard> board)
 	{
-		auto matrix = board->getBoardPerPlayer(PlayerEnum::NONE);
+		auto matrix = board->getBoard();
 
 		for (int row = 0; row < BOARD_SIZE; row++)
 		{
@@ -177,7 +177,7 @@ namespace battleship
 	{
 		eraseMoveDescription();
 		printLastMoveDescription(board, attackingPlayerNumber, row, col);
-		auto matrix = board->getBoardPerPlayer(PlayerEnum::NONE);
+		auto matrix = board->getBoard();
 		char endOfAnimationChar = matrix[row][col];
 
 		ConsoleColor color = PLAYER_A_COLOR_MAPPING.at(BattleBoardSquare::Bombared);
