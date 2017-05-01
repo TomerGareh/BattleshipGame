@@ -3,23 +3,20 @@ AlgoCommonsProj.pdb
 BattleshipGame.exe
 BattleshipGame.ilk
 BattleshipGame.pdb
-custom moves A.attack-a
-custom moves B.attack-b
-filenames.txt
-GameFromFileAlgoProj.dll
+board.sboard
 GameFromFileAlgoProj.exp
 GameFromFileAlgoProj.ilk
 GameFromFileAlgoProj.lib
 GameFromFileAlgoProj.pdb
-good_board_0.sboard
 HuntTargetAlgoProj.dll
 HuntTargetAlgoProj.exp
 HuntTargetAlgoProj.ilk
 HuntTargetAlgoProj.lib
 HuntTargetAlgoProj.pdb
+movesA.attack-a
+movesB.attack-b
 NaiveAlgoProj.dll
 NaiveAlgoProj.exp
 NaiveAlgoProj.ilk
 NaiveAlgoProj.lib
 NaiveAlgoProj.pdb
-zGameFromFileAlgoProj.dll

@@ -11,6 +11,8 @@ using std::pair;
 using std::vector;
 using std::map;
 
+using targetsMapEntry = map<pair<int, int>, vector<int>>::iterator;
+
 enum class AttackDirection : int
 {
 	InPlace = 0,
@@ -64,10 +66,20 @@ private:
 	// row and col are in the range 0 to board size - 1
 	void markUpDownAsVisited(int row, int col);
 
+	AttackDirection getTargetDirection(targetsMapEntry targetIt);
+
+	int getTargetSize(vector<int>* targetSurround);
+
+	pair<int, int> advanceInDirection(int row, int col, AttackDirection direction, int size);
+
 	// Check if the try to attack around a target is a valid attack, i.e. doesn't exceed the borders of the board
 	// and not yet visited.
 	// row and col are in the range 1 to board size
 	bool calcTargetNext(int& row, int& col, AttackDirection direction, int size);
 
-	int getTargetSize(vector<int>* targetSurround);
+	// row and col are in the range 0 to board size - 1
+	targetsMapEntry updateMapOnOtherAttack(int row, int col, AttackResult result);
+
+	// row and col are in the range 0 to board size - 1
+	void removeRedundantTargets(int row, int col, AttackDirection direction);
 };

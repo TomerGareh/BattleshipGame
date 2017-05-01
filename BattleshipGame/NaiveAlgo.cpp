@@ -15,11 +15,11 @@ pair<int, int> NaiveAlgo::getNextTarget()
 		// End of line
 		if (_nextCol >= _numOfCols)
 		{
-			_numOfRows++;
-			_numOfCols = 0;
+			_nextRow++;
+			_nextCol = 0;
 
 			// End of board
-			if (_numOfRows >= _numOfRows)
+			if (_nextRow >= _numOfRows)
 			{
 				return battleship::NO_MORE_MOVES; // Fail safe mechanism,
 												  // Shouldn't happen, since it means the game should be over by then.

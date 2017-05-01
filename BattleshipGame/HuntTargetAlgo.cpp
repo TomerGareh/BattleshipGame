@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <algorithm>
 #include <numeric>
+#include <time.h>
 #include "HuntTargetAlgo.h"
 #include "AlgoCommon.h"
 
@@ -71,10 +72,18 @@ void HuntTargetAlgo::setBoard(int player, const char ** board, int numRows, int 
 	}
 }
 
-// Ignored by this algorithm 
 bool HuntTargetAlgo::init(const string& path)
 {
+	srand(time(NULL));
 	return true;
+}
+
+AttackDirection HuntTargetAlgo::getTargetDirection(targetsMapEntry targetIt)
+{
+	vector<int>& directionVec = targetIt->second;
+	vector<int>::iterator maxDirection = std::max_element(directionVec.begin() + 1, directionVec.end());
+	size_t directionInd = std::distance(directionVec.begin(), maxDirection);
+	return static_cast<AttackDirection>(directionInd);
 }
 
 bool HuntTargetAlgo::calcTargetNext(int& row, int& col, AttackDirection direction, int size)
@@ -125,34 +134,27 @@ pair<int, int> HuntTargetAlgo::attack()
 		} while (visitedBoard[row-1][col-1]);
 		lastAttackDirection = AttackDirection::InPlace;
 	}
-	else	// Target mode: we try to attack around the hits that we already found
+	else	// Target mode: we try to attack around the targets that we already found
 	{
 		auto currTarget = targetsMap.begin();
 		row = currTarget->first.first + 1;	// 1 to number of rows
 		col = currTarget->first.second + 1;	// 1 to number of columns
-		if (currTarget->second[0] != 0)	// Check if we are those who attacked this square
-		{								// If not, attack it first
-			bool foundAttack = false;
-			while (!foundAttack)	// We aren't suppose to loop here to infinity 
-			{					// If this happens, apparently we have a bug
-				vector<int>& directionVec = currTarget->second;
-				vector<int>::iterator maxDirection = std::max_element(directionVec.begin() + 1, directionVec.end());
-				size_t direction = std::distance(directionVec.begin(), maxDirection);
-				lastAttackDirection = static_cast<AttackDirection>(direction);
-				foundAttack = calcTargetNext(row, col, lastAttackDirection, (directionVec[direction] + 1));
-				if (!foundAttack)	// This direction is no longer applicable
-					directionVec[direction] = -1;
-			}
-		}
-		else if (visitedBoard[row-1][col-1])	// If we already visited the square, it means that currTarget is a
-												// redundant target which was inserted by the other player.
-		{										// Therefore we remove it and look for another attack.
-			targetsMap.erase(currTarget);
-			return attack();
-		}
-		else
+		bool foundAttack = false;
+		while (!foundAttack)
 		{
-			lastAttackDirection = AttackDirection::InPlace;
+			lastAttackDirection = getTargetDirection(currTarget);
+			int directionInt = static_cast<int>(lastAttackDirection);
+			int maxDirection = currTarget->second[directionInt];
+
+			if (maxDirection == -1)	// This is a redundant target that came from the other player
+			{						// We remove it to avoid infinite loop
+				targetsMap.erase(currTarget);
+				return attack();
+			}
+			
+			foundAttack = calcTargetNext(row, col, lastAttackDirection, (maxDirection + 1));
+			if (!foundAttack)	// This direction is no longer applicable
+				currTarget->second[directionInt] = -1;
 		}
 	}
 
@@ -170,18 +172,102 @@ int HuntTargetAlgo::getTargetSize(vector<int>* targetSurround)
 	return size;
 }
 
+targetsMapEntry HuntTargetAlgo::updateMapOnOtherAttack(int row, int col, AttackResult result)
+{
+	for (targetsMapEntry targetIt = targetsMap.begin(); targetIt != targetsMap.end(); ++targetIt)
+	{
+		int targetRow = targetIt->first.first;
+		int targetCol = targetIt->first.second;
+		AttackDirection direction = getTargetDirection(targetIt);
+		int directionInt = static_cast<int>(direction);
+		int maxDirection = targetIt->second[directionInt];
+
+		if (((direction == AttackDirection::Right) && ((targetCol + maxDirection + 1) == col)) ||
+			((direction == AttackDirection::Left) && ((targetCol - maxDirection - 1) == col)) ||
+			((direction == AttackDirection::Up) && ((targetRow - maxDirection - 1) == row)) ||
+			((direction == AttackDirection::Down) && ((targetRow + maxDirection + 1) == row)))
+		{
+			if (result == AttackResult::Miss)
+			{
+				targetIt->second[directionInt] = -1;
+			}
+			else
+			{
+				targetIt->second[directionInt] += 1;
+				lastAttackDirection = direction;
+			}
+			return targetIt;
+		}
+	}
+
+	return targetsMap.end();
+}
+
+pair<int, int> HuntTargetAlgo::advanceInDirection(int row, int col, AttackDirection direction, int size)
+{
+	switch (direction)
+	{
+	case AttackDirection::Right:
+	{
+		col += size;
+		break;
+	}
+	case AttackDirection::Left:
+	{
+		col -= size;
+		break;
+	}
+	case AttackDirection::Up:
+	{
+		row -= size;
+		break;
+	}
+	case AttackDirection::Down:
+	{
+		row += size;
+		break;
+	}
+	default:
+		break;
+	}
+
+	return pair<int, int>(row, col);
+}
+
+void HuntTargetAlgo::removeRedundantTargets(int row, int col, AttackDirection direction)
+{
+	pair<int, int> advancedRowCol = advanceInDirection(row, col, direction, 1);
+	row = advancedRowCol.first;
+	col = advancedRowCol.second;
+
+	for (targetsMapEntry targetIt = targetsMap.begin(); targetIt != targetsMap.end(); ++targetIt)
+	{
+		int currRow = targetIt->first.first;
+		int currCol = targetIt->first.second;
+		AttackDirection currDirection = getTargetDirection(targetIt);
+		advancedRowCol = advanceInDirection(currRow, currCol, currDirection, targetIt->second[static_cast<int>(currDirection)]);
+
+		if (((currRow == row) && (currCol == col)) ||
+			((advancedRowCol.first == row) && (advancedRowCol.second == col)))
+		{
+			targetsMap.erase(targetIt);
+			break;
+		}
+	}
+}
+
 void HuntTargetAlgo::notifyOnAttackResult(int player, int row, int col, AttackResult result)
 {
-	visitedBoard[row-1][col-1] = true;
-
-	if (player == playerId)
+	if (targetsMap.empty())	// The attack comes from Hunt mode or other player
 	{
-		if (targetsMap.empty())	// The attack comes from Hunt mode
+		if ((player == playerId) || ((player != playerId) && (!visitedBoard[row-1][col-1])))
 		{
+			visitedBoard[row-1][col-1] = true;
+
 			if (result == AttackResult::Hit)	// New target
 			{
 				vector<int> newTargetSurround = {1, 0, 0, 0, 0};
-				targetsMap.emplace(pair<int, int>(row, col), newTargetSurround);
+				targetsMap.emplace(pair<int, int>(row-1, col-1), newTargetSurround);
 			}
 			else if (result == AttackResult::Sink)	// In case of rubber boat
 			{
@@ -189,63 +275,85 @@ void HuntTargetAlgo::notifyOnAttackResult(int player, int row, int col, AttackRe
 				markUpDownAsVisited(row-1, col-1);
 			}
 		}
-		else	// The attack comes from Target mode
-		{		// Update targetsMap
-			auto currTarget = targetsMap.begin();
-			if (result == AttackResult::Miss)
+	}
+	else
+	{
+		auto currTarget = targetsMap.begin();
+
+		// The attack comes from other player
+		if (player != playerId)
+		{
+			if (!visitedBoard[row-1][col-1])
 			{
-				currTarget->second[static_cast<int>(lastAttackDirection)] = -1;
+				visitedBoard[row-1][col-1] = true;
+				targetsMapEntry updateMapResult = updateMapOnOtherAttack(row-1, col-1, result);	// Search for existing target
+				if ((updateMapResult == targetsMap.end()) || (result == AttackResult::Miss))
+				{
+					if (result == AttackResult::Hit)	// New target
+					{
+						vector<int> newTargetSurround = {1, 0, 0, 0, 0};
+						targetsMap.emplace(pair<int, int>(row-1, col-1), newTargetSurround);
+					}
+					return;
+				}
+				currTarget = updateMapResult;
 			}
 			else
 			{
-				currTarget->second[static_cast<int>(lastAttackDirection)] += 1;
-				int currTargetSize = getTargetSize(&(currTarget->second));
-
-				if (currTargetSize == 2)	// We know now the orientation so we mark visited squares for the first hit
-				{
-					if (lastAttackDirection == AttackDirection::Right)
-						markUpDownAsVisited(row-1, col-2);
-					else if (lastAttackDirection == AttackDirection::Left)
-						markUpDownAsVisited(row-1, col);
-					else if (lastAttackDirection == AttackDirection::Up)
-						markRightLeftAsVisited(row, col-1);
-					else if (lastAttackDirection == AttackDirection::Down)
-						markRightLeftAsVisited(row-2, col-1);
-				}
-
-				if ((result == AttackResult::Hit) && (currTargetSize > 1))
-				{
-					if ((lastAttackDirection == AttackDirection::Right) || (lastAttackDirection == AttackDirection::Left))
-						markUpDownAsVisited(row-1, col-1);
-					else if ((lastAttackDirection == AttackDirection::Up) || (lastAttackDirection == AttackDirection::Down))
-						markRightLeftAsVisited(row-1, col-1);
-				}
-				else if (result == AttackResult::Sink)
-				{
-					markRightLeftAsVisited(row-1, col-1);
-					markUpDownAsVisited(row-1, col-1);
-
-					if ((lastAttackDirection == AttackDirection::Right) && (col-1-currTargetSize >= 0))
-						visitedBoard[row-1][col-1-currTargetSize] = true;
-					else if ((lastAttackDirection == AttackDirection::Left) && (col-1+currTargetSize < boardSize.second))
-						visitedBoard[row-1][col-1+currTargetSize] = true;
-					else if ((lastAttackDirection == AttackDirection::Up) && (row-1+currTargetSize < boardSize.first))
-						visitedBoard[row-1+currTargetSize][col-1] = true;
-					else if ((lastAttackDirection == AttackDirection::Down) && (row-1-currTargetSize >= 0))
-						visitedBoard[row-1-currTargetSize][col-1] = true;
-
-					targetsMap.erase(currTarget);
-				}
+				return;
 			}
 		}
-	}
-	else	// Other player
-	{
-		if (result != AttackResult::Miss)
+		else if (result == AttackResult::Miss)	// player == playerId
 		{
-			visitedBoard[row-1][col-1] = false;	// We do want to attack this square
-			vector<int> newTargetSurround = {0, 0, 0, 0, 0};
-			targetsMap.emplace(pair<int, int>(row-1, col-1), newTargetSurround);
+			currTarget->second[static_cast<int>(lastAttackDirection)] = -1;
+		}
+		else	// (player == playerId) && (result != AttackResult::Miss)
+		{
+			currTarget->second[static_cast<int>(lastAttackDirection)] += 1;
+		}
+
+		// The attack comes from Target mode (or self attack of the other player)
+		visitedBoard[row-1][col-1] = true;
+
+		int currTargetSize = getTargetSize(&(currTarget->second));
+
+		if (currTargetSize == 2)	// We know now the orientation so we mark visited squares for the first hit
+		{
+			if (lastAttackDirection == AttackDirection::Right)
+				markUpDownAsVisited(row-1, col-2);
+			else if (lastAttackDirection == AttackDirection::Left)
+				markUpDownAsVisited(row-1, col);
+			else if (lastAttackDirection == AttackDirection::Up)
+				markRightLeftAsVisited(row, col-1);
+			else if (lastAttackDirection == AttackDirection::Down)
+				markRightLeftAsVisited(row-2, col-1);
+		}
+
+		if ((result == AttackResult::Hit) && (currTargetSize > 1))
+		{
+			if ((lastAttackDirection == AttackDirection::Right) || (lastAttackDirection == AttackDirection::Left))
+				markUpDownAsVisited(row-1, col-1);
+			else if ((lastAttackDirection == AttackDirection::Up) || (lastAttackDirection == AttackDirection::Down))
+				markRightLeftAsVisited(row-1, col-1);
+		}
+		else if (result == AttackResult::Sink)
+		{
+			markRightLeftAsVisited(row-1, col-1);
+			markUpDownAsVisited(row-1, col-1);
+
+			// Mark the other edge as visited
+			if ((lastAttackDirection == AttackDirection::Right) && (col-1-currTargetSize >= 0))
+				visitedBoard[row-1][col-1-currTargetSize] = true;
+			else if ((lastAttackDirection == AttackDirection::Left) && (col-1+currTargetSize < boardSize.second))
+				visitedBoard[row-1][col-1+currTargetSize] = true;
+			else if ((lastAttackDirection == AttackDirection::Up) && (row-1+currTargetSize < boardSize.first))
+				visitedBoard[row-1+currTargetSize][col-1] = true;
+			else if ((lastAttackDirection == AttackDirection::Down) && (row-1-currTargetSize >= 0))
+				visitedBoard[row-1-currTargetSize][col-1] = true;
+
+			AttackDirection currTargetDirection = getTargetDirection(currTarget);
+			targetsMap.erase(currTarget);
+			removeRedundantTargets(row-1, col-1, currTargetDirection);
 		}
 	}
 }
