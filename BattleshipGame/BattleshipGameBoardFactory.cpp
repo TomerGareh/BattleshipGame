@@ -1,13 +1,26 @@
+#include <iostream>
 #include "BattleshipGameBoardFactory.h"
 #include "BattleBoard.h"
 #include "BoardBuilder.h"
 #include "IOUtil.h"
 
+using std::cout;
+using std::endl;
+
 namespace battleship
 {
-	// This function assumes that the file exists and the file name is valid
+	const string BattleshipGameBoardFactory::BOARD_SUFFIX = ".sboard";
+
 	shared_ptr<BattleBoard> BattleshipGameBoardFactory::buildBoardFromFile(const string& path)
 	{
+		auto boardFiles = IOUtil::listFilesInPath(path, BOARD_SUFFIX);
+
+		if (boardFiles.size() == 0)
+		{ // No board files found
+			std::cout << "Missing board file (*.sboard) looking in path: " << path << std::endl;
+			return NULL;
+		}
+
 		shared_ptr<BoardBuilder> builder = std::make_shared<BoardBuilder>();
 		shared_ptr<int> rowCounter = std::make_shared<int>(0);
 		shared_ptr<int> colCounter = std::make_shared<int>(0);
@@ -55,8 +68,10 @@ namespace battleship
 			(*rowCounter)++;
 		};
 
+		// Choose the first board file found, lexicographically
 		// Start parsing the file, line by line
-		IOUtil::parseFile(path, lineParser);
+		string boardFile = boardFiles[0];
+		IOUtil::parseFile(boardFile, lineParser);
 
 		// For missing rows - fill rows of blank squares
 		while (*rowCounter < BOARD_SIZE)

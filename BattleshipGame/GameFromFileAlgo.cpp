@@ -5,6 +5,9 @@
 
 using namespace battleship;
 
+const string GameFromFileAlgo::ATTACK_A_SUFFIX = ".attack-a";
+const string GameFromFileAlgo::ATTACK_B_SUFFIX = ".attack-b";
+
 // TODO: Change to coordinates of 1 to 10!
 void GameFromFileAlgo::populateMovesFromFile(const string& filename)
 {
@@ -78,6 +81,10 @@ void GameFromFileAlgo::setBoard(int player, const char** board, int numRows, int
 
 bool GameFromFileAlgo::init(const string& path)
 {
+	// TODO: Fix compilation issues
+	string playerAAttackFile = (*inputFileNames)[IOUtil::ATTACK_A_SUFFIX];
+	string playerBAttackFile = (*inputFileNames)[IOUtil::ATTACK_B_SUFFIX];
+
 	// Build player move list from attack file contents
 	populateMovesFromFile(path);
 	return true;	// ***** TODO: return the result from parseFile *****

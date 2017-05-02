@@ -100,26 +100,28 @@ int main(int argc, char* argv[])
 		if (!isLegalArgs)
 			return ERROR_CODE;
 
-		// Load files
-		auto inputFileNames = IOUtil::loadFilesInPath(string(configuration[BP_CONFIG_PATH]));
-		if (NULL == inputFileNames)
+		// Load and build game resources: board & algorithms
+		const string resourcesPath(configuration[BP_CONFIG_PATH]);
+
+		// Validation #1: Invalid resources path
+		if (!IOUtil::validatePath(resourcesPath))
+		{
+			std::cout << "Wrong path: " << resourcesPath << std::endl;
 			return ERROR_CODE;
+		}
 
-		string boardFile = (*inputFileNames)[IOUtil::BOARD_SUFFIX];
-
-		// TODO: Move this into init()
-		string playerAAttackFile = (*inputFileNames)[IOUtil::ATTACK_A_SUFFIX];
-		string playerBAttackFile = (*inputFileNames)[IOUtil::ATTACK_B_SUFFIX];
-
-		// Game initialization - players and board are initialized from files
+		// Game initialization - load board and player algorithms
 		auto board = BattleshipGameBoardFactory::loadBattleBoard(BattleshipBoardInitTypeEnum::LOAD_BOARD_FROM_FILE,
-																 boardFile);
-		if (NULL == board)	// Invalid board setup
-			return ERROR_CODE;
+																 resourcesPath);
 
 		AlgoLoader algoLoader;
-		string absolutePath = string(configuration[BP_CONFIG_PATH]); // TODO: Convert to absolute
-		algoLoader.loadDLLs(absolutePath);
+		string absolutePath = resourcesPath;
+		bool isAlgoMissing = !algoLoader.loadDLLs(absolutePath);
+
+		// Validation #2: Missing board path, Invalid board setup, Missing dll files
+		if ((NULL == board) || isAlgoMissing)
+			return ERROR_CODE;
+
 		shared_ptr<IBattleshipGameAlgo> playerA = algoLoader.getAlgoByLexicalOrder(0);
 		shared_ptr<IBattleshipGameAlgo> playerB = algoLoader.getAlgoByLexicalOrder(1);
 

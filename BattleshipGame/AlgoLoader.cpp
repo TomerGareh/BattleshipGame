@@ -96,6 +96,12 @@ namespace battleship
 			} while (FindNextFileA(dir, &fileData)); // Notice: Unicode compatible version of FindNextFile
 		}
 
+		// A game must have 2 algorithms to function properly.
+		if (_availableGameAlgos.size() < 2)
+		{
+			cout << "Missing an algorithm (dll) file looking in path:" << path << endl;
+		}
+
 		sortLoadedAlgorithms();
 
 		return true;

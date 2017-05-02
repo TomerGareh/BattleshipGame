@@ -1,18 +1,16 @@
 #pragma once
 
-#include <memory>
 #include <string>
 #include <functional>
 #include <initializer_list>
-#include <map>
+#include <vector>
 
 namespace battleship
 {
-	using std::shared_ptr;
 	using std::string;
 	using std::function;
 	using std::initializer_list;
-	using std::map;
+	using std::vector;
 
 	/** A helper class for dealing with IO operations logic common to the entire battleship game. */
 	class IOUtil
@@ -41,22 +39,22 @@ namespace battleship
 		/** Returns true if fullString ends with ending as a suffix */
 		static bool endsWith(const string& fullString, const string& ending);
 
-		/** Loads all files needed by the battleship game.
-		 *  Returns a mapping of each of the file suffixes vs their path.
-		 *	If one of the files is missing, NULL is returned.
-		 */
-		static shared_ptr<map<string, string>> loadFilesInPath(const string& path);
+		/** Returns true if the path argument points to a real valid path on disk, false if not. */
+		static bool validatePath(const string& path);
 
-		// Suffixes for game files
-		static const string BOARD_SUFFIX;
-		static const string ATTACK_A_SUFFIX;
-		static const string ATTACK_B_SUFFIX;
+		/** Lists all files found in the given path with the given extension.
+		 *  Path is expected to be valid (e.g verified with "validatePath").
+		 *  If no files with the given extension are found, an empty vector is returned.
+		 *  The files returned will be sorted in lexicographical order.
+		 */
+		static vector<string> IOUtil::listFilesInPath(const string& path, const string& extension);
+
+		/** Converts the given path to "absolute" path on the disk.
+		 *  If the given path is already absolute, this function simply returns it.
+		 */
+		static string convertPathToAbsolute(const string& path);
 
 	private:
 		IOUtil() = default;	// This helper class shouldn't be instantiated
-
-		/** Prints missing files to the console */
-		static void printLoadFileErrors(bool missingBoardFile, bool missingAttackAFile, bool missingAttackBFile,
-										const string& pathToDisplay);
 	};
 }

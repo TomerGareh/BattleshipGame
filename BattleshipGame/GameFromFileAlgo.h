@@ -40,6 +40,10 @@ public:
 
 private:
 
+	/** Games file extensions */
+	static const string ATTACK_A_SUFFIX;
+	static const string ATTACK_B_SUFFIX;
+
 	/** A list of the player's predefined moves, as read from the external attack file */
 	vector<std::pair<int, int>> _predefinedMoves;
 

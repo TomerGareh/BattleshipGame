@@ -12,10 +12,6 @@ namespace battleship
 {
 	using std::ifstream;
 
-	const string IOUtil::BOARD_SUFFIX = ".sboard";
-	const string IOUtil::ATTACK_A_SUFFIX = ".attack-a";
-	const string IOUtil::ATTACK_B_SUFFIX = ".attack-b";
-
 	bool IOUtil::isInteger(const std::string & s)
 	{
 		if (s.empty() || ((!isdigit(s[0])) && (s[0] != '-') && (s[0] != '+')))
@@ -105,10 +101,7 @@ namespace battleship
 	void IOUtil::printLoadFileErrors(bool missingBoardFile, bool missingAttackAFile, bool missingAttackBFile,
 									 const string& pathToDisplay)
 	{
-		if (missingBoardFile)
-		{
-			std::cout << "Missing board file (*.sboard) looking in path: " << pathToDisplay << std::endl;
-		}
+		
 
 		if (missingAttackAFile)
 		{
@@ -121,8 +114,17 @@ namespace battleship
 		}
 	}
 
-	shared_ptr<map<string, string>> IOUtil::loadFilesInPath(const string& path)
+	bool IOUtil::validatePath(const string& path)
 	{
+		// TODO: Tomer - implement
+		return false;
+	}
+
+	vector<string> IOUtil::listFilesInPath(const string& path, const string& extension)
+	{
+
+		// TODO: Tomer - rewrite without system
+		/*
 		const int BUFFER_SIZE = 1024;
 		char systemCommand[BUFFER_SIZE];
 		string pathWithQuotes = '\"' + path + '\"';
@@ -177,5 +179,18 @@ namespace battleship
 			std::cout << "Wrong path: " << pathToDisplay << std::endl;
 			return NULL;
 		}
+
+		*/
+
+		vector<string> v;
+		return v;
+	}
+
+	string IOUtil::convertPathToAbsolute(const string& path)
+	{
+		// TODO: Tomer - implement
+		return "";
+
+		// TODO: Verify RVO happens here for string (it should)
 	}
 }
