@@ -31,6 +31,7 @@ pair<int, int> NaiveAlgo::getNextTarget()
 }
 
 NaiveAlgo::NaiveAlgo():
+IBattleshipGameAlgo(),
 _visitedSquares(NULL), _numOfRows(0), _numOfCols(0), _nextRow(0), _nextCol(0)
 {
 }

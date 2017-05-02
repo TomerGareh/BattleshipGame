@@ -1,10 +1,40 @@
+#include <iostream>
 #include "GameManager.h"
 #include "AlgoCommon.h"
+
+using std::cout;
+using std::endl;
 
 namespace battleship
 {
 	GameManager::GameManager()
 	{
+	}
+
+	shared_ptr<IBattleshipGameAlgo> GameManager::initPlayer(int playerNum,
+														    AlgoLoader& algoLoader,
+														    shared_ptr<BattleBoard> board,
+														    const string& resourcesPath)
+	{
+		// Step #1: Load algorithm's DLL
+		shared_ptr<IBattleshipGameAlgo> player = algoLoader.loadAlgoByLexicalOrder(playerNum);
+
+		// Avoid DLL load errors
+		if (NULL == player)
+			return NULL;
+
+		player->setBoard(playerNum, board->getBoard(), BOARD_SIZE, BOARD_SIZE);
+
+		// Step #2: Initialize the algorithm
+		bool initSuccess = player->init(resourcesPath);
+		if (!initSuccess)
+		{ // Algorithm failed to initialize
+			const string algoPath = algoLoader.getAlgoPathByIndex(playerNum);
+			cout << "Algorithm initialization failed for dll: " << algoPath << endl;
+			return NULL;
+		}
+
+		return player;
 	}
 
 	bool GameManager::isPlayerShipsLeft(const BattleBoard *const board, PlayerEnum player) const
@@ -83,14 +113,16 @@ namespace battleship
 	}
 
 	void GameManager::startGame(shared_ptr<BattleBoard> board,
-								IBattleshipGameAlgo& playerA, IBattleshipGameAlgo& playerB,
+								shared_ptr<IBattleshipGameAlgo> playerA, shared_ptr<IBattleshipGameAlgo> playerB,
 								IGameVisual& visualizer)
 	{
-		playerA.setBoard(static_cast<int>(PlayerEnum::A), board->getBoardPlayerView(PlayerEnum::A).get(), BOARD_SIZE, BOARD_SIZE);
-		playerB.setBoard(static_cast<int>(PlayerEnum::B), board->getBoardPlayerView(PlayerEnum::B).get(), BOARD_SIZE, BOARD_SIZE);
+		playerA->setBoard(static_cast<int>(PlayerEnum::A),
+						  board->getBoardPlayerView(PlayerEnum::A).get(), BOARD_SIZE, BOARD_SIZE);
+		playerB->setBoard(static_cast<int>(PlayerEnum::B),
+						  board->getBoardPlayerView(PlayerEnum::B).get(), BOARD_SIZE, BOARD_SIZE);
 		visualizer.visualizeBeginGame(board);
 
-		IBattleshipGameAlgo* currentPlayer = &playerA;
+		IBattleshipGameAlgo* currentPlayer = playerA.get();
 		bool isPlayerAForfeit = false;
 		bool isPlayerBForfeit = false;
 		int playerAPoints = 0;
@@ -103,12 +135,12 @@ namespace battleship
 
 			if (target == NO_MORE_MOVES)
 			{	// Player chose not to attack - from now on this player forfeits the game
-				if (currentPlayer == &playerA)
+				if (currentPlayer == playerA.get())
 					isPlayerAForfeit = true;
 				else
 					isPlayerBForfeit = true;
 
-				currentPlayer = switchPlayerTurns(playerA, playerB, currentPlayer, NULL,
+				currentPlayer = switchPlayerTurns(*playerA, *playerB, currentPlayer, NULL,
 												  isPlayerAForfeit, isPlayerBForfeit);
 				continue;
 			}
@@ -122,7 +154,7 @@ namespace battleship
 			auto attackedGamePiece = board->executeAttack(target);
 
 			// Notify on attack results
-			int attackingPlayerNumber = (currentPlayer == &playerB); // A - 0, B - 1
+			int attackingPlayerNumber = (currentPlayer == playerB.get()); // A - 0, B - 1
 			AttackResult attackResult;
 
 			if (attackedGamePiece == NULL)
@@ -139,11 +171,11 @@ namespace battleship
 				attackResult = AttackResult::Hit;
 			}
 
-			currentPlayer = switchPlayerTurns(playerA, playerB, currentPlayer, attackedGamePiece,
+			currentPlayer = switchPlayerTurns(*playerA, *playerB, currentPlayer, attackedGamePiece,
 											  isPlayerAForfeit, isPlayerBForfeit);
 
-			playerA.notifyOnAttackResult(attackingPlayerNumber, target.first + 1, target.second + 1, attackResult);
-			playerB.notifyOnAttackResult(attackingPlayerNumber, target.first + 1, target.second + 1, attackResult);
+			playerA->notifyOnAttackResult(attackingPlayerNumber, target.first + 1, target.second + 1, attackResult);
+			playerB->notifyOnAttackResult(attackingPlayerNumber, target.first + 1, target.second + 1, attackResult);
 			visualizer.visualizeAttackResults(board, attackingPlayerNumber,
 											  target.first, target.second, attackResult, attackedGamePiece);
 		}

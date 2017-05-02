@@ -115,16 +115,26 @@ int main(int argc, char* argv[])
 																 resourcesPath);
 
 		AlgoLoader algoLoader;
-		string absolutePath = resourcesPath;
-		bool isAlgoMissing = !algoLoader.loadDLLs(absolutePath);
+		string absolutePath = IOUtil::convertPathToAbsolute(resourcesPath);
+		bool isAlgoMissing = !algoLoader.fetchDLLs(absolutePath);
 
 		// Validation #2: Missing board path, Invalid board setup, Missing dll files
 		if ((NULL == board) || isAlgoMissing)
 			return ERROR_CODE;
 
-		shared_ptr<IBattleshipGameAlgo> playerA = algoLoader.getAlgoByLexicalOrder(0);
-		shared_ptr<IBattleshipGameAlgo> playerB = algoLoader.getAlgoByLexicalOrder(1);
+		GameManager gameManager;
 
+		// Validation #3 & #4: Load playerA dll and initialize it
+		shared_ptr<IBattleshipGameAlgo> playerA = gameManager.initPlayer(0, algoLoader, board, resourcesPath);
+		if (NULL == playerA)
+			return ERROR_CODE;
+
+		// Validation #5 & #6: Load playerB dll and initialize it
+		shared_ptr<IBattleshipGameAlgo> playerB = gameManager.initPlayer(1, algoLoader, board, resourcesPath);
+		if (NULL == playerB)
+			return ERROR_CODE;
+
+		// All validation have passed - proceed to begin game
 		unique_ptr<IGameVisual> visual = NULL;
 
 		// Choose visualization type, depending on -quiet arg
@@ -140,8 +150,7 @@ int main(int argc, char* argv[])
 
 		// Start a single game session, visualizer is expected to print the results to the screen when the session
 		// is over (or during the session itself if this is a textual visualizer type)
-		GameManager gameManager;
-		gameManager.startGame(board, *playerA, *playerB, *visual);
+		gameManager.startGame(board, playerA, playerB, *visual);
 
 		return SUCCESS_CODE;
 	}

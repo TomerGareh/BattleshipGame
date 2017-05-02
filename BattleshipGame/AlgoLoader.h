@@ -27,13 +27,27 @@ namespace battleship
 		/** Releases all dynamic libraries loaded by this algorithm loader */
 		virtual ~AlgoLoader();
 
-		/** Loads all algorithms available in the given path */
-		bool loadDLLs(const string& path);
+		/** Fetches names for all algorithms available in the given path.
+		 *	(populates the AlgoLoad with available dlls for loading)
+		 */
+		bool fetchDLLs(const string& path);
 
-		/** Returns the algorithm loaded in lexicographical order by index */
-		shared_ptr<IBattleshipGameAlgo> getAlgoByLexicalOrder(unsigned int index);
+		/** Loads & returns the algorithm available in lexicographical order by index.
+		 *	Algorithms can only be loaded after their dll have been fetched.
+		 */
+		shared_ptr<IBattleshipGameAlgo> loadAlgoByLexicalOrder(unsigned int index);
+
+		/** Returns the algorithm name at the given index (algorithms are sorted in a list)
+		 *	If an error occurs, an empty string is returned.
+		 */
+		const string getAlgoPathByIndex(unsigned int index);
 
 	private:
+
+		// Error message strings
+		static const string LOAD_DLL_ERROR_STRING;
+		static const string MISSING_DLL_ERROR_STRING;
+		static const string NON_EXISTING_ALGO_ERROR_STRING;
 
 		/** Typedef for object creating new IBattleshipGameAlgo objects from Dlls */
 		using GetAlgorithmFuncType = IBattleshipGameAlgo *(*)();
@@ -43,11 +57,14 @@ namespace battleship
 		 */
 		using AlgoDescriptor = tuple<string, HINSTANCE, GetAlgorithmFuncType>;
 
-		/** Vector of available algorithms: <Algorithm name, dll handle, GetAlgorithm function ptr> */
-		vector<AlgoDescriptor> _availableGameAlgos;
+		/** Vector of available algorithms for loading: <Algorithm name> */
+		vector<string> _availableGameAlgos;
 
-		/** Sorts loaded algorithms lexicographically by algorithm name */
-		void sortLoadedAlgorithms();
+		/** Vector of loaded algorithms: <Algorithm name, dll handle, GetAlgorithm function ptr> */
+		vector<AlgoDescriptor> _loadedGameAlgos;
+
+		/** Loads the algorithm in the given path. */
+		IBattleshipGameAlgo* AlgoLoader::loadAlgorithm(const string& algoFullpath);
 	};
 
 }

@@ -5,7 +5,8 @@
 #include "HuntTargetAlgo.h"
 #include "AlgoCommon.h"
 
-HuntTargetAlgo::HuntTargetAlgo() : playerId(-1), boardSize(battleship::NO_MORE_MOVES), visitedBoard(NULL),
+HuntTargetAlgo::HuntTargetAlgo():  IBattleshipGameAlgo(),
+								   playerId(-1), boardSize(battleship::NO_MORE_MOVES), visitedBoard(NULL),
 								   lastAttackDirection(AttackDirection::InPlace)
 {
 }

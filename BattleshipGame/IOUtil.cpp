@@ -98,22 +98,6 @@ namespace battleship
 		}
 	}
 
-	void IOUtil::printLoadFileErrors(bool missingBoardFile, bool missingAttackAFile, bool missingAttackBFile,
-									 const string& pathToDisplay)
-	{
-		
-
-		if (missingAttackAFile)
-		{
-			std::cout << "Missing attack file for player A (*.attack-a) looking in path: " << pathToDisplay << std::endl;
-		}
-
-		if (missingAttackBFile)
-		{
-			std::cout << "Missing attack file for player B (*.attack-b) looking in path: " << pathToDisplay << std::endl;
-		}
-	}
-
 	bool IOUtil::validatePath(const string& path)
 	{
 		// TODO: Tomer - implement

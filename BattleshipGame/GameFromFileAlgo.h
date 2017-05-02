@@ -41,8 +41,12 @@ public:
 private:
 
 	/** Games file extensions */
-	static const string ATTACK_A_SUFFIX;
-	static const string ATTACK_B_SUFFIX;
+	static const string ATTACK_SUFFIX;
+
+	/** Saves the player number for this algorithm.
+	 *	0 for player A, 1 for player B.
+	 */
+	int _playerNum;
 
 	/** A list of the player's predefined moves, as read from the external attack file */
 	vector<std::pair<int, int>> _predefinedMoves;

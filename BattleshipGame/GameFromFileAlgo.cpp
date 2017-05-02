@@ -5,8 +5,7 @@
 
 using namespace battleship;
 
-const string GameFromFileAlgo::ATTACK_A_SUFFIX = ".attack-a";
-const string GameFromFileAlgo::ATTACK_B_SUFFIX = ".attack-b";
+const string GameFromFileAlgo::ATTACK_SUFFIX = ".attack";
 
 // TODO: Change to coordinates of 1 to 10!
 void GameFromFileAlgo::populateMovesFromFile(const string& filename)
@@ -76,18 +75,34 @@ GameFromFileAlgo::GameFromFileAlgo(const string& attackFile): IBattleshipGameAlg
 
 void GameFromFileAlgo::setBoard(int player, const char** board, int numRows, int numCols)
 {
-	// Ignored by the read from file logic
+	// Mostly ignored by the read from file logic
+	// Save only the player number
+	_playerNum = player;
 }
 
 bool GameFromFileAlgo::init(const string& path)
 {
-	// TODO: Fix compilation issues
-	string playerAAttackFile = (*inputFileNames)[IOUtil::ATTACK_A_SUFFIX];
-	string playerBAttackFile = (*inputFileNames)[IOUtil::ATTACK_B_SUFFIX];
+	vector<string> attackFiles = IOUtil::listFilesInPath(path, ATTACK_SUFFIX);
+	string attackFile;
+
+	if (attackFiles.size() == 0)
+	{
+		return false;							   // No attack files found - init fails
+	}
+	else if (attackFiles.size() == 1)
+	{
+		attackFile = attackFiles.at(0);			   // 1 attack file found, use it
+	}
+	else
+	{
+		int fileIndex = (_playerNum == 0) ? 0 : 1; // Use first file for player0, otherwise second file
+		attackFile = attackFiles.at(fileIndex);
+	}
 
 	// Build player move list from attack file contents
-	populateMovesFromFile(path);
-	return true;	// ***** TODO: return the result from parseFile *****
+	populateMovesFromFile(attackFile);
+
+	return true;
 }
 
 std::pair<int, int> GameFromFileAlgo::attack()
