@@ -52,6 +52,8 @@ private:
 	// Our last attack direction. If the last attack was in Hunt mode this field is not relevant
 	AttackDirection lastAttackDirection;
 
+	static const AttackDirection nonInPlaceDirections[];
+
 	// A map from the pending targets to their surrounding. 
 	// The surrounding is a vector of ints, representing the target square itself and the four directions according
 	// to AttackDirection enum. In each cell we keep the size of progression in that direction. Size of -1 is

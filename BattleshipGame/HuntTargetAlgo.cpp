@@ -5,6 +5,9 @@
 #include "HuntTargetAlgo.h"
 #include "AlgoCommon.h"
 
+const AttackDirection HuntTargetAlgo::nonInPlaceDirections[] = {AttackDirection::Right, AttackDirection::Left,
+																AttackDirection::Up, AttackDirection::Down};
+
 HuntTargetAlgo::HuntTargetAlgo() : playerId(-1), boardSize(battleship::NO_MORE_MOVES), visitedBoard(NULL),
 								   lastAttackDirection(AttackDirection::InPlace)
 {
@@ -179,13 +182,30 @@ targetsMapEntry HuntTargetAlgo::updateMapOnOtherAttack(int row, int col, AttackR
 		int targetRow = targetIt->first.first;
 		int targetCol = targetIt->first.second;
 		AttackDirection direction = getTargetDirection(targetIt);
+
+		auto checkRowColMatch = [row, col, targetRow, targetCol](AttackDirection direct, int size)->bool {
+			return (((direct == AttackDirection::Right) && (targetRow == row) && ((targetCol + size + 1) == col)) ||
+					((direct == AttackDirection::Left) && (targetRow == row) && ((targetCol - size - 1) == col)) ||
+					((direct == AttackDirection::Up) && ((targetRow - size - 1) == row) && (targetCol == col)) ||
+					((direct == AttackDirection::Down) && ((targetRow + size + 1) == row) && (targetCol == col)));
+		};
+
+		bool notInDirectionCase = false;
+		for (const auto otherDirection : nonInPlaceDirections)
+		{
+			if ((otherDirection != direction) && checkRowColMatch(otherDirection, 0))
+			{
+				notInDirectionCase = true;
+				direction = otherDirection;
+				break;
+			}
+		}
+
 		int directionInt = static_cast<int>(direction);
 		int maxDirection = targetIt->second[directionInt];
+		bool inDirectionCase = checkRowColMatch(direction, maxDirection);
 
-		if (((direction == AttackDirection::Right) && ((targetCol + maxDirection + 1) == col)) ||
-			((direction == AttackDirection::Left) && ((targetCol - maxDirection - 1) == col)) ||
-			((direction == AttackDirection::Up) && ((targetRow - maxDirection - 1) == row)) ||
-			((direction == AttackDirection::Down) && ((targetRow + maxDirection + 1) == row)))
+		if (inDirectionCase || notInDirectionCase)
 		{
 			if (result == AttackResult::Miss)
 			{
