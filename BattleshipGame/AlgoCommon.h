@@ -18,4 +18,21 @@ namespace battleship
 		Submarine = 'M',
 		Battleship = 'D'
 	};
+
+	/** A functor for validating attack moves returned by home made algorithms are valid. */
+	struct AttackValidator
+	{
+		pair<int, int> operator() (pair<int, int> move, int numOfRows, int numOfCols)
+		{
+			if ((move.first < 1) || (move.second < 1) ||
+				(move.first > numOfRows) || (move.second > numOfCols))
+			{	// Illegal moves are converted into forfeit
+				return NO_MORE_MOVES;
+			}
+			else
+			{
+				return move;
+			}
+		}
+	};
 }

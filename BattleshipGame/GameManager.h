@@ -4,6 +4,7 @@
 #include "BattleBoard.h"
 #include "IBattleshipGameAlgo.h"
 #include "IGameVisual.h"
+#include "AlgoLoader.h"
 
 using std::shared_ptr;
 using std::unique_ptr;
@@ -20,11 +21,17 @@ namespace battleship
 		GameManager();
 		virtual ~GameManager() = default;
 
+		/** Loads the player's algorithm and initializes it.
+		 *	If an error occurs, details are printed to the console and NULL is returned.
+		 */
+		shared_ptr<IBattleshipGameAlgo> initPlayer(int playerNum, AlgoLoader& algoLoader,
+												   shared_ptr<BattleBoard> board, const string& resourcesPath);
+
 		/** Starts a new game session using the given board, between the 2 players algorithms.
 		 *  The game output will be depicted using the visualizer strategy.
 		 */
 		void startGame(shared_ptr<BattleBoard> board,
-					   IBattleshipGameAlgo& playerA, IBattleshipGameAlgo& playerB,
+					   shared_ptr<IBattleshipGameAlgo> playerA, shared_ptr<IBattleshipGameAlgo> playerB,
 					   IGameVisual& visualizer);
 
 	private:

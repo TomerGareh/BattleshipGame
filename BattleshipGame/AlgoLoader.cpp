@@ -3,6 +3,7 @@
 #include <functional>
 #include <algorithm>
 #include "IBattleshipGameAlgo.h"
+#include "IOUtil.h"
 
 using std::cout;
 using std::endl;
@@ -10,99 +11,132 @@ using std::function;
 
 namespace battleship
 {
+	const string AlgoLoader::LOAD_DLL_ERROR_STRING = "Cannot load dll: ";
+	const string AlgoLoader::MISSING_DLL_ERROR_STRING = "Missing an algorithm (dll) file looking in path: ";
+	const string AlgoLoader::NON_EXISTING_ALGO_ERROR_STRING = "Error: Game tried to access a non-existing algorithm";
+
 	AlgoLoader::AlgoLoader()
 	{	
 	}
 
-
 	AlgoLoader::~AlgoLoader()
 	{
 		// Close all the dynamic libs we opened
-		for (auto algIter = _availableGameAlgos.begin(); algIter != _availableGameAlgos.end(); ++algIter)
+		for (auto algIter = _loadedGameAlgos.begin(); algIter != _loadedGameAlgos.end(); ++algIter)
 		{
 			// Free HINSTANCE loaded, which resides in the 2nd cell of the algo tuple
 			FreeLibrary(std::get<1>(*algIter));
 		}
 	}
 
-	shared_ptr<IBattleshipGameAlgo> AlgoLoader::getAlgoByLexicalOrder(unsigned int index)
+	IBattleshipGameAlgo* AlgoLoader::loadAlgorithm(const string& algoFullpath)
+	{
+		// Load dynamic library
+		// Again using Unicode compatible version of LoadLibrary
+		HINSTANCE hDll = LoadLibraryA(algoFullpath.c_str());
+		if (!hDll)
+		{
+			cout << LOAD_DLL_ERROR_STRING << algoFullpath << endl;
+			return NULL;
+		}
+
+		// Get function pointer
+		GetAlgorithmFuncType getAlgorithmFunc = (GetAlgorithmFuncType)GetProcAddress(hDll, "GetAlgorithm");
+		if (!getAlgorithmFunc)
+		{
+			cout << LOAD_DLL_ERROR_STRING << algoFullpath << endl;
+			return NULL;
+		}
+
+		// Keep algorithm in list of loaded algos
+		_loadedGameAlgos.push_back(std::make_tuple(algoFullpath, hDll, getAlgorithmFunc));
+
+		// Call GetAlgorithm for the specified algorithm, this should create a new instance for that algo type 
+		IBattleshipGameAlgo* algo = getAlgorithmFunc();
+		if (NULL == algo)
+		{
+			cout << LOAD_DLL_ERROR_STRING << algoFullpath << endl;
+			return NULL;
+		}
+
+		return algo;
+	}
+
+	const string AlgoLoader::getAlgoPathByIndex(unsigned int index)
+	{
+		// Avoid array out of bounds, return an empty string
+		if (index >= _availableGameAlgos.size())
+		{
+			cout << NON_EXISTING_ALGO_ERROR_STRING << endl;
+			return "";
+		}
+
+		const string algoPath = _availableGameAlgos.at(index);
+		
+		return algoPath;
+	}
+
+	shared_ptr<IBattleshipGameAlgo> AlgoLoader::loadAlgoByLexicalOrder(unsigned int index)
 	{
 		// Avoid array out of bounds, return NULL
 		if (index >= _availableGameAlgos.size())
+		{
+			cout << NON_EXISTING_ALGO_ERROR_STRING << endl;
 			return NULL;
+		}
 
-		// Call GetAlgorithm for the specified algorithm, this should create a new instance for that algo type 
-		IBattleshipGameAlgo* algo = std::get<2>(_availableGameAlgos[index])();
+		const string algoPath = _availableGameAlgos.at(index);
+		IBattleshipGameAlgo* algo = NULL;
+
+		// Search if algo was already loaded before
+		auto it = std::find_if(_loadedGameAlgos.begin(), _loadedGameAlgos.end(),
+							   [&algoPath](const AlgoDescriptor& ad) { return std::get<0>(ad) == algoPath; });
+
+		if (it == _loadedGameAlgos.end())
+		{	
+			// Not loaded before, so load and cache here
+			algo = loadAlgorithm(algoPath);
+		}
+		else
+		{	// Loaded before
+			// Retrieve algorithm descriptor
+			AlgoDescriptor& algoDesc = *it;
+			auto getAlgorithmFunc = std::get<2>(algoDesc); // 3rd element holds the function pointer
+
+			// Call GetAlgorithm for the specified algorithm,
+			// this should create a new instance for that algo type 
+			IBattleshipGameAlgo* algo = getAlgorithmFunc();
+			if (NULL == algo)
+			{
+				cout << LOAD_DLL_ERROR_STRING << std::get<0>(algoDesc) << endl;
+				return NULL;
+			}
+		}
 
 		// Wrap in a smart pointer, so consumers don't have to deal with memory deallocation manually
 		return shared_ptr<IBattleshipGameAlgo>(algo);
 	}
 
-	void AlgoLoader::sortLoadedAlgorithms()
+	bool AlgoLoader::fetchDLLs(const string& path)
 	{
-		using LexicalAlgoDescriptorSort = function<bool(const AlgoDescriptor&, const AlgoDescriptor&)>;
+		_availableGameAlgos.clear();
+		vector<string> foundDlls = IOUtil::listFilesInPath(path, "dll");
 
-		LexicalAlgoDescriptorSort sortFunc = [](const AlgoDescriptor& algo1, const AlgoDescriptor& algo2)
+		// Scan for dlls in the path, and append the path to their filenames
+		for (auto& nextDllFilename : foundDlls)
 		{
-			return std::get<0>(algo1) < std::get<0>(algo1);
-		};
-
-		std::sort(_availableGameAlgos.begin(), _availableGameAlgos.end(), sortFunc);
-	}
-
-	bool AlgoLoader::loadDLLs(const string& path)
-	{
-		HANDLE dir;
-
-		WIN32_FIND_DATAA fileData; // Data struct for files information
-		vector<HINSTANCE>::iterator itr;
-
-		GetAlgorithmFuncType getAlgorithmFunc;
-
-		// Iterate over *.dll files in path
-		string s = "\\*.dll"; // Filter only .dll endings
-		dir = FindFirstFileA((path + s).c_str(), &fileData); // Unicode compatible version of FindFirstFile
-
-		// Check if the dir opened successfully
-		if (dir != INVALID_HANDLE_VALUE)
-		{
-			// test each file suffix and set variables as needed
-			do
-			{
-				string fileName = fileData.cFileName;
-				string fullFileName = path + "\\" + fileName;
-				string algoName = fileName.substr(0, fileName.find("."));
-
-				// Load dynamic library
-				// Again using Unicode compatible version of LoadLibrary
-				HINSTANCE hDll = LoadLibraryA(fullFileName.c_str());
-				if (!hDll)
-				{
-					cout << "Cannot load dll: " << fullFileName << endl;
-					return false;
-				}
-
-				// Get function pointer
-				getAlgorithmFunc = (GetAlgorithmFuncType)GetProcAddress(hDll, "GetAlgorithm");
-				if (!getAlgorithmFunc)
-				{
-					
-					cout << "Algorithm initialization failed for dll: " << fullFileName << endl;
-					return false;
-				}
-
-				_availableGameAlgos.push_back(make_tuple(algoName, hDll, getAlgorithmFunc));
-
-			} while (FindNextFileA(dir, &fileData)); // Notice: Unicode compatible version of FindNextFile
+			string fullFileName = path + "\\" + nextDllFilename;
+			_availableGameAlgos.push_back(fullFileName);
 		}
 
-		// A game must have 2 algorithms to function properly.
+		// A game must have 2 algorithms to function properly
 		if (_availableGameAlgos.size() < 2)
 		{
-			cout << "Missing an algorithm (dll) file looking in path:" << path << endl;
+			cout << MISSING_DLL_ERROR_STRING << path << endl;
 		}
 
-		sortLoadedAlgorithms();
+		// Sort available algorithms lexicographically by name
+		std::sort(_availableGameAlgos.begin(), _availableGameAlgos.end());
 
 		return true;
 	}
