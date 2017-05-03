@@ -111,11 +111,11 @@ int main(int argc, char* argv[])
 		}
 
 		// Game initialization - load board and player algorithms
+		const string absolutePath = IOUtil::convertPathToAbsolute(resourcesPath);
 		auto board = BattleshipGameBoardFactory::loadBattleBoard(BattleshipBoardInitTypeEnum::LOAD_BOARD_FROM_FILE,
-																 resourcesPath);
+																 absolutePath);
 
 		AlgoLoader algoLoader;
-		string absolutePath = IOUtil::convertPathToAbsolute(resourcesPath);
 		bool isAlgoMissing = !algoLoader.fetchDLLs(absolutePath);
 
 		// Validation #2: Missing board path, Invalid board setup, Missing dll files
@@ -125,12 +125,12 @@ int main(int argc, char* argv[])
 		GameManager gameManager;
 
 		// Validation #3 & #4: Load playerA dll and initialize it
-		shared_ptr<IBattleshipGameAlgo> playerA = gameManager.initPlayer(0, algoLoader, board, resourcesPath);
+		shared_ptr<IBattleshipGameAlgo> playerA = gameManager.initPlayer(0, algoLoader, board, absolutePath);
 		if (NULL == playerA)
 			return ERROR_CODE;
 
 		// Validation #5 & #6: Load playerB dll and initialize it
-		shared_ptr<IBattleshipGameAlgo> playerB = gameManager.initPlayer(1, algoLoader, board, resourcesPath);
+		shared_ptr<IBattleshipGameAlgo> playerB = gameManager.initPlayer(1, algoLoader, board, absolutePath);
 		if (NULL == playerB)
 			return ERROR_CODE;
 

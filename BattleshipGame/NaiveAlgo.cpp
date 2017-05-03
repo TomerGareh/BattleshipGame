@@ -2,8 +2,13 @@
 #include "BattleBoard.h"
 #include "AlgoCommon.h"
 #include <vector>
+#include <iostream>
+#include <exception>
 
 using std::vector;
+using std::exception;
+using std::cerr;
+using std::endl;
 
 pair<int, int> NaiveAlgo::getNextTarget()
 {
@@ -138,8 +143,7 @@ void NaiveAlgo::setBoard(int player, const char** board, int numRows, int numCol
 		if (row + 1 < numRows)
 		{
 			_visitedSquares[row + 1][col] = static_cast<char>(NaiveSquareStatus::Visited);
-		}
-		
+		}	
 	}
 }
 
@@ -151,10 +155,20 @@ bool NaiveAlgo::init(const string& path)
 
 std::pair<int, int> NaiveAlgo::attack()
 {
-	auto target = getNextTarget();
-	_visitedSquares[target.first - 1][target.second - 1] = static_cast<char>(NaiveSquareStatus::Visited);
+	try
+	{
+		auto target = getNextTarget();
+		_visitedSquares[target.first - 1][target.second - 1] = static_cast<char>(NaiveSquareStatus::Visited);
 
-	return target;
+		battleship::AttackValidator validator;
+		return validator(target, _numOfRows, _numOfCols);
+	}
+	catch (const exception& e)
+	{	// This should be a barrier that stops the app from failing.
+		// If the algorithm fails, let it forfeit
+		cerr << "Error: NaiveAlgo::attack failed on " << e.what() << endl;
+		return battleship::NO_MORE_MOVES;
+	}
 }
 
 void NaiveAlgo::notifyOnAttackResult(int player, int row, int col, AttackResult result)

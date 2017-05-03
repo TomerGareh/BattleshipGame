@@ -144,6 +144,15 @@ namespace battleship
 												  isPlayerAForfeit, isPlayerBForfeit);
 				continue;
 			}
+			else if ((target.first < 1) || (target.second < 1) ||
+					 (target.first > BOARD_SIZE) || (target.second > BOARD_SIZE))
+			{
+				// Play performed an illegal move and will lose his turn
+				currentPlayer = switchPlayerTurns(*playerA, *playerB, currentPlayer, NULL,
+												  isPlayerAForfeit, isPlayerBForfeit);
+
+				continue;
+			}
 
 			// Normalize coordinates to 0~BOARD_SIZE-1
 			target.first--;

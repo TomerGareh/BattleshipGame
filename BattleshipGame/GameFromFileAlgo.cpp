@@ -2,12 +2,16 @@
 #include "IOUtil.h"
 #include "BattleBoard.h"
 #include "AlgoCommon.h"
+#include <exception>
+#include <iostream>
 
 using namespace battleship;
+using std::exception;
+using std::cerr;
+using std::endl;
 
 const string GameFromFileAlgo::ATTACK_SUFFIX = ".attack";
 
-// TODO: Change to coordinates of 1 to 10!
 void GameFromFileAlgo::populateMovesFromFile(const string& filename)
 {
 	// This line-parser logic will clean the line string from illegal characters and spaces,
@@ -17,7 +21,10 @@ void GameFromFileAlgo::populateMovesFromFile(const string& filename)
 	// be captured inside the lambda expression (we have to capture "this" if we want to allow access,
 	// instead we capture a "fake" reference to the _predefinedMoves field)
 	auto* moveListPtr = &_predefinedMoves;
-	auto lineParser = [moveListPtr](string& nextLine) mutable
+	int rows = _numRows;
+	int cols = _numCols;
+
+	auto lineParser = [moveListPtr, rows, cols](string& nextLine) mutable
 	{
 		auto legalChars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', COORDS_DELIM };
 		IOUtil::replaceIllegalCharacters(nextLine, (char)BoardSquare::Empty, legalChars);
@@ -56,8 +63,8 @@ void GameFromFileAlgo::populateMovesFromFile(const string& filename)
 			int secondNum = stoi(secondToken);
 
 			// Check if these are legal coordinates, otherwise ignore
-			if ((firstNum >= 1) && (firstNum <= BOARD_SIZE) &&
-				(secondNum >= 1) && (secondNum <= BOARD_SIZE))
+			if ((firstNum >= 1) && (firstNum <= rows) &&
+				(secondNum >= 1) && (secondNum <= cols))
 			{
 				auto move = std::make_pair(firstNum, secondNum);
 				moveListPtr->push_back(move);
@@ -69,54 +76,74 @@ void GameFromFileAlgo::populateMovesFromFile(const string& filename)
 	IOUtil::parseFile(filename, lineParser);
 }
 
-GameFromFileAlgo::GameFromFileAlgo(const string& attackFile): IBattleshipGameAlgo()
+GameFromFileAlgo::GameFromFileAlgo(): IBattleshipGameAlgo()
 {
 }
 
 void GameFromFileAlgo::setBoard(int player, const char** board, int numRows, int numCols)
 {
-	// Mostly ignored by the read from file logic
-	// Save only the player number
+	// Board itself is mostly ignored by the read from file logic
+	// Save only the player number and board size
 	_playerNum = player;
+	_numRows = numRows;
+	_numCols = numCols;
 }
 
 bool GameFromFileAlgo::init(const string& path)
 {
-	vector<string> attackFiles = IOUtil::listFilesInPath(path, ATTACK_SUFFIX);
-	string attackFile;
-
-	if (attackFiles.size() == 0)
+	try
 	{
-		return false;							   // No attack files found - init fails
-	}
-	else if (attackFiles.size() == 1)
-	{
-		attackFile = attackFiles.at(0);			   // 1 attack file found, use it
-	}
-	else
-	{
-		int fileIndex = (_playerNum == 0) ? 0 : 1; // Use first file for player0, otherwise second file
-		attackFile = attackFiles.at(fileIndex);
-	}
+		vector<string> attackFiles = IOUtil::listFilesInPath(path, ATTACK_SUFFIX);
+		string attackFile;
 
-	// Build player move list from attack file contents
-	populateMovesFromFile(attackFile);
+		if (attackFiles.size() == 0)
+		{
+			return false;							   // No attack files found - init fails
+		}
+		else if (attackFiles.size() == 1)
+		{
+			attackFile = attackFiles.at(0);			   // 1 attack file found, use it
+		}
+		else
+		{
+			int fileIndex = (_playerNum == 0) ? 0 : 1; // Use first file for player0, otherwise second file
+			attackFile = attackFiles.at(fileIndex);
+		}
 
-	return true;
+		// Build player move list from attack file contents
+		populateMovesFromFile(attackFile);
+
+		return true;
+	}
+	catch (...)
+	{	// This should be a barrier that stops the app from failing.
+		// If the algorithm fails to initialize due to an error, let it fail gracefully
+		return false;
+	}
 }
 
 std::pair<int, int> GameFromFileAlgo::attack()
 {
-	// Execute the next step from the attack file
-	// If the player have used his entire move list read from the file, he forfeits
-	// (allowing the other player to play until he wins or both forfeit)
-	if (_predefinedMoves.empty())
-		return battleship::NO_MORE_MOVES;
+	try
+	{
+		// Execute the next step from the attack file
+		// If the player have used his entire move list read from the file, he forfeits
+		// (allowing the other player to play until he wins or both forfeit)
+		if (_predefinedMoves.empty())
+			return battleship::NO_MORE_MOVES;
 
-	std::pair<int, int> nextMove = *(_predefinedMoves.begin());	// Fetch next move from head of list
-	_predefinedMoves.erase(_predefinedMoves.begin());	// Remove fetched item
+		std::pair<int, int> nextMove = *(_predefinedMoves.begin());	// Fetch next move from head of list
+		_predefinedMoves.erase(_predefinedMoves.begin());	// Remove fetched item
 
-	return nextMove;
+		battleship::AttackValidator validator;
+		return validator(nextMove, _numRows, _numCols);
+	}
+	catch (const exception& e)
+	{	// This should be a barrier that stops the app from failing.
+		// If the algorithm fails to attack due to an error, it should forfeit
+		cerr << "Error: GameFromFileAlgo::attack failed on " << e.what() << endl;
+		return NO_MORE_MOVES;
+	}
 }
 
 void GameFromFileAlgo::notifyOnAttackResult(int player, int row, int col, AttackResult result)
@@ -126,7 +153,5 @@ void GameFromFileAlgo::notifyOnAttackResult(int player, int row, int col, Attack
 
 ALGO_API IBattleshipGameAlgo* GetAlgorithm()
 {
-	// TODO: Load attack file here
-	string attackFile = "";
-	return new GameFromFileAlgo(attackFile);
+	return new GameFromFileAlgo();
 }
