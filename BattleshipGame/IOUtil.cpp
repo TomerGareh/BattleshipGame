@@ -7,6 +7,7 @@
 #include <locale>
 #include <cerrno>
 #include <sstream>
+#include <windows.h>
 
 namespace battleship
 {
@@ -100,81 +101,41 @@ namespace battleship
 
 	bool IOUtil::validatePath(const string& path)
 	{
-		// TODO: Tomer - implement
-		return false;
+		WIN32_FIND_DATAA fileData;
+		HANDLE dir = FindFirstFileA((path + "\\*").c_str(), &fileData);	// Notice: Unicode compatible version of FindFirstFile	
+		bool isValid = (dir != INVALID_HANDLE_VALUE);
+		FindClose(dir);
+		return isValid;
 	}
 
 	vector<string> IOUtil::listFilesInPath(const string& path, const string& extension)
 	{
+		vector<string> fileList;
+		WIN32_FIND_DATAA fileData;
+		HANDLE dir = FindFirstFileA((path + "\\*." + extension).c_str(), &fileData);	// Notice: Unicode compatible version of FindFirstFile
+		if (dir != INVALID_HANDLE_VALUE)	// We assume that the path is valid here, this shouldn't happen
+		{
+			do
+			{
+				string fileName = path + "\\" + fileData.cFileName;	
+				fileList.push_back(fileName);
+			} while (FindNextFileA(dir, &fileData));	// Notice: Unicode compatible version of FindNextFile
+		}
 
-		// TODO: Tomer - rewrite without system
-		/*
-		const int BUFFER_SIZE = 1024;
-		char systemCommand[BUFFER_SIZE];
-		string pathWithQuotes = '\"' + path + '\"';
-
-		// Use the safer sprintf_s since Visual Studio throws warnings on sprintf due to potential misuse
-		sprintf_s(systemCommand, BUFFER_SIZE, "2>NUL dir /a-d /b %s > filenames.txt", pathWithQuotes.c_str());
+		FindClose(dir);
 		
-		shared_ptr<map<string, string>> inputFileNames = std::make_shared<map<string, string>>();
-		const string pathToDisplay = (path.compare(".") == 0) ? "Working Directory" : path;
+		std::sort(fileList.begin(), fileList.end());
 
-		if (system(systemCommand) == 0)
-		{
-			shared_ptr<bool> missingBoardFile = std::make_shared<bool>(true);
-			shared_ptr<bool> missingAttackAFile = std::make_shared<bool>(true);
-			shared_ptr<bool> missingAttackBFile = std::make_shared<bool>(true);
-
-			auto lineParser = [missingBoardFile, missingAttackAFile, missingAttackBFile,
-							   inputFileNames, path](string& nextLine) mutable
-			{
-				if ((*missingBoardFile) || (*missingAttackAFile) || (*missingAttackBFile))
-				{
-					if (IOUtil::endsWith(nextLine, BOARD_SUFFIX))
-					{
-						*missingBoardFile = false;
-						(*inputFileNames)[BOARD_SUFFIX] = path + '/' + nextLine;
-					}
-					else if (IOUtil::endsWith(nextLine, ATTACK_A_SUFFIX))
-					{
-						*missingAttackAFile = false;
-						(*inputFileNames)[ATTACK_A_SUFFIX] = path + '/' + nextLine;
-					}
-					else if (IOUtil::endsWith(nextLine, ATTACK_B_SUFFIX))
-					{
-						*missingAttackBFile = false;
-						(*inputFileNames)[ATTACK_B_SUFFIX] = path + '/' + nextLine;
-					}
-				}
-			};
-
-			IOUtil::parseFile("filenames.txt", lineParser);
-
-			if ((*missingBoardFile) || (*missingAttackAFile) || (*missingAttackBFile))
-			{
-				inputFileNames = NULL;
-				IOUtil::printLoadFileErrors(*missingBoardFile, *missingAttackAFile, *missingAttackBFile, pathToDisplay);
-			}
-
-			return inputFileNames;
-		}
-		else
-		{
-			std::cout << "Wrong path: " << pathToDisplay << std::endl;
-			return NULL;
-		}
-
-		*/
-
-		vector<string> v;
-		return v;
+		return fileList;
 	}
 
 	string IOUtil::convertPathToAbsolute(const string& path)
 	{
-		// TODO: Tomer - implement
-		return "";
-
+		const int BUFFER_SIZE = 1024;
+		char buffer[BUFFER_SIZE];
+		int pathSize = GetFullPathNameA(path.c_str(), BUFFER_SIZE, buffer, NULL);
+		string fullPath(buffer, pathSize);
+		return fullPath;
 		// TODO: Verify RVO happens here for string (it should)
 	}
 }

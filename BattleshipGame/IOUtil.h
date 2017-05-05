@@ -51,6 +51,7 @@ namespace battleship
 
 		/** Converts the given path to "absolute" path on the disk.
 		 *  If the given path is already absolute, this function simply returns it.
+		 *  This function does not verify that the resulting path is valid.
 		 */
 		static string convertPathToAbsolute(const string& path);
 
