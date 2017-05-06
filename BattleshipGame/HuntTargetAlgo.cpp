@@ -11,7 +11,7 @@ using std::exception;
 using std::cerr;
 using std::endl;
 
-const int MAX_NUM_OF_DRAWS = 1000;
+const int HuntTargetAlgo::MAX_NUM_OF_DRAWS = 1000;
 const AttackDirection HuntTargetAlgo::nonInPlaceDirections[] = {AttackDirection::Right, AttackDirection::Left,
 																AttackDirection::Up, AttackDirection::Down};
 
