@@ -11,6 +11,7 @@ using std::exception;
 using std::cerr;
 using std::endl;
 
+const int MAX_NUM_OF_DRAWS = 1000;
 const AttackDirection HuntTargetAlgo::nonInPlaceDirections[] = {AttackDirection::Right, AttackDirection::Left,
 																AttackDirection::Up, AttackDirection::Down};
 
@@ -89,6 +90,25 @@ bool HuntTargetAlgo::init(const string& path)
 	return true;
 }
 
+void HuntTargetAlgo::searchUnvisitedSquare(int& row, int& col)
+{
+	for (int i = 0; i < boardSize.first; ++i)
+	{
+		for (int j = 0; j < boardSize.second; ++j)
+		{
+			if (!visitedBoard[i][j])
+			{
+				row = i;
+				col = j;
+				return;
+			}
+		}
+	}
+
+	row = battleship::NO_MORE_MOVES.first;
+	col = battleship::NO_MORE_MOVES.second;
+}
+
 AttackDirection HuntTargetAlgo::getTargetDirection(targetsMapEntry targetIt)
 {
 	vector<int>& directionVec = targetIt->second;
@@ -141,11 +161,17 @@ pair<int, int> HuntTargetAlgo::attack()
 		int row, col;
 		if (targetsMap.empty())	// Hunt mode: we draw a random attack
 		{
+			int drawsCounter = 0;
 			do {
 				row = rand() % boardSize.first + 1;		// In the range 1 to number of rows
 				col = rand() % boardSize.second + 1;	// In the range 1 to number of columns
-			} while (visitedBoard[row - 1][col - 1]);
+				drawsCounter++;
+			} while ((visitedBoard[row-1][col-1]) && (drawsCounter <= MAX_NUM_OF_DRAWS));
+			
 			lastAttackDirection = AttackDirection::InPlace;
+
+			if (drawsCounter > MAX_NUM_OF_DRAWS)
+				searchUnvisitedSquare(row, col);
 		}
 		else	// Target mode: we try to attack around the targets that we already found
 		{

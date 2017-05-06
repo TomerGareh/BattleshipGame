@@ -42,6 +42,9 @@ public:
 	void notifyOnAttackResult(int player, int row, int col, AttackResult result) override;
 
 private:
+	static const int MAX_NUM_OF_DRAWS;
+	static const AttackDirection nonInPlaceDirections[];
+
 	int playerId;
 
 	pair<int, int> boardSize;
@@ -51,8 +54,6 @@ private:
 	
 	// Our last attack direction. If the last attack was in Hunt mode this field is not relevant
 	AttackDirection lastAttackDirection;
-
-	static const AttackDirection nonInPlaceDirections[];
 
 	// A map from the pending targets to their surrounding. 
 	// The surrounding is a vector of ints, representing the target square itself and the four directions according
@@ -76,7 +77,7 @@ private:
 
 	// Check if the try to attack around a target is a valid attack, i.e. doesn't exceed the borders of the board
 	// and not yet visited.
-	// row and col are in the range 1 to board size
+	// row and col are in the range 1 to board size.
 	bool calcTargetNext(int& row, int& col, AttackDirection direction, int size);
 
 	// row and col are in the range 0 to board size - 1
@@ -84,4 +85,8 @@ private:
 
 	// row and col are in the range 0 to board size - 1
 	void removeRedundantTargets(int row, int col, AttackDirection direction);
+
+	// Search for unvisited square in 'visitedBoard' and return the result into row and col.
+	// If no square was found, battleship::NO_MORE_MOVES is returned (inside row and col).
+	void searchUnvisitedSquare(int& row, int& col);
 };
