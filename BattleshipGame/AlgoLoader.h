@@ -27,6 +27,11 @@ namespace battleship
 		/** Releases all dynamic libraries loaded by this algorithm loader */
 		virtual ~AlgoLoader();
 
+		AlgoLoader(AlgoLoader const&) = delete;						  // Disable copying
+		AlgoLoader& operator=(AlgoLoader const&) = delete;			  // Disable copying (assignment)
+		AlgoLoader(AlgoLoader&& other) noexcept = delete;			  // Disable moving
+		AlgoLoader& operator= (AlgoLoader&& other) noexcept = delete; // Disable moving (assignment)
+
 		/** Fetches names for all algorithms available in the given path.
 		 *	(populates the AlgoLoad with available dlls for loading)
 		 */
@@ -40,7 +45,7 @@ namespace battleship
 		/** Returns the algorithm name at the given index (algorithms are sorted in a list)
 		 *	If an error occurs, an empty string is returned.
 		 */
-		const string getAlgoPathByIndex(unsigned int index);
+		const string getAlgoPathByIndex(unsigned int index) const;
 
 	private:
 

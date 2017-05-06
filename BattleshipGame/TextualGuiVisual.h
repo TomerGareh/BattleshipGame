@@ -95,23 +95,23 @@ namespace battleship
 		int _delayMs;
 
 		/** Prints the given board status to the console */
-		void printBoard(shared_ptr<BattleBoard> board);
+		void printBoard(shared_ptr<BattleBoard> board) const;
 
 		/** Returns which color should be used for the game-square in the given indices (according to
 		 *  which player owns the square, which piece is it, is it blank, etc).
 		 */
-		ConsoleColor getColorForSquare(shared_ptr<BattleBoard> board, int row, int col);
+		ConsoleColor getColorForSquare(shared_ptr<BattleBoard> board, int row, int col) const;
 
 		/** Prints the details of the last attack by a player */
 		void printLastMoveDescription(shared_ptr<BattleBoard> board, int attackingPlayerNumber,
-									  int row, int col);
+									  int row, int col) const;
 
 		/** Prints the details of the last attack results by a player */
 		void printLastAttackResultsDesc(shared_ptr<BattleBoard> board,
-										int row, int col, AttackResult attackResults);
+										int row, int col, AttackResult attackResults) const;
 
 		/** Erase the previous move and attack result descriptions */
-		void eraseMoveDescription();
+		void eraseMoveDescription() const;
 
 		/** Points the cursor at (row,col) in the console output */
 		static void gotoxy(int row, int col);

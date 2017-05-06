@@ -27,6 +27,8 @@ namespace battleship
 			// Free HINSTANCE loaded, which resides in the 2nd cell of the algo tuple
 			FreeLibrary(std::get<1>(*algIter));
 		}
+
+		_loadedGameAlgos.clear();
 	}
 
 	IBattleshipGameAlgo* AlgoLoader::loadAlgorithm(const string& algoFullpath)
@@ -45,6 +47,7 @@ namespace battleship
 		if (!getAlgorithmFunc)
 		{
 			cout << LOAD_DLL_ERROR_STRING << algoFullpath << endl;
+			FreeLibrary(hDll); // Make sure to release loaded library, as AlgoLoader doesn't manage it yet
 			return NULL;
 		}
 
@@ -62,7 +65,7 @@ namespace battleship
 		return algo;
 	}
 
-	const string AlgoLoader::getAlgoPathByIndex(unsigned int index)
+	const string AlgoLoader::getAlgoPathByIndex(unsigned int index) const
 	{
 		// Avoid array out of bounds, return an empty string
 		if (index >= _availableGameAlgos.size())

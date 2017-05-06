@@ -41,48 +41,17 @@ _visitedSquares(NULL), _numOfRows(0), _numOfCols(0), _nextRow(0), _nextCol(0)
 {
 }
 
-// Move Ctor
-NaiveAlgo::NaiveAlgo(NaiveAlgo&& other) noexcept:
-_visitedSquares(other._visitedSquares),
-_numOfRows(other._numOfRows),
-_numOfCols(other._numOfCols),
-_nextRow(other._nextRow),
-_nextCol(other._nextCol)
-{
-	other._visitedSquares = NULL;
-}
-
 void NaiveAlgo::disposeAllocatedResources() noexcept
-{
-	// If the matrix is initialized, _numOfRows should contain the real dimensions
-	// (otherwise it is 0 and we won't get an ArrayOutOfIndexBounds error)
-	for (int index = 0; index < _numOfRows; index++)
-		delete[] _visitedSquares[index];
-	delete[] _visitedSquares;
-}
-
-// Move assignment operator
-NaiveAlgo& NaiveAlgo::operator= (NaiveAlgo&& other) noexcept
 {
 	if (_visitedSquares != NULL)
 	{
-		disposeAllocatedResources();
+		// If the matrix is initialized, _numOfRows should contain the real dimensions
+		// (otherwise it is 0 and we won't get an ArrayOutOfIndexBounds error)
+		for (int index = 0; index < _numOfRows; index++)
+			delete[] _visitedSquares[index];
+		delete[] _visitedSquares;
+		_visitedSquares = NULL;
 	}
-
-	_visitedSquares = other._visitedSquares;
-	_numOfRows = other._numOfRows;
-	_numOfCols = other._numOfCols;
-	_nextRow = other._nextRow;
-	_nextCol = other._nextCol;
-
-	// Zero out to make it clear the object have been moved
-	other._visitedSquares = NULL;
-	other._numOfRows = 0;
-	other._numOfCols = 0;
-	other._nextRow = 0;
-	other._nextCol = 0;
-
-	return *this;
 }
 
 NaiveAlgo::~NaiveAlgo()

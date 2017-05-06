@@ -136,6 +136,5 @@ namespace battleship
 		int pathSize = GetFullPathNameA(path.c_str(), BUFFER_SIZE, buffer, NULL);
 		string fullPath(buffer, pathSize);
 		return fullPath;
-		// TODO: Verify RVO happens here for string (it should)
 	}
 }

@@ -13,8 +13,8 @@ public:
 	NaiveAlgo();
 	NaiveAlgo(NaiveAlgo const&) = delete;	// Disable copying
 	NaiveAlgo& operator=(NaiveAlgo const&) = delete;	// Disable copying (assignment)
-	NaiveAlgo(NaiveAlgo&& other) noexcept; // Enable moving
-	NaiveAlgo& operator= (NaiveAlgo&& other) noexcept; // Enable moving (assignment)
+	NaiveAlgo(NaiveAlgo&& other) noexcept = delete; // Disable moving
+	NaiveAlgo& operator= (NaiveAlgo&& other) noexcept = delete; // Disable moving (assignment)
 	virtual ~NaiveAlgo() noexcept;
 
 	void disposeAllocatedResources() noexcept;

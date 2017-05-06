@@ -55,7 +55,7 @@ namespace battleship
 	}
 
 	ConsoleColor TextualGuiVisual::getColorForSquare(shared_ptr<BattleBoard> board,
-													 int row, int col)
+													 int row, int col) const
 	{
 		auto matrix = board->getBoard();
 		char currSquare = matrix[row][col];
@@ -77,7 +77,7 @@ namespace battleship
 		return color;
 	}
 
-	void TextualGuiVisual::printBoard(shared_ptr<BattleBoard> board)
+	void TextualGuiVisual::printBoard(shared_ptr<BattleBoard> board) const
 	{
 		auto matrix = board->getBoard();
 
@@ -104,7 +104,7 @@ namespace battleship
 		printBoard(board);
 	}
 
-	void TextualGuiVisual::eraseMoveDescription()
+	void TextualGuiVisual::eraseMoveDescription() const
 	{
 		int titleRow = BOARD_SIZE / 3;
 		int titleCol = BOARD_SIZE + 4;
@@ -123,7 +123,7 @@ namespace battleship
 	}
 
 	void TextualGuiVisual::printLastAttackResultsDesc(shared_ptr<BattleBoard> board,
-													  int row, int col, AttackResult attackResults)
+													  int row, int col, AttackResult attackResults) const
 	{
 		gotoxy(TITLE_ROW + 1, TITLE_COL);
 		setTextColor(ConsoleColor::WHITE);
@@ -149,7 +149,7 @@ namespace battleship
 	}
 
 	void TextualGuiVisual::printLastMoveDescription(shared_ptr<BattleBoard> board, int attackingPlayerNumber,
-													int row, int col)
+													int row, int col) const
 	{
 		
 		gotoxy(TITLE_ROW, TITLE_COL);

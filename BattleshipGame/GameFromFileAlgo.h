@@ -19,6 +19,11 @@ public:
 
 	virtual ~GameFromFileAlgo() = default;
 
+	GameFromFileAlgo(GameFromFileAlgo const&) = delete;	// Disable copying
+	GameFromFileAlgo& operator=(GameFromFileAlgo const&) = delete;	// Disable copying (assignment)
+	GameFromFileAlgo(GameFromFileAlgo&& other) noexcept = delete; // Disable moving
+	GameFromFileAlgo& operator= (GameFromFileAlgo&& other) noexcept = delete; // Disable moving (assignment)
+
 	/** Ignored by this algorithm (empty implementation) */
 	void setBoard(int player, const char** board, int numRows, int numCols) override;
 

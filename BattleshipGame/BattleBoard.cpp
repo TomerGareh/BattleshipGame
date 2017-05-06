@@ -61,12 +61,15 @@ namespace battleship
 
 	void BattleBoard::disposeAllocatedResource(const char* const* resource) noexcept
 	{
-		for (int index = 0; index < BOARD_SIZE; index++)
+		if (resource != NULL)
 		{
-			if (resource != NULL)
+			for (int index = 0; index < BOARD_SIZE; index++)
+			{
 				delete[] resource[index];
+			}
+			delete[] resource;
+			resource = NULL;
 		}
-		delete[] resource;
 	}
 
 	// Move assignment operator
@@ -240,7 +243,7 @@ namespace battleship
 		auto deleter = [](const char** ptr) { disposeAllocatedResource(ptr); };
 		TempBoardView playerSmartMat(const_cast<const char**>(playerMat), deleter);
 
-		return playerSmartMat;	// Compiler expected to performs auto move
+		return playerSmartMat;	// Compiler expected to perform auto move
 	}
 
 	const int BattleBoard::getPlayerAShipCount() const

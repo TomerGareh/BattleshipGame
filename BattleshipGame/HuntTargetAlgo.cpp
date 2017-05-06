@@ -29,6 +29,7 @@ HuntTargetAlgo::~HuntTargetAlgo()
 			delete[] visitedBoard[i];
 		}
 		delete[] visitedBoard;
+		visitedBoard = NULL;
 	}
 }
 

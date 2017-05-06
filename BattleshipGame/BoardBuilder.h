@@ -62,7 +62,7 @@ namespace battleship
 		public:
 			/** Construct a new error, defined by error type (which determines the message and priority) */
 			BoardInitializeError(ErrorPriorityEnum errorType);
-			~BoardInitializeError();
+			virtual ~BoardInitializeError();
 			
 			/** Returns the error message string stored for this error */
 			const string& getMsg() const { return _msg; };

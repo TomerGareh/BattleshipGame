@@ -14,7 +14,7 @@ namespace battleship
 
 	void ConsoleMessageVisual::visualizeBeginGame(shared_ptr<BattleBoard> board)
 	{
-		// Console doesn't executes any setup logic in the beginning of the game
+		// Console doesn't execute any setup logic in the beginning of the game
 	}
 
 	void ConsoleMessageVisual::visualizeAttackResults(shared_ptr<BattleBoard> board, int attackingPlayerNumber,
