@@ -112,12 +112,19 @@ namespace battleship
 	{
 		vector<string> fileList;
 		WIN32_FIND_DATAA fileData;
-		HANDLE dir = FindFirstFileA((path + "\\*." + extension).c_str(), &fileData);	// Notice: Unicode compatible version of FindFirstFile
+		const string targetExtension = "." + extension;
+
+		HANDLE dir = FindFirstFileA((path + "\\*" + targetExtension).c_str(), &fileData); // Unicode compatible
 		if (dir != INVALID_HANDLE_VALUE)	// We assume that the path is valid here, this shouldn't happen
 		{
 			do
 			{
-				fileList.push_back(fileData.cFileName);
+				// FindFirstFileA returns string that end with extension*, so we require additional filtering here
+				string nextFile = fileData.cFileName;
+				if (endsWith(nextFile, targetExtension))
+				{
+					fileList.push_back(fileData.cFileName);
+				}
 			} while (FindNextFileA(dir, &fileData));	// Notice: Unicode compatible version of FindNextFile
 		}
 
