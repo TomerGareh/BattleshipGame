@@ -23,7 +23,7 @@ namespace battleship
 		if (NULL == player)
 			return NULL;
 
-		player->setBoard(playerNum, board->getBoard(), BOARD_SIZE, BOARD_SIZE);
+		player->setBoard(playerNum,	board->getBoardPlayerView(PlayerEnum::A).get(), BOARD_SIZE, BOARD_SIZE);
 
 		// Step #2: Initialize the algorithm
 		bool initSuccess = player->init(resourcesPath);
@@ -116,10 +116,6 @@ namespace battleship
 								shared_ptr<IBattleshipGameAlgo> playerA, shared_ptr<IBattleshipGameAlgo> playerB,
 								IGameVisual& visualizer)
 	{
-		playerA->setBoard(static_cast<int>(PlayerEnum::A),
-						  board->getBoardPlayerView(PlayerEnum::A).get(), BOARD_SIZE, BOARD_SIZE);
-		playerB->setBoard(static_cast<int>(PlayerEnum::B),
-						  board->getBoardPlayerView(PlayerEnum::B).get(), BOARD_SIZE, BOARD_SIZE);
 		visualizer.visualizeBeginGame(board);
 
 		IBattleshipGameAlgo* currentPlayer = playerA.get();

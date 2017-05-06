@@ -9,7 +9,7 @@ using std::endl;
 
 namespace battleship
 {
-	const string BattleshipGameBoardFactory::BOARD_SUFFIX = ".sboard";
+	const string BattleshipGameBoardFactory::BOARD_SUFFIX = "sboard";
 
 	shared_ptr<BattleBoard> BattleshipGameBoardFactory::buildBoardFromFile(const string& path)
 	{
@@ -70,7 +70,7 @@ namespace battleship
 
 		// Choose the first board file found, lexicographically
 		// Start parsing the file, line by line
-		string boardFile = boardFiles[0];
+		string boardFile = path + "\\" + boardFiles[0];
 		IOUtil::parseFile(boardFile, lineParser);
 
 		// For missing rows - fill rows of blank squares

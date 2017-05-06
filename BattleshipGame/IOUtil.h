@@ -42,7 +42,7 @@ namespace battleship
 		/** Returns true if the path argument points to a real valid path on disk, false if not. */
 		static bool validatePath(const string& path);
 
-		/** Lists all files found in the given path with the given extension.
+		/** Lists all files found in the given path with the given extension (without a dot, e.g. "sboard").
 		 *  Path is expected to be valid (e.g verified with "validatePath").
 		 *  If no files with the given extension are found, an empty vector is returned.
 		 *  The files returned will be sorted in lexicographical order.

@@ -117,8 +117,7 @@ namespace battleship
 		{
 			do
 			{
-				string fileName = path + "\\" + fileData.cFileName;	
-				fileList.push_back(fileName);
+				fileList.push_back(fileData.cFileName);
 			} while (FindNextFileA(dir, &fileData));	// Notice: Unicode compatible version of FindNextFile
 		}
 

@@ -10,7 +10,7 @@ using std::exception;
 using std::cerr;
 using std::endl;
 
-const string GameFromFileAlgo::ATTACK_SUFFIX = ".attack";
+const string GameFromFileAlgo::ATTACK_SUFFIX = "attack";
 
 void GameFromFileAlgo::populateMovesFromFile(const string& filename)
 {

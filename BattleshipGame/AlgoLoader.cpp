@@ -138,9 +138,6 @@ namespace battleship
 			cout << MISSING_DLL_ERROR_STRING << path << endl;
 		}
 
-		// Sort available algorithms lexicographically by name
-		std::sort(_availableGameAlgos.begin(), _availableGameAlgos.end());
-
 		return true;
 	}
 }
