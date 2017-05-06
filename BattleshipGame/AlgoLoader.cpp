@@ -136,6 +136,7 @@ namespace battleship
 		if (_availableGameAlgos.size() < 2)
 		{
 			cout << MISSING_DLL_ERROR_STRING << path << endl;
+			return false;
 		}
 
 		return true;
