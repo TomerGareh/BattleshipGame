@@ -20,11 +20,11 @@ void GameFromFileAlgo::populateMovesFromFile(const string& filename)
 	// We pass a local ref to the object's field: _predefinedMoves, because this single field can't
 	// be captured inside the lambda expression (we have to capture "this" if we want to allow access,
 	// instead we capture a "fake" reference to the _predefinedMoves field)
-	auto* moveListPtr = &_predefinedMoves;
+	auto& moveListPtr = _predefinedMoves;
 	int rows = _numRows;
 	int cols = _numCols;
 
-	auto lineParser = [moveListPtr, rows, cols](string& nextLine) mutable
+	auto lineParser = [&moveListPtr, rows, cols](string& nextLine)
 	{
 		auto legalChars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', COORDS_DELIM };
 		IOUtil::replaceIllegalCharacters(nextLine, (char)BoardSquare::Empty, legalChars);
@@ -67,7 +67,7 @@ void GameFromFileAlgo::populateMovesFromFile(const string& filename)
 				(secondNum >= 1) && (secondNum <= cols))
 			{
 				auto move = std::make_pair(firstNum, secondNum);
-				moveListPtr->push_back(move);
+				moveListPtr.push_back(move);
 			}
 		}
 	};
@@ -94,7 +94,7 @@ bool GameFromFileAlgo::init(const string& path)
 	try
 	{
 		vector<string> attackFiles = IOUtil::listFilesInPath(path, ATTACK_SUFFIX);
-		string attackFile;
+		string attackFile = path + "\\";
 
 		if (attackFiles.size() == 0)
 		{
@@ -102,12 +102,12 @@ bool GameFromFileAlgo::init(const string& path)
 		}
 		else if (attackFiles.size() == 1)
 		{
-			attackFile = attackFiles.at(0);			   // 1 attack file found, use it
+			attackFile += attackFiles.at(0);			   // 1 attack file found, use it
 		}
 		else
 		{
 			int fileIndex = (_playerNum == 0) ? 0 : 1; // Use first file for player0, otherwise second file
-			attackFile = attackFiles.at(fileIndex);
+			attackFile += attackFiles.at(fileIndex);
 		}
 
 		// Build player move list from attack file contents

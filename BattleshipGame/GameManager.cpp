@@ -22,8 +22,9 @@ namespace battleship
 		// Avoid DLL load errors
 		if (NULL == player)
 			return NULL;
-
-		player->setBoard(playerNum,	board->getBoardPlayerView(PlayerEnum::A).get(), BOARD_SIZE, BOARD_SIZE);
+		
+		player->setBoard(playerNum,	board->getBoardPlayerView(static_cast<PlayerEnum>(playerNum)).get(),
+						 BOARD_SIZE, BOARD_SIZE);
 
 		// Step #2: Initialize the algorithm
 		bool initSuccess = player->init(resourcesPath);
