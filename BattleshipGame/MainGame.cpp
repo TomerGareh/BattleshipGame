@@ -4,11 +4,10 @@
 #include "GameFromFileAlgo.h"
 #include "BattleBoard.h"
 #include "GameManager.h"
-#include "IGameVisual.h"
-#include "ConsoleMessageVisual.h"
-#include "TextualGuiVisual.h"
+#include "GameVisual.h"
 #include "IOUtil.h"
 #include "AlgoLoader.h"
+#include "Logger.h"
 
 #include <cstdlib>
 #include <memory>
@@ -30,8 +29,6 @@ const int SUCCESS_CODE = 0;
 const int ERROR_CODE = -1;
 const int MAX_ARG_COUNT = 5;
 const char* BP_CONFIG_PATH = "path";
-const char* BP_CONFIG_DELAY = "-delay";
-const char* BP_CONFIG_QUIET = "-quiet";
 char* BP_CONFIG_FALSE = "false";
 char* BP_CONFIG_TRUE = "true";
 
@@ -93,6 +90,8 @@ int main(int argc, char* argv[])
 {
 	try
 	{
+		Logger::getInstance().log(Severity::INFO_LEVEL, "Battleship game started.");
+
 		// Define configuration and validate arguments
 		map<const char*, char*> configuration;
 		bool isLegalArgs = parseArgs(argc, argv, configuration);
@@ -106,14 +105,20 @@ int main(int argc, char* argv[])
 		// Validation #1: Invalid resources path
 		if (!IOUtil::validatePath(resourcesPath))
 		{
-			std::cout << "Wrong path: " << resourcesPath << std::endl;
+			cout << "Wrong path: " << resourcesPath << endl;
+			Logger::getInstance().log(Severity::ERROR_LEVEL, "Wrong path: " + resourcesPath);
 			return ERROR_CODE;
 		}
 
 		// Game initialization - load board and player algorithms
 		const string absolutePath = IOUtil::convertPathToAbsolute(resourcesPath);
-		auto board = BattleshipGameBoardFactory::loadBattleBoard(BattleshipBoardInitTypeEnum::LOAD_BOARD_FROM_FILE,
-																 absolutePath);
+		auto boards = BattleshipGameBoardFactory::loadAllBattleBoards(absolutePath);
+
+		if (boards.empty())
+		{
+			Logger::getInstance().log(Severity::ERROR_LEVEL,
+									  "No board files(*.sboard) looking in path: " + resourcesPath);
+		}
 
 		AlgoLoader algoLoader;
 		bool isAlgoMissing = !algoLoader.fetchDLLs(absolutePath);
@@ -135,22 +140,11 @@ int main(int argc, char* argv[])
 			return ERROR_CODE;
 
 		// All validation have passed - proceed to begin game
-		unique_ptr<IGameVisual> visual = NULL;
-
-		// Choose visualization type, depending on -quiet arg
-		if (strcmp(configuration[BP_CONFIG_QUIET], BP_CONFIG_FALSE))
-		{
-			visual = std::make_unique<ConsoleMessageVisual>();
-		}
-		else
-		{
-			int delay = atoi(configuration[BP_CONFIG_DELAY]);
-			visual = std::make_unique<TextualGuiVisual>(delay);
-		}
+		GameVisual visual;
 
 		// Start a single game session, visualizer is expected to print the results to the screen when the session
 		// is over (or during the session itself if this is a textual visualizer type)
-		gameManager.startGame(board, playerA, playerB, *visual);
+		gameManager.startGame(board, playerA, playerB, visual);
 
 		return SUCCESS_CODE;
 	}

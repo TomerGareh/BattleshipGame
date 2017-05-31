@@ -3,7 +3,7 @@
 #include <memory>
 #include "BattleBoard.h"
 #include "IBattleshipGameAlgo.h"
-#include "IGameVisual.h"
+#include "GameVisual.h"
 #include "AlgoLoader.h"
 
 using std::shared_ptr;
@@ -32,7 +32,7 @@ namespace battleship
 		 */
 		void startGame(shared_ptr<BattleBoard> board,
 					   shared_ptr<IBattleshipGameAlgo> playerA, shared_ptr<IBattleshipGameAlgo> playerB,
-					   IGameVisual& visualizer);
+					   GameVisual& visualizer);
 
 	private:
 		// Score for past games

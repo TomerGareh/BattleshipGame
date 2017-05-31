@@ -1,112 +1,199 @@
 #include <iostream>
+#include <vector>
 #include "BattleshipGameBoardFactory.h"
 #include "BattleBoard.h"
 #include "BoardBuilder.h"
 #include "IOUtil.h"
+#include "Logger.h"
 
 using std::cout;
 using std::endl;
+using std::vector;
 
 namespace battleship
 {
 	const string BattleshipGameBoardFactory::BOARD_SUFFIX = "sboard";
 
-	shared_ptr<BattleBoard> BattleshipGameBoardFactory::buildBoardFromFile(const string& path)
+	bool BattleshipGameBoardFactory::parseHeader(string& nextLine, int& rows, int& cols, int& depth)
+	{
+		bool isValidFile = true;
+
+		string delimiter = "x"; // Separates dimensions
+
+		int dimensionIndex = 0;
+		size_t pos = 0;
+		string token;
+		while ((pos = nextLine.find(delimiter)) != std::string::npos)
+		{
+			token = nextLine.substr(0, pos);
+			nextLine.erase(0, pos + delimiter.length());
+
+			// Parse each dimension
+			if (IOUtil::isInteger(token))
+			{
+				int dimensionVal = stoi(token);
+
+				switch (dimensionIndex)
+				{
+				case (0) : { cols = dimensionVal; break; }
+				case (1) : { rows = dimensionVal; break; }
+				case (2) : { depth = dimensionVal; break; }
+				default: { break; }
+				}
+
+				dimensionIndex++;
+			}
+			else
+			{
+				isValidFile = false;
+				break;
+			}
+		}
+
+		isValidFile = isValidFile && (dimensionIndex == 3);
+
+		return isValidFile;
+	}
+
+	void BattleshipGameBoardFactory::parseBoardRow(BoardBuilder& builder, string& nextLine,
+												   int depthIndex, int rowIndex, int cols)
+	{
+		int colCounter = 0;
+
+		auto legalChars =
+		{
+			(char)toupper((char)BattleBoardSquare::Empty),
+			(char)toupper((char)BattleBoardSquare::RubberBoat),
+			(char)toupper((char)BattleBoardSquare::RocketShip),
+			(char)toupper((char)BattleBoardSquare::Submarine),
+			(char)toupper((char)BattleBoardSquare::Battleship),
+			(char)tolower((char)BattleBoardSquare::RubberBoat),
+			(char)tolower((char)BattleBoardSquare::RocketShip),
+			(char)tolower((char)BattleBoardSquare::Submarine),
+			(char)tolower((char)BattleBoardSquare::Battleship)
+		};
+		IOUtil::replaceIllegalCharacters(nextLine, (char)BattleBoardSquare::Empty, legalChars);
+
+		// Traverse each character in the row and put into the board
+		for (char& nextChar : nextLine)
+		{
+			// Add to board only squares with real game pieces
+			if (nextChar == (char)BattleBoardSquare::Empty)
+				continue;
+
+			builder.addPiece(colCounter, rowIndex, depthIndex, nextChar);
+			colCounter++;
+
+			// Read at most "width" amount of cols characters from each line, skip the rest
+			if (colCounter >= cols)
+				break;
+		}
+	}
+
+	shared_ptr<BattleBoard> BattleshipGameBoardFactory::buildBoardFromFile(const string& boardFile)
+	{
+		unique_ptr<BoardBuilder> builder;
+
+		//Board dimensions
+		int cols = 0;
+		int rows = 0;
+		int depth = 0;
+
+		// Current position on board file
+		int rowCounter = 0;
+		int depthCounter = 0;
+
+		auto headerParser = [&builder, &rows, &cols, &depth](string& nextLine, int lineNum,
+															 bool& isHeader, bool& isValidFile)
+		{
+			if (lineNum == 1)
+			{
+				// Parse [cols]x[rows]x[depth] header
+				isValidFile = parseHeader(nextLine, rows, cols, depth);
+				builder = std::make_unique<BoardBuilder>(cols, rows, depth);
+			}
+			else if (lineNum == 2)
+			{
+				// Parse empty line - end of header
+				isValidFile = nextLine.empty();
+				isHeader = false; // End of header (2 lines only)
+			}
+		};
+
+		auto lineParser = [&builder, &cols, &rows, &depth,
+						   &rowCounter, &depthCounter](string& nextLine)
+		{
+			if (depthCounter >= depth)
+			{
+				return; // Read the first "depth" amount of levels, ignore the rest
+			}
+			else if (nextLine.empty())
+			{
+				rowCounter = 0; // Empty line - end of level data
+				depthCounter++;
+			}
+			else if (rowCounter > rows)
+			{
+				return; // Read the first "height" amount of rows in each level, ignore the rest
+			}
+			else
+			{	// Line with game pieces data - parse it
+				parseBoardRow(*builder, nextLine, depthCounter, rowCounter, cols);
+				rowCounter++;
+			}
+		};
+
+		bool isValidFile = IOUtil::parseFile(boardFile, lineParser, headerParser);
+
+		if (!isValidFile)
+			return NULL;
+
+		// Finalize the board, perform validation here
+		auto board = builder->build();
+		return board;
+	}
+
+	shared_ptr<BattleBoard> BattleshipGameBoardFactory::loadBattleBoard(const string& path)
 	{
 		auto boardFiles = IOUtil::listFilesInPath(path, BOARD_SUFFIX);
 
 		if (boardFiles.size() == 0)
 		{ // No board files found
-			std::cout << "Missing board file (*.sboard) looking in path: " << path << std::endl;
+			cout << "No board files (*.sboard) looking in path: " << path << endl;
+			Logger::getInstance().log(Severity::ERROR_LEVEL,
+									  "No board files (*.sboard) looking in path: " + path);
 			return NULL;
 		}
-
-		BoardBuilder builder;
-		int rowCounter = 0;
-		int colCounter = 0;
-
-		auto lineParser = [&builder, &rowCounter, &colCounter](string& nextLine)
-		{
-			// Read at the first BOARD_SIZE rows, ignore the rest
-			if (rowCounter >= BOARD_SIZE)
-				return;
-
-			colCounter = 0;
-
-			auto legalChars =
-				{ 
-					(char)toupper((char)BattleBoardSquare::Empty),
-					(char)toupper((char)BattleBoardSquare::RubberBoat),
-					(char)toupper((char)BattleBoardSquare::RocketShip),
-					(char)toupper((char)BattleBoardSquare::Submarine),
-					(char)toupper((char)BattleBoardSquare::Battleship),
-					(char)tolower((char)BattleBoardSquare::RubberBoat),
-					(char)tolower((char)BattleBoardSquare::RocketShip),
-					(char)tolower((char)BattleBoardSquare::Submarine),
-					(char)tolower((char)BattleBoardSquare::Battleship)
-				};
-			IOUtil::replaceIllegalCharacters(nextLine, (char)BattleBoardSquare::Empty, legalChars);
-
-			// Traverse each character in the row and put into the board
-			for (char& nextChar : nextLine)
-			{
-				builder.addPiece(rowCounter, colCounter, nextChar);
-				colCounter++;
-
-				// Read at most BOARD_SIZE characters from each line, skip the rest
-				if (colCounter >= BOARD_SIZE)
-					break;
-			}
-
-			// For rows missing characters - fill the rest with blanks
-			while (colCounter < BOARD_SIZE)
-			{
-				builder.addPiece(rowCounter, colCounter, (char)BattleBoardSquare::Empty);
-				colCounter++;
-			}
-
-			rowCounter++;
-		};
 
 		// Choose the first board file found, lexicographically
 		// Start parsing the file, line by line
 		string boardFile = path + "\\" + boardFiles[0];
-		IOUtil::parseFile(boardFile, lineParser);
 
-		// For missing rows - fill rows of blank squares
-		while (rowCounter < BOARD_SIZE)
-		{
-			for (colCounter = 0; colCounter < BOARD_SIZE; colCounter++)
-			{
-				builder.addPiece(rowCounter, colCounter, (char)BattleBoardSquare::Empty);
-			}
-
-			rowCounter++;
-		}
-
-		// Finalize the board, perform validation here
-		auto board = builder.build();
-		return board;
+		return buildBoardFromFile(boardFile);
 	}
 
-	shared_ptr<BattleBoard> BattleshipGameBoardFactory::loadBattleBoard(BattleshipBoardInitTypeEnum loadMethod,
-																	   const string& param0)
+	vector<shared_ptr<BattleBoard>> BattleshipGameBoardFactory::loadAllBattleBoards(const string& path)
 	{
-		switch (loadMethod)
+		vector<shared_ptr<BattleBoard>> loadedBoards;
+		auto boardFiles = IOUtil::listFilesInPath(path, BOARD_SUFFIX);
+
+		// Load each of the battle boards
+		for (const auto& boardFilename : boardFiles)
 		{
-			case(BattleshipBoardInitTypeEnum::LOAD_BOARD_FROM_FILE):
+			Logger::getInstance().log(Severity::INFO_LEVEL, "Loading battle board: " + boardFilename + "..");
+			string boardFile = path + "\\" + boardFilename;
+			shared_ptr<BattleBoard> nextBoard = buildBoardFromFile(boardFile);
+
+			// Accumulate only valid boards
+			if (NULL != nextBoard)
 			{
-				return buildBoardFromFile(param0);
-			}
-			default:
-			{
-				return NULL;
+				loadedBoards.push_back(nextBoard);
+				Logger::getInstance().log(Severity::INFO_LEVEL,
+										  "Battle board " + boardFilename + " loaded successfully");
 			}
 		}
-	}
 
-	shared_ptr<BattleBoard> BattleshipGameBoardFactory::loadBattleBoard(BattleshipBoardInitTypeEnum loadMethod)
-	{
-		return loadBattleBoard(loadMethod, "");
+		// Compiler expected to perform return value optimization (vector is moved)
+		return loadedBoards;
 	}
 }

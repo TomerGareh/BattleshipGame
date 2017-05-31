@@ -1,4 +1,5 @@
 #include "BattleBoard.h"
+#include "BoardDataImpl.h"
 
 namespace battleship
 {
@@ -14,10 +15,9 @@ namespace battleship
 	#pragma endregion
 	#pragma region GamePiece
 
-	GamePiece::GamePiece(int firstRow, int firstCol, const ShipType *const type,
+	GamePiece::GamePiece(Coordinate firstPos, const ShipType *const type,
 						 PlayerEnum player, Orientation orientation) :
-		_firstRow(firstRow),
-		_firstCol(firstCol),
+		_firstPos(firstPos),
 		_shipType(type),
 		_player(player),
 		_orient(orientation),
@@ -35,94 +35,67 @@ namespace battleship
 	const ShipType BattleBoard::BATTLESHIP(BattleBoardSquare::Battleship, 4, 8 );
 
 	// Ctor
-	BattleBoard::BattleBoard()
+	BattleBoard::BattleBoard(int width, int height, int depth):
+		_boardWidth(width),
+		_boardHeight(height),
+		_boardDepth(depth)
 	{
-		_matrix = new char*[BOARD_SIZE];
-		for (int index = 0; index < BOARD_SIZE; index++)
-		{
-			_matrix[index] = new char[BOARD_SIZE];
-
-			for (int subIndex = 0; subIndex < BOARD_SIZE; subIndex++)
-			{
-				_matrix[index][subIndex] = (char)(BattleBoardSquare::Empty);
-			}
-		}
 	}
 
 	// Move Ctor
 	BattleBoard::BattleBoard(BattleBoard&& other) noexcept:
-		_matrix(other._matrix),
 		_gamePieces(std::move(other._gamePieces)),
 		_playerAShipCount(other._playerAShipCount),
-		_playerBShipCount(other._playerBShipCount)
+		_playerBShipCount(other._playerBShipCount),
+		_boardWidth(other._boardWidth),
+		_boardHeight(other._boardHeight),
+		_boardDepth(other._boardDepth)
 	{
-		other._matrix = NULL;
-	}
-
-	void BattleBoard::disposeAllocatedResource(const char* const* resource) noexcept
-	{
-		if (resource != NULL)
-		{
-			for (int index = 0; index < BOARD_SIZE; index++)
-			{
-				delete[] resource[index];
-			}
-			delete[] resource;
-			resource = NULL;
-		}
 	}
 
 	// Move assignment operator
 	BattleBoard& BattleBoard::operator= (BattleBoard&& other) noexcept
 	{
-		// Add const to type to cope with strict dispose-resource signature
-		disposeAllocatedResource(_matrix);
-
-		_matrix = other._matrix;
 		_gamePieces = std::move(other._gamePieces);
 		_playerAShipCount = other._playerAShipCount;
 		_playerBShipCount = other._playerBShipCount;
+		_boardWidth = other._boardWidth;
+		_boardHeight = other._boardHeight;
+		_boardDepth = other._boardDepth;
 
-		other._matrix = NULL;
 		other._playerAShipCount = 0;
 		other._playerBShipCount = 0;
+		other._boardWidth = 0;
+		other._boardHeight = 0;
+		other._boardDepth = 0;
 		return *this;
 	}
 
-	// Dtor
-	BattleBoard::~BattleBoard() noexcept
-	{
-		// Add const to type to cope with strict dispose-resource signature
-		disposeAllocatedResource(_matrix);
-	}
-
-
 	// Logic methods
 
-	void BattleBoard::initSquare(int row, int col, char type)
-	{
-		_matrix[row][col] = type;
-	}
-
-	void BattleBoard::addGamePiece(int firstRow, int firstCol, const ShipType& shipType,
+	void BattleBoard::addGamePiece(Coordinate firstPos, const ShipType& shipType,
 								   PlayerEnum player, Orientation orientation)
 	{
-		auto gamePieceVal = std::make_shared<GamePiece>(firstRow, firstCol, &shipType, player, orientation);
+		auto gamePieceVal = std::make_shared<GamePiece>(firstPos, &shipType, player, orientation);
 
-		int deltaRow = (orientation == Orientation::VERTICAL) ? 1 : 0;
-		int deltaCol = (orientation == Orientation::HORIZONTAL) ? 1 : 0;
-		int rowOffset = 0;
+		int deltaCol = (orientation == Orientation::X_AXIS) ? 1 : 0;
+		int deltaRow = (orientation == Orientation::Y_AXIS) ? 1 : 0;
+		int deltaDepth = (orientation == Orientation::Z_AXIS) ? 1 : 0;
 		int colOffset = 0;
+		int rowOffset = 0;
+		int depthOffset = 0;
 
 		for (int index = 0; index < (shipType._size); index++)
 		{
-			int curRow = firstRow + rowOffset;
-			int curCol = firstCol + colOffset;
-			auto gamePieceKey = std::make_pair(curRow, curCol);
+			int curCol = firstPos.col + colOffset;
+			int curRow = firstPos.row + rowOffset;
+			int curDepth = firstPos.depth + depthOffset;
+			Coordinate gamePieceKey{ curRow, curCol, curDepth };
 			_gamePieces.emplace(gamePieceKey, gamePieceVal);
 
 			rowOffset += deltaRow;
 			colOffset += deltaCol;
+			depthOffset += deltaDepth;
 		}
 
 		if (player == PlayerEnum::A)
@@ -137,27 +110,28 @@ namespace battleship
 
 	void BattleBoard::sinkShip(const GamePiece* pieceToRemove)
 	{
-		int deltaRow = (pieceToRemove->_orient == Orientation::VERTICAL) ? 1 : 0;
-		int deltaCol = (pieceToRemove->_orient == Orientation::HORIZONTAL) ? 1 : 0;
-		int rowOffset = 0;
+		int deltaCol = (pieceToRemove->_orient == Orientation::X_AXIS) ? 1 : 0;
+		int deltaRow = (pieceToRemove->_orient == Orientation::Y_AXIS) ? 1 : 0;
+		int deltaDepth = (pieceToRemove->_orient == Orientation::Z_AXIS) ? 1 : 0;
 		int colOffset = 0;
+		int rowOffset = 0;
+		int depthOffset = 0;
 
 		int pieceSize = pieceToRemove->_shipType->_size;
 
 		for (int index = 0; index < pieceSize; index++)
 		{
-			int curRow = pieceToRemove->_firstRow + rowOffset;
-			int curCol = pieceToRemove->_firstCol + colOffset;
+			int curCol = pieceToRemove->_firstPos.col + colOffset;
+			int curRow = pieceToRemove->_firstPos.row + rowOffset;
+			int curDepth = pieceToRemove->_firstPos.depth + depthOffset;
 
 			// Remove from game-pieces dictionary
-			auto gamePieceKey = std::make_pair(curRow, curCol);
+			Coordinate gamePieceKey{ curRow, curCol, curDepth };
 			_gamePieces.erase(gamePieceKey);
 
-			// Remove from game board matrix
-			_matrix[curRow][curCol] = (char)BattleBoardSquare::Empty;
-
-			rowOffset += deltaRow;
 			colOffset += deltaCol;
+			rowOffset += deltaRow;
+			depthOffset += deltaDepth;
 		}
 
 		// Reduce ship count
@@ -167,10 +141,8 @@ namespace battleship
 			_playerBShipCount--;
 	}
 
-	shared_ptr<const GamePiece> BattleBoard::executeAttack(pair<int, int> target)
+	shared_ptr<const GamePiece> BattleBoard::executeAttack(const Coordinate& target)
 	{
-		int coordRow = target.first;
-		int coordCol = target.second;
 		auto dictIter = _gamePieces.find(target);
 		shared_ptr<GamePiece> gamePiece = NULL;
 
@@ -179,16 +151,15 @@ namespace battleship
 			gamePiece = dictIter->second;
 
 			// Ship got hit in this part for the first time, reduce life
-			if (_matrix[coordRow][coordCol] != (char)BattleBoardSquare::Hit)
+			if (gamePiece->_damagedCoords.find(target) == (gamePiece->_damagedCoords.end()))
+			{
 				gamePiece->_lifeLeft--;
+				gamePiece->_damagedCoords.insert(target);
+			}	
 
 			if (gamePiece->_lifeLeft == 0)
 			{	// No life left for ship, sink it
 				sinkShip(gamePiece.get());
-			}
-			else
-			{	// Ship hit, but not sinked
-				_matrix[coordRow][coordCol] = (char)BattleBoardSquare::Hit;
 			}
 		}
 
@@ -198,52 +169,9 @@ namespace battleship
 
 	// Getters & Setters
 
-	const char** BattleBoard::getBoard() const
+	unique_ptr<BoardData> BattleBoard::getBoardPlayerView(PlayerEnum player) const
 	{
-		return const_cast<const char**>(_matrix);
-	}
-
-	TempBoardView BattleBoard::getBoardPlayerView(PlayerEnum player) const
-	{
-		bool isPlayerA = false;
-
-		if (player == PlayerEnum::A)
-			isPlayerA = true;
-		else if (player == PlayerEnum::B)
-			isPlayerA = false;
-		else
-			return NULL;
-
-		char** playerMat = new char*[BOARD_SIZE];
-		
-		for (int index = 0; index < BOARD_SIZE; index++)
-		{
-			playerMat[index] = new char[BOARD_SIZE];
-
-			for (int subIndex = 0; subIndex < BOARD_SIZE; subIndex++)
-			{
-				char val = _matrix[index][subIndex];
-
-				if ((val != static_cast<char>(BattleBoardSquare::Empty)) &&
-					((!isPlayerA && isupper(val)) || (isPlayerA && !isupper(val))))
-				{ // Hide enemy ships
-					playerMat[index][subIndex] = static_cast<char>(BattleBoardSquare::Empty);
-				}
-				else
-				{
-					playerMat[index][subIndex] = val;
-				}
-			}
-		}
-
-		// Cast the raw pointer to a unique_ptr with custom deleter.
-		// When consumers are done copying data from this board it will be automatically freed,
-		// which will dispose the matrix resource allocated by this function.
-		// This way we don't have to rely on an external consumer to manage this piece of allocated mem.
-		auto deleter = [](const char** ptr) { disposeAllocatedResource(ptr); };
-		TempBoardView playerSmartMat(const_cast<const char**>(playerMat), deleter);
-
-		return playerSmartMat;	// Compiler expected to perform auto move
+		return std::make_unique<BoardDataImpl>(player, &_gamePieces, _boardHeight, _boardWidth, _boardDepth);
 	}
 
 	const int BattleBoard::getPlayerAShipCount() const
@@ -256,9 +184,9 @@ namespace battleship
 		return _playerBShipCount;
 	}
 
-	const PlayerEnum BattleBoard::whichPlayerOwnsSquare(int row, int col) const
+	const PlayerEnum BattleBoard::whichPlayerOwnsSquare(const Coordinate& pos) const
 	{
-		auto dictIter = _gamePieces.find(std::make_pair(row, col));
+		auto dictIter = _gamePieces.find(pos);
 
 		if (dictIter == _gamePieces.end())
 		{
@@ -269,6 +197,24 @@ namespace battleship
 			shared_ptr<GamePiece> gamePiece = dictIter->second;
 			return gamePiece->_player;
 		}
+	}
+
+	/** Returns the board width */
+	int BattleBoard::width() const
+	{
+		return _boardWidth;
+	}
+
+	/** Returns the board height */
+	int BattleBoard::height() const
+	{
+		return _boardHeight;
+	}
+
+	/** Returns the board depth */
+	int BattleBoard::depth() const
+	{
+		return _boardDepth;
 	}
 
 	#pragma endregion

@@ -114,22 +114,20 @@
     <ClInclude Include="BattleBoard.h" />
     <ClInclude Include="BattleshipGameBoardFactory.h" />
     <ClInclude Include="BoardBuilder.h" />
-    <ClInclude Include="ConsoleMessageVisual.h" />
+    <ClInclude Include="BoardDataImpl.h" />
     <ClInclude Include="GameManager.h" />
-    <ClInclude Include="IGameVisual.h" />
+    <ClInclude Include="GameVisual.h" />
     <ClInclude Include="MainGame.h" />
-    <ClInclude Include="TextualGuiVisual.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AlgoLoader.cpp" />
     <ClCompile Include="BattleBoard.cpp" />
     <ClCompile Include="BattleshipGameBoardFactory.cpp" />
     <ClCompile Include="BoardBuilder.cpp" />
-    <ClCompile Include="ConsoleMessageVisual.cpp" />
+    <ClCompile Include="BoardDataImpl.cpp" />
     <ClCompile Include="GameManager.cpp" />
-    <ClCompile Include="IGameVisual.cpp" />
+    <ClCompile Include="GameVisual.cpp" />
     <ClCompile Include="MainGame.cpp" />
-    <ClCompile Include="TextualGuiVisual.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AlgoCommonsProj\AlgoCommonsProj.vcxproj">

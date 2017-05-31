@@ -15,7 +15,7 @@ namespace battleship
 
 	bool IOUtil::isInteger(const std::string & s)
 	{
-		if (s.empty() || ((!isdigit(s[0])) && (s[0] != '-') && (s[0] != '+')))
+		if (s.empty() || !isdigit(s[0]))
 		{
 			return false;
 		}
@@ -59,13 +59,19 @@ namespace battleship
 		line = line.substr(first, (last - first));
 	}
 
-	void IOUtil::parseFile(const string& filename, function<void(string& nextReadLine)> lineParser)
+	bool IOUtil::parseFile(const string& filename,
+						   function<void(string& nextReadLine)> lineParser,
+						   function<void(string& nextReadLine, int lineNum,
+										 bool& isHeader, bool& isValidFile)> headerParser)
 	{
 		string nextLine;
 		ifstream fs(filename);
 
 		if (!fs.is_open())
 			std::cerr << "Error: Failed to open file " << filename << std::endl;
+
+		bool isHeader = (NULL != headerParser);
+		int lineNum = 0;
 
 		// Read the next line from the file, in case of an error this is skipped
 		while (getline(fs, nextLine))
@@ -74,17 +80,33 @@ namespace battleship
 			if (nextLine.size() && nextLine[nextLine.size() - 1] == '\r')
 			{
 				nextLine = nextLine.substr(0, nextLine.size() - 1);
+				lineNum++;
 			}
 
-			// Invoke parser on next line read
-			lineParser(nextLine);
+			if (isHeader)
+			{
+				bool isValidFile = true;
+				headerParser(nextLine, lineNum, isHeader, isValidFile);
+
+				if (!isValidFile)
+					return false;
+			}
+			else
+			{
+				// Invoke parser on next line read
+				lineParser(nextLine);
+			}
 		}
 
 		// This term is activated only in the case when ifstream's badbit is set
-		if (fs.bad())
+		if (fs.bad()) {
 			std::cerr << "Error: IO error occured while reading file " << filename << std::endl;
+			return false;
+		}
 
 		fs.close();
+
+		return true;
 	}
 
 	bool IOUtil::endsWith(const string& fullString, const string& ending)

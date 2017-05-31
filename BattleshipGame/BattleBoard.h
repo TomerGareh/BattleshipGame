@@ -2,13 +2,16 @@
 
 #include <memory>
 #include <string>
-#include <map>
+#include <unordered_map>
+#include <set>
 #include <utility>
 #include <functional>
 #include "AlgoCommon.h"
+#include "IBattleshipGameAlgo.h"
 
 using std::string;
-using std::map;
+using std::unordered_map;
+using std::set;
 using std::pair;
 using std::unique_ptr;
 using std::shared_ptr;
@@ -16,22 +19,14 @@ using std::function;
 
 namespace battleship
 {
-	/* -- Constants -- */
-	const size_t BOARD_SIZE = 10;
-	const int NUM_OF_SHIPS_PER_PLAYER = 5;
-
 	/* -- Forward Declarations -- */
 	class BoardBuilder;
 	struct GamePiece;
 
 	/* -- Type defs -- */
 
-	// A mapping type for game pieces by 2d coordinates.
-	using GamePiecesDict = map<pair<int, int>, shared_ptr<GamePiece>>;
-
-	// A pointer to a temporary view of the board.
-	// The board allocated mem will be freed when this smart pointer is destroyed.
-	using TempBoardView = unique_ptr<const char*, function<void(const char**)>>;
+	// A mapping type for game pieces by 3d coordinates.
+	using GamePiecesDict = unordered_map<Coordinate, shared_ptr<GamePiece>>;
 
 	/* -- Enums & consts -- */
 
@@ -70,16 +65,9 @@ namespace battleship
 	/** Orientation of the ship on the battle board */
 	enum class Orientation: bool
 	{
-		HORIZONTAL,
-		VERTICAL
-	};
-
-	/** An enum to differentiate the players who put pieces on the board */
-	enum class PlayerEnum : int
-	{
-		A = 0,
-		B = 1,
-		NONE = 2
+		X_AXIS,
+		Y_AXIS,
+		Z_AXIS
 	};
 
 	/** 
@@ -90,15 +78,17 @@ namespace battleship
 	struct GamePiece
 	{
 	public:
-		int _firstRow = 0;					// Top left x coordinate of the game piece
-		int _firstCol = 0;					// Top left y coordinate of the game piece
+		Coordinate _firstPos; // Top-Left point of the game piece in XY space,
+							  // and lowest point in Z index
+						      // (essentially this is the lowest coordinnate of the game piece in all dimensions)
 		const ShipType *const _shipType;	// A predefined ship-type for this game piece
-		Orientation _orient = Orientation::HORIZONTAL;	// How the piece is positioned on board
+		Orientation _orient = Orientation::X_AXIS; // How the piece is positioned on board
 		PlayerEnum _player = PlayerEnum::A;	// Which player owns the game piece
 
 		int _lifeLeft = 0;	// How many more hits can the game piece sustain
 
-		GamePiece(int firstRow, int firstCol, const ShipType *const type, PlayerEnum player, Orientation orientation);
+		set<Coordinate> _damagedCoords;
+		GamePiece(Coordinate firstPos, const ShipType *const type, PlayerEnum player, Orientation orientation);
 		virtual ~GamePiece() = default;
 	};
 
@@ -112,26 +102,21 @@ namespace battleship
 
 		BattleBoard(BattleBoard&& other) noexcept; // Move constructor
 		BattleBoard& operator= (BattleBoard&& other) noexcept; // Move assignment operator
-		virtual ~BattleBoard() noexcept;
+		virtual ~BattleBoard() noexcept = default;
 
 		/** Apply a player's move on the board, changing a ship's status in case it has been hit.
 		 *  Returns NULL if the attack have missed a ship.
 		 *  Otherwise returns the status of the game-piece representing the ship that has been hurt,
 		 *	after the attack was taken into consideration.
 		 */
-		shared_ptr<const GamePiece> executeAttack(pair<int, int> target);
-
-		/** Returns the matrix that represents the visual data in each game square on the board.
-		 *  Coordinates are defined in the range [0, BOARD_SIZE-1]
-		 */
-		const char** BattleBoard::getBoard() const;
+		shared_ptr<const GamePiece> executeAttack(const Coordinate& target);
 
 		/** Returns a view of the board as the player sees it.
 		 *	The view is temporary and should not be held by consumers.
 		 *	When the view is done being used (object is no longer referenced), it will get automatically
 		 *	deallocated
 		 */
-		TempBoardView getBoardPlayerView(PlayerEnum player) const;
+		unique_ptr<BoardData> getBoardPlayerView(PlayerEnum player) const;
 
 		/** Returns the number of ships for player A */
 		const int getPlayerAShipCount() const;
@@ -143,7 +128,16 @@ namespace battleship
 		 *	If this is a blank spot, PlayerEnum::None is returned.
 		 *  Coordinates are defined in the range [0, BOARD_SIZE-1]
 		 */
-		const PlayerEnum whichPlayerOwnsSquare(int row, int col) const;
+		const PlayerEnum whichPlayerOwnsSquare(const Coordinate& pos) const;
+
+		/** Returns the board width */
+		int width() const;
+
+		/** Returns the board height */
+		int height() const;
+
+		/** Returns the board depth */
+		int depth() const;
 
 		/** Allows BoardBuilder access to the private constructor, so BoardBuilder is able to produce new
 		 *  BattleBoard instances (according to Builder pattern).
@@ -157,8 +151,10 @@ namespace battleship
 		static const ShipType SUBMARINE;
 		static const ShipType BATTLESHIP;
 
-		// The matrix which holds the visual data of the board game squares
-		char** _matrix = NULL;
+		// Dimensions of board in x-y-z axes (number of squares)
+		int _boardWidth;
+		int _boardHeight;
+		int _boardDepth;
 
 		// List of game pieces in the game (active pieces only, sank pieces are removed).
 		// Game pieces are indexed in this dictionary by their index on the game board.
@@ -168,7 +164,7 @@ namespace battleship
 
 		// BattleBoard default constructor is private, as only the BoardBuilder is expected to instantiate
 		// this object type.
-		BattleBoard();
+		BattleBoard(int width, int height, int depth);
 
 		// BattleBoard contains a pointer to a 2d buffer containing the visual data,
 		// we avoid shallow copies of such objects since the new copy will share the same visual data
@@ -177,19 +173,11 @@ namespace battleship
 		BattleBoard(BattleBoard const&) = delete; // Disable copying
 		BattleBoard& operator=(BattleBoard const&) = delete; // Disable copying (assignment)
 
-		/** Safely releases all manually allocated resources by the BattleBoard (e.g: new() )*/
-		static void disposeAllocatedResource(const char* const* resource) noexcept;
-
-		/* Edits the board, without adding any game-pieces. This method affects the visual data only.
-		 * Coordinates are defined in the range [0, BOARD_SIZE-1]
-		 */
-		void initSquare(int row, int col, char type);
-
-		/* Called when the board-matrix is initialized, to assemble game pieces list.
+		/* Called when the board is initialized, to assemble game pieces list.
 		 * This method is expected to get called before the game starts.
 		 * Coordinates are defined in the range [0, BOARD_SIZE-1]
 		 */
-		void addGamePiece(int firstRow, int firstCol, const ShipType& shipType,
+		void addGamePiece(Coordinate firstPos, const ShipType& shipType,
 						  PlayerEnum player, Orientation orientation);
 
 		/** Applies a move of "sinking" a game-piece, assuming it has been hit enough times.

@@ -46,7 +46,7 @@ namespace battleship
 	{
 	public:
 		/** Creates a new BoardBuilder instance */
-		BoardBuilder();
+		BoardBuilder(int width, int height, int depth);
 		virtual ~BoardBuilder();
 
 		BoardBuilder(BoardBuilder const&) = delete;	// Disable copying
@@ -87,7 +87,7 @@ namespace battleship
 		/** Defines a value for a single game-square on the battle-board.
 		 *  This method will not generate a game-piece in the real BattleBoard object just yet.
 		 */
-		BoardBuilder* addPiece(int row, int col, char type);
+		BoardBuilder* addPiece(int col, int row, int depth, char type);
 
 		/** Finailize the creation of the BattleBoard.
 		 *	Validation occurs here, and logical game pieces data is initialized for the BattleBoard object.

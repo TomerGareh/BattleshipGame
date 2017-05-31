@@ -3,9 +3,10 @@
 
 namespace battleship
 {
-	BoardBuilder::BoardBuilder()
+	BoardBuilder::BoardBuilder(int width, int height, int depth)
 	{
-		_board = std::shared_ptr<BattleBoard>(new BattleBoard());	// Only BoardBuilder can instantiate this class
+		// Only BoardBuilder can instantiate this class
+		_board = std::shared_ptr<BattleBoard>(new BattleBoard(width, height, depth));
 	}
 
 	BoardBuilder::~BoardBuilder()
@@ -270,7 +271,7 @@ namespace battleship
 		adjacentShips = false;
 	}
 
-	BoardBuilder* BoardBuilder::addPiece(int row, int col, char type)
+	BoardBuilder* BoardBuilder::addPiece(int col, int row, int depth, char type)
 	{
 		_board->initSquare(row, col, type);
 		return this;
