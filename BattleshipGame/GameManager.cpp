@@ -11,33 +11,16 @@ namespace battleship
 	{
 	}
 
-	shared_ptr<IBattleshipGameAlgo> GameManager::initPlayer(int playerNum,
-														    AlgoLoader& algoLoader,
-														    shared_ptr<BattleBoard> board,
-														    const string& resourcesPath)
+	void GameManager::setupGame(shared_ptr<IBattleshipGameAlgo> playerA,
+								shared_ptr<IBattleshipGameAlgo> playerB,
+								shared_ptr<BattleBoard> board)
 	{
-		// Step #1: Load algorithm's DLL
-		shared_ptr<IBattleshipGameAlgo> player = algoLoader.loadAlgoByLexicalOrder(playerNum);
+		playerA->setPlayer(0);
+		playerB->setPlayer(1);
 
-		// Avoid DLL load errors
-		if (NULL == player)
-			return NULL;
-		
 		// TODO: The player can query this view later too?
-		player->setPlayer(playerNum);
-		player->setBoard(*board->getBoardPlayerView(static_cast<PlayerEnum>(playerNum)).get());
-
-		// TODO: Init the algorithm for competition
-		// Step #2: Initialize the algorithm
-		bool initSuccess = player->init(resourcesPath);
-		if (!initSuccess)
-		{ // Algorithm failed to initialize
-			const string algoPath = algoLoader.getAlgoPathByIndex(playerNum);
-			cout << "Algorithm initialization failed for dll: " << algoPath << endl;
-			return NULL;
-		}
-
-		return player;
+		playerA->setBoard(*board->getBoardPlayerView(static_cast<PlayerEnum>(0)).get());
+		playerB->setBoard(*board->getBoardPlayerView(static_cast<PlayerEnum>(1)).get());
 	}
 
 	bool GameManager::isPlayerShipsLeft(const BattleBoard *const board, PlayerEnum player) const

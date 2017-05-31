@@ -121,30 +121,32 @@ int main(int argc, char* argv[])
 		}
 
 		AlgoLoader algoLoader;
-		bool isAlgoMissing = !algoLoader.fetchDLLs(absolutePath);
+		auto algorithms = algoLoader.loadAllAlgorithms(absolutePath);
 
 		// Validation #2: Missing board path, Invalid board setup, Missing dll files
-		if ((NULL == board) || isAlgoMissing)
+		if (boards.empty() || algorithms.size < 2)
 			return ERROR_CODE;
 
 		GameManager gameManager;
-
-		// Validation #3 & #4: Load playerA dll and initialize it
-		shared_ptr<IBattleshipGameAlgo> playerA = gameManager.initPlayer(0, algoLoader, board, absolutePath);
-		if (NULL == playerA)
-			return ERROR_CODE;
-
-		// Validation #5 & #6: Load playerB dll and initialize it
-		shared_ptr<IBattleshipGameAlgo> playerB = gameManager.initPlayer(1, algoLoader, board, absolutePath);
-		if (NULL == playerB)
-			return ERROR_CODE;
-
-		// All validation have passed - proceed to begin game
 		GameVisual visual;
 
-		// Start a single game session, visualizer is expected to print the results to the screen when the session
-		// is over (or during the session itself if this is a textual visualizer type)
-		gameManager.startGame(board, playerA, playerB, visual);
+		for (auto playerA: algorithms)
+		{
+			for (auto playerB: algorithms)
+			{
+				if (playerA == playerB)
+					continue;
+
+				for (auto board: boards)
+				{
+					gameManager.setupGame(playerA, playerB, board);
+
+					// Start a single game session,
+					// visualizer is expected to print the results to the screen when the session is over
+					gameManager.startGame(board, playerA, playerB, visual);
+				}
+			}
+		}
 
 		return SUCCESS_CODE;
 	}

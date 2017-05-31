@@ -21,11 +21,12 @@ namespace battleship
 		GameManager();
 		virtual ~GameManager() = default;
 
-		/** Loads the player's algorithm and initializes it.
-		 *	If an error occurs, details are printed to the console and NULL is returned.
+		/** Setups the next game before starting it: notifies players about their board view and assigned player
+		 *  id.
 		 */
-		shared_ptr<IBattleshipGameAlgo> initPlayer(int playerNum, AlgoLoader& algoLoader,
-												   shared_ptr<BattleBoard> board, const string& resourcesPath);
+		void GameManager::setupGame(shared_ptr<IBattleshipGameAlgo> playerA,
+							    	shared_ptr<IBattleshipGameAlgo> playerB,
+								    shared_ptr<BattleBoard> board);
 
 		/** Starts a new game session using the given board, between the 2 players algorithms.
 		 *  The game output will be depicted using the visualizer strategy.

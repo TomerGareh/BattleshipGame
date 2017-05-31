@@ -79,24 +79,16 @@ namespace battleship
 		return algoPath;
 	}
 
-	shared_ptr<IBattleshipGameAlgo> AlgoLoader::loadAlgoByLexicalOrder(unsigned int index)
+	shared_ptr<IBattleshipGameAlgo> AlgoLoader::loadAlgoByPath(const string& algoPath)
 	{
-		// Avoid array out of bounds, return NULL
-		if (index >= _availableGameAlgos.size())
-		{
-			cout << NON_EXISTING_ALGO_ERROR_STRING << endl;
-			return NULL;
-		}
-
-		const string algoPath = _availableGameAlgos.at(index);
 		IBattleshipGameAlgo* algo = NULL;
 
 		// Search if algo was already loaded before
 		auto it = std::find_if(_loadedGameAlgos.begin(), _loadedGameAlgos.end(),
-							   [&algoPath](const AlgoDescriptor& ad) { return std::get<0>(ad) == algoPath; });
+			[&algoPath](const AlgoDescriptor& ad) { return std::get<0>(ad) == algoPath; });
 
 		if (it == _loadedGameAlgos.end())
-		{	
+		{
 			// Not loaded before, so load and cache here
 			algo = loadAlgorithm(algoPath);
 		}
@@ -120,6 +112,19 @@ namespace battleship
 		return shared_ptr<IBattleshipGameAlgo>(algo);
 	}
 
+	shared_ptr<IBattleshipGameAlgo> AlgoLoader::loadAlgoByLexicalOrder(unsigned int index)
+	{
+		// Avoid array out of bounds, return NULL
+		if (index >= _availableGameAlgos.size())
+		{
+			cout << NON_EXISTING_ALGO_ERROR_STRING << endl;
+			return NULL;
+		}
+
+		const string algoPath = _availableGameAlgos.at(index);
+		return loadAlgoByPath(algoPath);
+	}
+
 	bool AlgoLoader::fetchDLLs(const string& path)
 	{
 		_availableGameAlgos.clear();
@@ -140,5 +145,26 @@ namespace battleship
 		}
 
 		return true;
+	}
+
+	vector<shared_ptr<IBattleshipGameAlgo>> AlgoLoader::loadAllAlgorithms(const string& path)
+	{
+		vector<shared_ptr<IBattleshipGameAlgo>> algorithms;
+
+		if (!fetchDLLs(path))
+			return algorithms;
+
+		for (const string& algoPath : _availableGameAlgos)
+		{
+			auto algo = loadAlgoByPath(algoPath);
+
+			if (algo != NULL)
+			{
+				algorithms.push_back(algo);
+			}
+		}
+
+		// Compiler is expected to perform RVO on vector return value
+		return algorithms;
 	}
 }

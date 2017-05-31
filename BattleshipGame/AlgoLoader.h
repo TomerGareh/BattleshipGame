@@ -32,20 +32,9 @@ namespace battleship
 		AlgoLoader(AlgoLoader&& other) noexcept = delete;			  // Disable moving
 		AlgoLoader& operator= (AlgoLoader&& other) noexcept = delete; // Disable moving (assignment)
 
-		/** Fetches names for all algorithms available in the given path.
-		 *	(populates the AlgoLoad with available dlls for loading)
+		/** Loads & returns all algorithms available.
 		 */
-		bool fetchDLLs(const string& path);
-
-		/** Loads & returns the algorithm available in lexicographical order by index.
-		 *	Algorithms can only be loaded after their dll have been fetched.
-		 */
-		shared_ptr<IBattleshipGameAlgo> loadAlgoByLexicalOrder(unsigned int index);
-
-		/** Returns the algorithm name at the given index (algorithms are sorted in a list)
-		 *	If an error occurs, an empty string is returned.
-		 */
-		const string getAlgoPathByIndex(unsigned int index) const;
+		vector<shared_ptr<IBattleshipGameAlgo>> loadAllAlgorithms(const string& path);
 
 	private:
 
@@ -70,6 +59,26 @@ namespace battleship
 
 		/** Loads the algorithm in the given path. */
 		IBattleshipGameAlgo* AlgoLoader::loadAlgorithm(const string& algoFullpath);
+
+		/** Fetches names for all algorithms available in the given path.
+	 	 *	(populates the AlgoLoad with available dlls for loading)
+		 */
+		bool fetchDLLs(const string& path);
+
+		/** Loads & returns the algorithm available in lexicographical order by index.
+		 *	Algorithms can only be loaded after their dll have been fetched.
+		 */
+		shared_ptr<IBattleshipGameAlgo> loadAlgoByLexicalOrder(unsigned int index);
+
+		/** Loads & returns the algorithm in the given path.
+		 *  This method assumes algoPath was returned by previous call of fetchDLLs.
+		 */
+		shared_ptr<IBattleshipGameAlgo> loadAlgoByPath(const string& algoPath);
+
+		/** Returns the algorithm name at the given index (algorithms are sorted in a list)
+		 *	If an error occurs, an empty string is returned.
+		 */
+		const string getAlgoPathByIndex(unsigned int index) const;
 	};
 
 }
