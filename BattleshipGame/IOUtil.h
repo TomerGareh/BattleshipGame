@@ -32,9 +32,16 @@ namespace battleship
 		static void removeLeadingTrailingSpaces(string& line);
 
 		/** Parses the file line by line and invokes the lineParser on each line read.
+		 *  If a headerParser is specified the header can be parsed by a different logic,
+		 *	which sets isHeader=false when we're done finishing reading the header, or 
+		 *  isValidFile=false if the file header is invalid.
 		 *  This helper function deals with IO errors and managing external file resources.
+		 *  Returns true for a valid file, false for an invalid file.
 		 */
-		static void parseFile(const string& filename, function<void(string& nextReadLine)> lineParser);
+		static bool parseFile(const string& filename,
+					  	      function<void(string& nextReadLine)> lineParser,
+							  function<void(string& nextReadLine, int lineNum,
+										    bool& isHeader, bool& isValidFile)> headerParser = NULL);
 
 		/** Returns true if fullString ends with ending as a suffix */
 		static bool endsWith(const string& fullString, const string& ending);

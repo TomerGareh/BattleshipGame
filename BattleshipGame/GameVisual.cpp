@@ -1,4 +1,4 @@
-#include "IGameVisual.h"
+#include "GameVisual.h"
 #include <iostream>
 
 using std::cout;
@@ -6,11 +6,16 @@ using std::endl;
 
 namespace battleship
 {
-	IGameVisual::IGameVisual()
+	GameVisual::GameVisual()
 	{
 	}
 
-	void IGameVisual::visualizeEndGame(shared_ptr<BattleBoard> board, int playerAPoints, int playerBPoints)
+	void GameVisual::visualizeBeginGame(shared_ptr<BattleBoard> board)
+	{
+		// Do nothing for Release
+	}
+
+	void GameVisual::visualizeEndGame(shared_ptr<BattleBoard> board, int playerAPoints, int playerBPoints)
 	{
 		bool isTie = ((board->getPlayerAShipCount() != 0) && (board->getPlayerBShipCount() != 0));
 		if (!isTie)

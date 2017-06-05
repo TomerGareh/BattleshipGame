@@ -4,11 +4,10 @@
 #include "GameFromFileAlgo.h"
 #include "BattleBoard.h"
 #include "GameManager.h"
-#include "IGameVisual.h"
-#include "ConsoleMessageVisual.h"
-#include "TextualGuiVisual.h"
+#include "GameVisual.h"
 #include "IOUtil.h"
 #include "AlgoLoader.h"
+#include "Logger.h"
 
 #include <cstdlib>
 #include <memory>
@@ -30,8 +29,6 @@ const int SUCCESS_CODE = 0;
 const int ERROR_CODE = -1;
 const int MAX_ARG_COUNT = 5;
 const char* BP_CONFIG_PATH = "path";
-const char* BP_CONFIG_DELAY = "-delay";
-const char* BP_CONFIG_QUIET = "-quiet";
 char* BP_CONFIG_FALSE = "false";
 char* BP_CONFIG_TRUE = "true";
 
@@ -93,6 +90,8 @@ int main(int argc, char* argv[])
 {
 	try
 	{
+		Logger::getInstance().log(Severity::INFO_LEVEL, "Battleship game started.");
+
 		// Define configuration and validate arguments
 		map<const char*, char*> configuration;
 		bool isLegalArgs = parseArgs(argc, argv, configuration);
@@ -106,51 +105,48 @@ int main(int argc, char* argv[])
 		// Validation #1: Invalid resources path
 		if (!IOUtil::validatePath(resourcesPath))
 		{
-			std::cout << "Wrong path: " << resourcesPath << std::endl;
+			cout << "Wrong path: " << resourcesPath << endl;
+			Logger::getInstance().log(Severity::ERROR_LEVEL, "Wrong path: " + resourcesPath);
 			return ERROR_CODE;
 		}
 
 		// Game initialization - load board and player algorithms
 		const string absolutePath = IOUtil::convertPathToAbsolute(resourcesPath);
-		auto board = BattleshipGameBoardFactory::loadBattleBoard(BattleshipBoardInitTypeEnum::LOAD_BOARD_FROM_FILE,
-																 absolutePath);
+		auto boards = BattleshipGameBoardFactory::loadAllBattleBoards(absolutePath);
+
+		if (boards.empty())
+		{
+			Logger::getInstance().log(Severity::ERROR_LEVEL,
+									  "No board files(*.sboard) looking in path: " + resourcesPath);
+		}
 
 		AlgoLoader algoLoader;
-		bool isAlgoMissing = !algoLoader.fetchDLLs(absolutePath);
+		auto algorithms = algoLoader.loadAllAlgorithms(absolutePath);
 
 		// Validation #2: Missing board path, Invalid board setup, Missing dll files
-		if ((NULL == board) || isAlgoMissing)
+		if (boards.empty() || algorithms.size < 2)
 			return ERROR_CODE;
 
 		GameManager gameManager;
+		GameVisual visual;
 
-		// Validation #3 & #4: Load playerA dll and initialize it
-		shared_ptr<IBattleshipGameAlgo> playerA = gameManager.initPlayer(0, algoLoader, board, absolutePath);
-		if (NULL == playerA)
-			return ERROR_CODE;
-
-		// Validation #5 & #6: Load playerB dll and initialize it
-		shared_ptr<IBattleshipGameAlgo> playerB = gameManager.initPlayer(1, algoLoader, board, absolutePath);
-		if (NULL == playerB)
-			return ERROR_CODE;
-
-		// All validation have passed - proceed to begin game
-		unique_ptr<IGameVisual> visual = NULL;
-
-		// Choose visualization type, depending on -quiet arg
-		if (strcmp(configuration[BP_CONFIG_QUIET], BP_CONFIG_FALSE))
+		for (auto playerA: algorithms)
 		{
-			visual = std::make_unique<ConsoleMessageVisual>();
-		}
-		else
-		{
-			int delay = atoi(configuration[BP_CONFIG_DELAY]);
-			visual = std::make_unique<TextualGuiVisual>(delay);
-		}
+			for (auto playerB: algorithms)
+			{
+				if (playerA == playerB)
+					continue;
 
-		// Start a single game session, visualizer is expected to print the results to the screen when the session
-		// is over (or during the session itself if this is a textual visualizer type)
-		gameManager.startGame(board, playerA, playerB, *visual);
+				for (auto board: boards)
+				{
+					gameManager.setupGame(playerA, playerB, board);
+
+					// Start a single game session,
+					// visualizer is expected to print the results to the screen when the session is over
+					gameManager.startGame(board, playerA, playerB, visual);
+				}
+			}
+		}
 
 		return SUCCESS_CODE;
 	}

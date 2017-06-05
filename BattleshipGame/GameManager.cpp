@@ -11,31 +11,16 @@ namespace battleship
 	{
 	}
 
-	shared_ptr<IBattleshipGameAlgo> GameManager::initPlayer(int playerNum,
-														    AlgoLoader& algoLoader,
-														    shared_ptr<BattleBoard> board,
-														    const string& resourcesPath)
+	void GameManager::setupGame(shared_ptr<IBattleshipGameAlgo> playerA,
+								shared_ptr<IBattleshipGameAlgo> playerB,
+								shared_ptr<BattleBoard> board)
 	{
-		// Step #1: Load algorithm's DLL
-		shared_ptr<IBattleshipGameAlgo> player = algoLoader.loadAlgoByLexicalOrder(playerNum);
+		playerA->setPlayer(0);
+		playerB->setPlayer(1);
 
-		// Avoid DLL load errors
-		if (NULL == player)
-			return NULL;
-		
-		player->setBoard(playerNum,	board->getBoardPlayerView(static_cast<PlayerEnum>(playerNum)).get(),
-						 BOARD_SIZE, BOARD_SIZE);
-
-		// Step #2: Initialize the algorithm
-		bool initSuccess = player->init(resourcesPath);
-		if (!initSuccess)
-		{ // Algorithm failed to initialize
-			const string algoPath = algoLoader.getAlgoPathByIndex(playerNum);
-			cout << "Algorithm initialization failed for dll: " << algoPath << endl;
-			return NULL;
-		}
-
-		return player;
+		// TODO: The player can query this view later too?
+		playerA->setBoard(*board->getBoardPlayerView(static_cast<PlayerEnum>(0)).get());
+		playerB->setBoard(*board->getBoardPlayerView(static_cast<PlayerEnum>(1)).get());
 	}
 
 	bool GameManager::isPlayerShipsLeft(const BattleBoard *const board, PlayerEnum player) const
@@ -115,7 +100,7 @@ namespace battleship
 
 	void GameManager::startGame(shared_ptr<BattleBoard> board,
 								shared_ptr<IBattleshipGameAlgo> playerA, shared_ptr<IBattleshipGameAlgo> playerB,
-								IGameVisual& visualizer)
+								GameVisual& visualizer)
 	{
 		visualizer.visualizeBeginGame(board);
 
@@ -141,23 +126,25 @@ namespace battleship
 												  isPlayerAForfeit, isPlayerBForfeit);
 				continue;
 			}
-			else if ((target.first < 1) || (target.second < 1) ||
-					 (target.first > BOARD_SIZE) || (target.second > BOARD_SIZE))
+			else 
 			{
-				// Play performed an illegal move and will lose his turn
-				currentPlayer = switchPlayerTurns(*playerA, *playerB, currentPlayer, NULL,
-												  isPlayerAForfeit, isPlayerBForfeit);
+				battleship::AttackValidator validator;
 
-				continue;
+				if (NO_MORE_MOVES == validator(target, board->height(), board->width(), board->depth()))
+				{
+					// Player performed an illegal move and will lose his turn
+					currentPlayer = switchPlayerTurns(*playerA, *playerB, currentPlayer, NULL,
+													  isPlayerAForfeit, isPlayerBForfeit);
+					continue;
+				}
 			}
 
 			// Normalize coordinates to 0~BOARD_SIZE-1
-			target.first--;
-			target.second--;
+			Coordinate normalizedTarget{ target.row - 1, target.col - 1, target.depth - 1 };
 
 			// Execute attack move on the board itself and update the game-pieces status
 			// We get in return an object that describes the result of the attack
-			auto attackedGamePiece = board->executeAttack(target);
+			auto attackedGamePiece = board->executeAttack(normalizedTarget);
 
 			// Notify on attack results
 			int attackingPlayerNumber = (currentPlayer == playerB.get()); // A - 0, B - 1
@@ -180,10 +167,8 @@ namespace battleship
 			currentPlayer = switchPlayerTurns(*playerA, *playerB, currentPlayer, attackedGamePiece,
 											  isPlayerAForfeit, isPlayerBForfeit);
 
-			playerA->notifyOnAttackResult(attackingPlayerNumber, target.first + 1, target.second + 1, attackResult);
-			playerB->notifyOnAttackResult(attackingPlayerNumber, target.first + 1, target.second + 1, attackResult);
-			visualizer.visualizeAttackResults(board, attackingPlayerNumber,
-											  target.first, target.second, attackResult, attackedGamePiece);
+			playerA->notifyOnAttackResult(attackingPlayerNumber, target, attackResult);
+			playerB->notifyOnAttackResult(attackingPlayerNumber, target, attackResult);
 		}
 
 		updateScoreboard(board.get());
