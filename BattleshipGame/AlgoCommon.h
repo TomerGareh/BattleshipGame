@@ -7,7 +7,7 @@ using std::pair;
 namespace battleship
 {
 	/** A constant that represents no more moves remain for game algorithms */
-	const pair<int, int> NO_MORE_MOVES = std::make_pair(-1, -1);
+	const Coordinate NO_MORE_MOVES(-1, -1, -1);
 
 	/** Represents legal values for squares on the game board */
 	enum class BoardSquare : char
@@ -22,10 +22,10 @@ namespace battleship
 	/** A functor for validating attack moves returned by home made algorithms are valid. */
 	struct AttackValidator
 	{
-		pair<int, int> operator() (pair<int, int> move, int numOfRows, int numOfCols)
+		Coordinate operator() (Coordinate move, int numOfRows, int numOfCols, int numOfDepths)
 		{
-			if ((move.first < 1) || (move.second < 1) ||
-				(move.first > numOfRows) || (move.second > numOfCols))
+			if ((move.row < 1) || (move.col < 1) || (move.depth < 1) ||
+				(move.row > numOfRows) || (move.col > numOfCols) || (move.depth > numOfDepths))
 			{	// Illegal moves are converted into forfeit
 				return NO_MORE_MOVES;
 			}

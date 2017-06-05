@@ -12,141 +12,165 @@ using std::cerr;
 using std::endl;
 
 const int HuntTargetAlgo::MAX_NUM_OF_DRAWS = 1000;
-const AttackDirection HuntTargetAlgo::nonInPlaceDirections[] = {AttackDirection::Right, AttackDirection::Left,
-																AttackDirection::Up, AttackDirection::Down};
+const AttackDirection HuntTargetAlgo::nonInPlaceDirections[] = {AttackDirection::RowPlus, AttackDirection::RowMinus,
+																AttackDirection::ColPlus, AttackDirection::ColMinus,
+																AttackDirection::DepthPlus, AttackDirection::DepthMinus};
 
 HuntTargetAlgo::HuntTargetAlgo():  IBattleshipGameAlgo(),
-								   playerId(-1), boardSize(battleship::NO_MORE_MOVES), visitedBoard(NULL),
+								   playerId(-1),
+								   boardSize(std::make_tuple(0, 0, 0)),
+								   visitedCoords({}),
 								   lastAttackDirection(AttackDirection::InPlace)
 {
 }
 
 HuntTargetAlgo::~HuntTargetAlgo()
 {
-	if (visitedBoard != NULL)
-	{
-		for (int i = 0; i < boardSize.first; ++i)
-		{
-			delete[] visitedBoard[i];
-		}
-		delete[] visitedBoard;
-		visitedBoard = NULL;
-	}
 }
 
-// To be called only after the initialization of boardSize
-void HuntTargetAlgo::allocateVisitedBoard()
-{
-	visitedBoard = new bool*[boardSize.first];
-	for (int i = 0; i < boardSize.first; ++i)
-	{
-		visitedBoard[i] = new bool[boardSize.second]();	// Init to false
-	}
-}
-
-// This function assumes that row and col are inside the board
-void HuntTargetAlgo::markRightLeftAsVisited(int row, int col)
-{
-	if ((col + 1) < boardSize.second)
-		visitedBoard[row][col+1] = true;
-	if ((col - 1) >= 0)
-		visitedBoard[row][col-1] = true;
-}
-
-// This function assumes that row and col are inside the board
-void HuntTargetAlgo::markUpDownAsVisited(int row, int col)
-{
-	if ((row - 1) >= 0)
-		visitedBoard[row-1][col] = true;
-	if ((row + 1) < boardSize.first)
-		visitedBoard[row+1][col] = true;
-}
-
-void HuntTargetAlgo::setBoard(int player, const char ** board, int numRows, int numCols)
+void HuntTargetAlgo::setPlayer(int player)
 {
 	playerId = player;
-	boardSize.first = numRows;
-	boardSize.second = numCols;
-	allocateVisitedBoard();
+}
+
+// This function assumes that coord is inside the board
+void HuntTargetAlgo::markRowNeighbors(Coordinate coord)
+{
+	if ((coord.row + 1) < std::get<0>(boardSize))
+		visitedCoords.emplace(coord.row + 1, coord.col, coord.depth);
+	if ((coord.row - 1) >= 0)
+		visitedCoords.emplace(coord.row - 1, coord.col, coord.depth);
+}
+
+// This function assumes that coord is inside the board
+void HuntTargetAlgo::markColNeighbors(Coordinate coord)
+{
+	if ((coord.col + 1) < std::get<1>(boardSize))
+		visitedCoords.emplace(coord.row, coord.col + 1, coord.depth);
+	if ((coord.col - 1) >= 0)
+		visitedCoords.emplace(coord.row, coord.col - 1, coord.depth);
+}
+
+// This function assumes that coord is inside the board
+void HuntTargetAlgo::markDepthNeighbors(Coordinate coord)
+{
+	if ((coord.depth + 1) < std::get<2>(boardSize))
+		visitedCoords.emplace(coord.row, coord.col, coord.depth + 1);		
+	if ((coord.depth - 1) >= 0)
+		visitedCoords.emplace(coord.row, coord.col, coord.depth - 1);
+}
+
+void HuntTargetAlgo::setBoard(const BoardData& board)
+{
+	std::get<0>(boardSize) = board.rows();
+	std::get<1>(boardSize) = board.cols();
+	std::get<2>(boardSize) = board.depth();
 
 	// Mark our ships and their surrounding as visited
-	for (int i = 0; i < numRows; ++i)
+	for (int i = 0; i < std::get<0>(boardSize); ++i)
 	{
-		for (int j = 0; j < numCols; ++j)
+		for (int j = 0; j < std::get<1>(boardSize); ++j)
 		{
-			if (board[i][j] != static_cast<char>(battleship::BoardSquare::Empty))
+			for (int k = 0; k < std::get<2>(boardSize); ++k)
 			{
-				visitedBoard[i][j] = true;
-				markRightLeftAsVisited(i, j);
-				markUpDownAsVisited(i, j);
-			}
-		}
-	}
-}
-
-bool HuntTargetAlgo::init(const string& path)
-{
-	srand(static_cast<unsigned int>(time(NULL)));
-	return true;
-}
-
-void HuntTargetAlgo::searchUnvisitedSquare(int& row, int& col)
-{
-	for (int i = 0; i < boardSize.first; ++i)
-	{
-		for (int j = 0; j < boardSize.second; ++j)
-		{
-			if (!visitedBoard[i][j])
-			{
-				row = i;
-				col = j;
-				return;
+				Coordinate coord(i, j, k);
+				if (board.charAt(coord) != static_cast<char>(battleship::BoardSquare::Empty))
+				{
+					visitedCoords.insert(coord);
+					markRowNeighbors(coord);
+					markColNeighbors(coord);
+					markDepthNeighbors(coord);
+				}
 			}
 		}
 	}
 
-	row = battleship::NO_MORE_MOVES.first;
-	col = battleship::NO_MORE_MOVES.second;
+	srand(static_cast<unsigned int>(time(NULL)));	// Initialize random seed
+}
+
+Coordinate HuntTargetAlgo::searchUnvisitedCoord()
+{
+	for (int i = 0; i < std::get<0>(boardSize); ++i)
+	{
+		for (int j = 0; j < std::get<1>(boardSize); ++j)
+		{
+			for (int k = 0; k < std::get<2>(boardSize); ++k)
+			{
+				if (visitedCoords.find(Coordinate(i, j, k)) == visitedCoords.end())
+					return Coordinate(i+1, j+1, k+1);
+			}
+		}
+	}
+
+	return battleship::NO_MORE_MOVES;
 }
 
 AttackDirection HuntTargetAlgo::getTargetDirection(targetsMapEntry targetIt)
 {
-	vector<int>& directionVec = targetIt->second;
-	vector<int>::iterator maxDirection = std::max_element(directionVec.begin() + 1, directionVec.end());
-	size_t directionInd = std::distance(directionVec.begin(), maxDirection);
-	return static_cast<AttackDirection>(directionInd);
+	map<AttackDirection, int>& directionMap = targetIt->second;
+	map<AttackDirection, int>::iterator maxDirection = std::max_element(directionMap.begin(), directionMap.end(),
+		[](const pair<AttackDirection, int>& p1, const pair<AttackDirection, int>& p2) {
+			// Search for the max element that isn't InPlace direction
+			if (p1.first == AttackDirection::InPlace)
+				return true;
+			else if (p2.first == AttackDirection::InPlace)
+				return false;
+			else
+				return (p1.second < p2.second);
+		});
+	return maxDirection->first;
 }
 
-bool HuntTargetAlgo::calcTargetNext(int& row, int& col, AttackDirection direction, int size)
+bool HuntTargetAlgo::calcTargetNext(Coordinate& coord, AttackDirection direction, int size)
 {
 	switch (direction)
 	{
-	case AttackDirection::Right:
+	case AttackDirection::RowPlus:
 	{
-		if ((col + size > boardSize.second) || visitedBoard[row-1][col-1+size])
+		if ((coord.row + size > std::get<0>(boardSize)) ||
+			(visitedCoords.find(Coordinate(coord.row-1+size, coord.col-1, coord.depth-1)) != visitedCoords.end()))
 			return false;
-		col += size;
+		coord.row += size;
 		return true;
 	}
-	case AttackDirection::Left:
+	case AttackDirection::RowMinus:
 	{
-		if ((col - size < 1) || visitedBoard[row-1][col-1-size])
+		if ((coord.row - size < 1) ||
+			(visitedCoords.find(Coordinate(coord.row-1-size, coord.col-1, coord.depth-1)) != visitedCoords.end()))
 			return false;
-		col -= size;
+		coord.row -= size;
 		return true;
 	}
-	case AttackDirection::Up:
+	case AttackDirection::ColPlus:
 	{
-		if ((row - size < 1) || visitedBoard[row-1-size][col-1])
+		if ((coord.col + size > std::get<1>(boardSize)) ||
+			(visitedCoords.find(Coordinate(coord.row-1, coord.col-1+size, coord.depth-1)) != visitedCoords.end()))
 			return false;
-		row -= size;
+		coord.col += size;
 		return true;
 	}
-	case AttackDirection::Down:
+	case AttackDirection::ColMinus:
 	{
-		if ((row + size > boardSize.first) || visitedBoard[row-1+size][col-1])
+		if ((coord.col - size < 1) ||
+			(visitedCoords.find(Coordinate(coord.row-1, coord.col-1-size, coord.depth-1)) != visitedCoords.end()))
 			return false;
-		row += size;
+		coord.col -= size;
+		return true;
+	}
+	case AttackDirection::DepthPlus:
+	{
+		if ((coord.depth + size > std::get<2>(boardSize)) ||
+			(visitedCoords.find(Coordinate(coord.row-1, coord.col-1, coord.depth-1+size)) != visitedCoords.end()))
+			return false;
+		coord.depth += size;
+		return true;
+	}
+	case AttackDirection::DepthMinus:
+	{
+		if ((coord.depth - size < 1) ||
+			(visitedCoords.find(Coordinate(coord.row-1, coord.col-1, coord.depth-1-size)) != visitedCoords.end()))
+			return false;
+		coord.depth -= size;
 		return true;
 	}
 	default:
@@ -154,36 +178,38 @@ bool HuntTargetAlgo::calcTargetNext(int& row, int& col, AttackDirection directio
 	}
 }
 
-pair<int, int> HuntTargetAlgo::attack()
+Coordinate HuntTargetAlgo::attack()
 {
 	try
 	{
-		int row, col;
+		Coordinate coord = battleship::NO_MORE_MOVES;
 		if (targetsMap.empty())	// Hunt mode: we draw a random attack
 		{
 			int drawsCounter = 0;
 			do {
-				row = rand() % boardSize.first + 1;		// In the range 1 to number of rows
-				col = rand() % boardSize.second + 1;	// In the range 1 to number of columns
+				coord.row = rand() % std::get<0>(boardSize) + 1;	// In the range 1 to number of rows
+				coord.col = rand() % std::get<1>(boardSize) + 1;	// In the range 1 to number of columns
+				coord.depth = rand() % std::get<2>(boardSize) + 1;	// In the range 1 to number of depths
 				drawsCounter++;
-			} while ((visitedBoard[row-1][col-1]) && (drawsCounter <= MAX_NUM_OF_DRAWS));
+			} while ((visitedCoords.find(Coordinate(coord.row-1, coord.col-1, coord.depth-1)) != visitedCoords.end()) &&
+					 (drawsCounter <= MAX_NUM_OF_DRAWS));
 			
 			lastAttackDirection = AttackDirection::InPlace;
 
 			if (drawsCounter > MAX_NUM_OF_DRAWS)
-				searchUnvisitedSquare(row, col);
+				coord = searchUnvisitedCoord();
 		}
 		else	// Target mode: we try to attack around the targets that we already found
 		{
 			auto currTarget = targetsMap.begin();
-			row = currTarget->first.first + 1;	// 1 to number of rows
-			col = currTarget->first.second + 1;	// 1 to number of columns
+			coord.row = currTarget->first.row + 1;		// 1 to number of rows
+			coord.col = currTarget->first.col + 1;		// 1 to number of columns
+			coord.depth = currTarget->first.depth + 1;	// 1 to number of depths
 			bool foundAttack = false;
 			while (!foundAttack)
 			{
 				lastAttackDirection = getTargetDirection(currTarget);
-				int directionInt = static_cast<int>(lastAttackDirection);
-				int maxDirection = currTarget->second[directionInt];
+				int maxDirection = currTarget->second[lastAttackDirection];
 
 				if (maxDirection == -1)	// This is a redundant target that came from the other player
 				{						// We remove it to avoid infinite loop
@@ -191,15 +217,14 @@ pair<int, int> HuntTargetAlgo::attack()
 					return attack();
 				}
 
-				foundAttack = calcTargetNext(row, col, lastAttackDirection, (maxDirection + 1));
+				foundAttack = calcTargetNext(coord, lastAttackDirection, maxDirection + 1);
 				if (!foundAttack)	// This direction is no longer applicable
-					currTarget->second[directionInt] = -1;
+					currTarget->second[lastAttackDirection] = -1;
 			}
 		}
 
-		auto attackMove = std::make_pair(row, col);
 		battleship::AttackValidator validator;
-		return validator(attackMove, boardSize.first, boardSize.second);
+		return validator(coord, std::get<0>(boardSize), std::get<1>(boardSize), std::get<2>(boardSize));
 	}
 	catch (const exception& e)
 	{	// This should be a barrier that stops the app from failing.
@@ -209,36 +234,37 @@ pair<int, int> HuntTargetAlgo::attack()
 	}
 }
 
-int HuntTargetAlgo::getTargetSize(vector<int>* targetSurround)
+int HuntTargetAlgo::getTargetSize(const map<AttackDirection, int>& targetSurround)
 {
 	int size = 0;
-	for (auto& directionSize : *targetSurround)
+	for (const auto& directionSizePair : targetSurround)
 	{
-		if (directionSize != -1)
-			size += directionSize;
+		if (directionSizePair.second != -1)
+			size += directionSizePair.second;
 	}
 	return size;
 }
 
-targetsMapEntry HuntTargetAlgo::updateMapOnOtherAttack(int row, int col, AttackResult result)
+targetsMapEntry HuntTargetAlgo::updateMapOnOtherAttack(Coordinate coord, AttackResult result)
 {
 	for (targetsMapEntry targetIt = targetsMap.begin(); targetIt != targetsMap.end(); ++targetIt)
 	{
-		int targetRow = targetIt->first.first;
-		int targetCol = targetIt->first.second;
+		Coordinate targetCoord = targetIt->first;
 		AttackDirection direction = getTargetDirection(targetIt);
 
-		auto checkRowColMatch = [row, col, targetRow, targetCol](AttackDirection direct, int size)->bool {
-			return (((direct == AttackDirection::Right) && (targetRow == row) && ((targetCol + size + 1) == col)) ||
-					((direct == AttackDirection::Left) && (targetRow == row) && ((targetCol - size - 1) == col)) ||
-					((direct == AttackDirection::Up) && ((targetRow - size - 1) == row) && (targetCol == col)) ||
-					((direct == AttackDirection::Down) && ((targetRow + size + 1) == row) && (targetCol == col)));
+		auto checkCoordinatesMatch = [coord, targetCoord](AttackDirection direct, int size)->bool {
+			return (((direct == AttackDirection::RowPlus) && (Coordinate(targetCoord.row + size + 1, targetCoord.col, targetCoord.depth) == coord))	||
+					((direct == AttackDirection::RowMinus) && (Coordinate(targetCoord.row - size - 1, targetCoord.col, targetCoord.depth) == coord)) ||
+					((direct == AttackDirection::ColPlus) && (Coordinate(targetCoord.row, targetCoord.col + size + 1, targetCoord.depth) == coord))	||
+					((direct == AttackDirection::ColMinus) && (Coordinate(targetCoord.row, targetCoord.col - size - 1, targetCoord.depth == coord))	||
+					((direct == AttackDirection::DepthPlus) && (Coordinate(targetCoord.row, targetCoord.col, targetCoord.depth + size + 1) == coord)) ||
+					((direct == AttackDirection::DepthMinus) && (Coordinate(targetCoord.row, targetCoord.col, targetCoord.depth - size - 1) == coord)));
 		};
 
 		bool notInDirectionCase = false;
 		for (const auto otherDirection : nonInPlaceDirections)
 		{
-			if ((otherDirection != direction) && checkRowColMatch(otherDirection, 0))
+			if ((otherDirection != direction) && checkCoordinatesMatch(otherDirection, 0))
 			{
 				notInDirectionCase = true;
 				direction = otherDirection;
@@ -246,19 +272,18 @@ targetsMapEntry HuntTargetAlgo::updateMapOnOtherAttack(int row, int col, AttackR
 			}
 		}
 
-		int directionInt = static_cast<int>(direction);
-		int maxDirection = targetIt->second[directionInt];
-		bool inDirectionCase = checkRowColMatch(direction, maxDirection);
+		int maxDirection = targetIt->second[direction];
+		bool inDirectionCase = checkCoordinatesMatch(direction, maxDirection);
 
 		if (inDirectionCase || notInDirectionCase)
 		{
 			if (result == AttackResult::Miss)
 			{
-				targetIt->second[directionInt] = -1;
+				targetIt->second[direction] = -1;
 			}
 			else
 			{
-				targetIt->second[directionInt] += 1;
+				targetIt->second[direction] += 1;
 				lastAttackDirection = direction;
 			}
 			return targetIt;
@@ -268,52 +293,56 @@ targetsMapEntry HuntTargetAlgo::updateMapOnOtherAttack(int row, int col, AttackR
 	return targetsMap.end();
 }
 
-pair<int, int> HuntTargetAlgo::advanceInDirection(int row, int col, AttackDirection direction, int size)
+void HuntTargetAlgo::advanceInDirection(Coordinate& coord, AttackDirection direction, int size)
 {
 	switch (direction)
 	{
-	case AttackDirection::Right:
+	case AttackDirection::RowPlus:
 	{
-		col += size;
+		coord.row += size;
 		break;
 	}
-	case AttackDirection::Left:
+	case AttackDirection::RowMinus:
 	{
-		col -= size;
+		coord.row -= size;
 		break;
 	}
-	case AttackDirection::Up:
+	case AttackDirection::ColPlus:
 	{
-		row -= size;
+		coord.col += size;
 		break;
 	}
-	case AttackDirection::Down:
+	case AttackDirection::ColMinus:
 	{
-		row += size;
+		coord.col -= size;
+		break;
+	}
+	case AttackDirection::DepthPlus:
+	{
+		coord.depth += size;
+		break;
+	}
+	case AttackDirection::DepthMinus:
+	{
+		coord.depth -= size;
 		break;
 	}
 	default:
 		break;
 	}
-
-	return pair<int, int>(row, col);
 }
 
-void HuntTargetAlgo::removeRedundantTargets(int row, int col, AttackDirection direction)
+void HuntTargetAlgo::removeRedundantTargets(Coordinate coord, AttackDirection direction)
 {
-	pair<int, int> advancedRowCol = advanceInDirection(row, col, direction, 1);
-	row = advancedRowCol.first;
-	col = advancedRowCol.second;
+	advanceInDirection(coord, direction, 1);
 
 	for (targetsMapEntry targetIt = targetsMap.begin(); targetIt != targetsMap.end(); ++targetIt)
 	{
-		int currRow = targetIt->first.first;
-		int currCol = targetIt->first.second;
 		AttackDirection currDirection = getTargetDirection(targetIt);
-		advancedRowCol = advanceInDirection(currRow, currCol, currDirection, targetIt->second[static_cast<int>(currDirection)]);
+		Coordinate advancedCoord = targetIt->first;
+		advanceInDirection(advancedCoord, currDirection, targetIt->second[currDirection]);
 
-		if (((currRow == row) && (currCol == col)) ||
-			((advancedRowCol.first == row) && (advancedRowCol.second == col)))
+		if ((targetIt->first == coord) || (advancedCoord == coord))
 		{
 			targetsMap.erase(targetIt);
 			break;
@@ -321,25 +350,134 @@ void HuntTargetAlgo::removeRedundantTargets(int row, int col, AttackDirection di
 	}
 }
 
-void HuntTargetAlgo::notifyOnAttackResult(int player, int row, int col, AttackResult result)
+void HuntTargetAlgo::notifyOnAttackInTarget(Coordinate moveZeroBased, targetsMapEntry target, AttackResult result)
+{
+	visitedCoords.insert(moveZeroBased);
+
+	int currTargetSize = getTargetSize(target->second);
+
+	if (currTargetSize == 2)	// We know now the orientation so we mark visited squares for the first hit
+	{
+		if (lastAttackDirection == AttackDirection::RowPlus)
+		{
+			Coordinate firstHit(moveZeroBased.row-1, moveZeroBased.col, moveZeroBased.depth);
+			markColNeighbors(firstHit);
+			markDepthNeighbors(firstHit);
+		}
+		else if (lastAttackDirection == AttackDirection::RowMinus)
+		{
+			Coordinate firstHit(moveZeroBased.row+1, moveZeroBased.col, moveZeroBased.depth);
+			markColNeighbors(firstHit);
+			markDepthNeighbors(firstHit);
+		}
+		else if (lastAttackDirection == AttackDirection::ColPlus)
+		{
+			Coordinate firstHit(moveZeroBased.row, moveZeroBased.col-1, moveZeroBased.depth);
+			markRowNeighbors(firstHit);
+			markDepthNeighbors(firstHit);
+		}
+		else if (lastAttackDirection == AttackDirection::ColMinus)
+		{
+			Coordinate firstHit(moveZeroBased.row, moveZeroBased.col+1, moveZeroBased.depth);
+			markRowNeighbors(firstHit);
+			markDepthNeighbors(firstHit);
+		}
+		else if (lastAttackDirection == AttackDirection::DepthPlus)
+		{
+			Coordinate firstHit(moveZeroBased.row, moveZeroBased.col, moveZeroBased.depth-1);
+			markRowNeighbors(firstHit);
+			markColNeighbors(firstHit);
+		}
+		else if (lastAttackDirection == AttackDirection::DepthMinus)
+		{
+			Coordinate firstHit(moveZeroBased.row, moveZeroBased.col, moveZeroBased.depth+1);
+			markRowNeighbors(firstHit);
+			markColNeighbors(firstHit);
+		}
+	}
+
+	if ((result == AttackResult::Hit) && (currTargetSize > 1))
+	{
+		if ((lastAttackDirection == AttackDirection::RowPlus) || (lastAttackDirection == AttackDirection::RowMinus))
+		{
+			markColNeighbors(moveZeroBased);
+			markDepthNeighbors(moveZeroBased);
+		}
+		else if ((lastAttackDirection == AttackDirection::ColPlus) || (lastAttackDirection == AttackDirection::ColMinus))
+		{
+			markRowNeighbors(moveZeroBased);
+			markDepthNeighbors(moveZeroBased);
+		}
+		else if ((lastAttackDirection == AttackDirection::DepthPlus) || (lastAttackDirection == AttackDirection::DepthMinus))
+		{
+			markRowNeighbors(moveZeroBased);
+			markColNeighbors(moveZeroBased);
+		}
+	}
+	else if (result == AttackResult::Sink)
+	{
+		markRowNeighbors(moveZeroBased);
+		markColNeighbors(moveZeroBased);
+		markDepthNeighbors(moveZeroBased);
+
+		// Mark the other edge as visited
+		if ((lastAttackDirection == AttackDirection::RowPlus) && (moveZeroBased.row-currTargetSize >= 0))
+		{
+			visitedCoords.emplace(moveZeroBased.row-currTargetSize, moveZeroBased.col, moveZeroBased.depth);
+		}
+		else if ((lastAttackDirection == AttackDirection::RowMinus) && (moveZeroBased.row+currTargetSize < std::get<0>(boardSize)))
+		{
+			visitedCoords.emplace(moveZeroBased.row+currTargetSize, moveZeroBased.col, moveZeroBased.depth);
+		}
+		else if ((lastAttackDirection == AttackDirection::ColPlus) && (moveZeroBased.col-currTargetSize >= 0))
+		{
+			visitedCoords.emplace(moveZeroBased.row, moveZeroBased.col-currTargetSize, moveZeroBased.depth);
+		}
+		else if ((lastAttackDirection == AttackDirection::ColMinus) && (moveZeroBased.col+currTargetSize < std::get<1>(boardSize)))
+		{
+			visitedCoords.emplace(moveZeroBased.row, moveZeroBased.col+currTargetSize, moveZeroBased.depth);
+		}
+		else if ((lastAttackDirection == AttackDirection::DepthPlus) && (moveZeroBased.depth-currTargetSize >= 0))
+		{
+			visitedCoords.emplace(moveZeroBased.row, moveZeroBased.col, moveZeroBased.depth-currTargetSize);
+		}
+		else if ((lastAttackDirection == AttackDirection::DepthMinus) && (moveZeroBased.depth+currTargetSize < std::get<2>(boardSize)))
+		{
+			visitedCoords.emplace(moveZeroBased.row, moveZeroBased.col, moveZeroBased.depth+currTargetSize);
+		}
+
+		AttackDirection targetDirection = getTargetDirection(target);
+		targetsMap.erase(target);
+		removeRedundantTargets(moveZeroBased, targetDirection);
+	}
+}
+
+void HuntTargetAlgo::notifyOnAttackResult(int player, Coordinate move, AttackResult result)
 {
 	try
 	{
+		Coordinate moveZeroBased(move.row-1, move.col-1, move.depth-1);
+
 		if (targetsMap.empty())	// The attack comes from Hunt mode or other player
 		{
-			if ((player == playerId) || ((player != playerId) && (!visitedBoard[row-1][col-1])))
+			if ((player == playerId) ||
+				((player != playerId) && (visitedCoords.find(moveZeroBased) == visitedCoords.end())))
 			{
-				visitedBoard[row-1][col-1] = true;
+				visitedCoords.insert(moveZeroBased);
 
 				if (result == AttackResult::Hit)	// New target
 				{
-					vector<int> newTargetSurround = {1, 0, 0, 0, 0};
-					targetsMap.emplace(pair<int, int>(row-1, col-1), newTargetSurround);
+					map<AttackDirection, int> newTargetSurround = {{AttackDirection::InPlace, 1}, 
+																   {AttackDirection::RowPlus, 0}, {AttackDirection::RowMinus, 0}, 
+																   {AttackDirection::ColPlus, 0}, {AttackDirection::ColMinus, 0},
+																   {AttackDirection::DepthPlus, 0}, {AttackDirection::DepthMinus, 0}};
+					targetsMap.emplace(move, newTargetSurround);
 				}
 				else if (result == AttackResult::Sink)	// In case of rubber boat
 				{
-					markRightLeftAsVisited(row-1, col-1);
-					markUpDownAsVisited(row-1, col-1);
+					markRowNeighbors(moveZeroBased);
+					markColNeighbors(moveZeroBased);
+					markDepthNeighbors(moveZeroBased);
 				}
 			}
 		}
@@ -350,16 +488,20 @@ void HuntTargetAlgo::notifyOnAttackResult(int player, int row, int col, AttackRe
 			// The attack comes from other player
 			if (player != playerId)
 			{
-				if (!visitedBoard[row-1][col-1])
+				if (visitedCoords.find(moveZeroBased) == visitedCoords.end())
 				{
-					visitedBoard[row-1][col-1] = true;
-					targetsMapEntry updateMapResult = updateMapOnOtherAttack(row-1, col-1, result);	// Search for existing target
+					visitedCoords.insert(moveZeroBased);
+					// Search for existing target
+					targetsMapEntry updateMapResult = updateMapOnOtherAttack(moveZeroBased, result);
 					if ((updateMapResult == targetsMap.end()) || (result == AttackResult::Miss))
 					{
 						if (result == AttackResult::Hit)	// New target
 						{
-							vector<int> newTargetSurround = {1, 0, 0, 0, 0};
-							targetsMap.emplace(pair<int, int>(row-1, col-1), newTargetSurround);
+							map<AttackDirection, int> newTargetSurround = {{AttackDirection::InPlace, 1},
+																		   {AttackDirection::RowPlus, 0}, {AttackDirection::RowMinus, 0},
+																		   {AttackDirection::ColPlus, 0}, {AttackDirection::ColMinus, 0},
+																		   {AttackDirection::DepthPlus, 0}, {AttackDirection::DepthMinus, 0}};
+							targetsMap.emplace(move, newTargetSurround);
 						}
 						return;
 					}
@@ -372,56 +514,15 @@ void HuntTargetAlgo::notifyOnAttackResult(int player, int row, int col, AttackRe
 			}
 			else if (result == AttackResult::Miss)	// player == playerId
 			{
-				currTarget->second[static_cast<int>(lastAttackDirection)] = -1;
+				currTarget->second[lastAttackDirection] = -1;
 			}
 			else	// (player == playerId) && (result != AttackResult::Miss)
 			{
-				currTarget->second[static_cast<int>(lastAttackDirection)] += 1;
+				currTarget->second[lastAttackDirection] += 1;
 			}
 
-			// The attack comes from Target mode (or self attack of the other player)
-			visitedBoard[row-1][col-1] = true;
-
-			int currTargetSize = getTargetSize(&(currTarget->second));
-
-			if (currTargetSize == 2)	// We know now the orientation so we mark visited squares for the first hit
-			{
-				if (lastAttackDirection == AttackDirection::Right)
-					markUpDownAsVisited(row-1, col-2);
-				else if (lastAttackDirection == AttackDirection::Left)
-					markUpDownAsVisited(row-1, col);
-				else if (lastAttackDirection == AttackDirection::Up)
-					markRightLeftAsVisited(row, col-1);
-				else if (lastAttackDirection == AttackDirection::Down)
-					markRightLeftAsVisited(row-2, col-1);
-			}
-
-			if ((result == AttackResult::Hit) && (currTargetSize > 1))
-			{
-				if ((lastAttackDirection == AttackDirection::Right) || (lastAttackDirection == AttackDirection::Left))
-					markUpDownAsVisited(row-1, col-1);
-				else if ((lastAttackDirection == AttackDirection::Up) || (lastAttackDirection == AttackDirection::Down))
-					markRightLeftAsVisited(row-1, col-1);
-			}
-			else if (result == AttackResult::Sink)
-			{
-				markRightLeftAsVisited(row-1, col-1);
-				markUpDownAsVisited(row-1, col-1);
-
-				// Mark the other edge as visited
-				if ((lastAttackDirection == AttackDirection::Right) && (col-1-currTargetSize >= 0))
-					visitedBoard[row-1][col-1-currTargetSize] = true;
-				else if ((lastAttackDirection == AttackDirection::Left) && (col-1+currTargetSize < boardSize.second))
-					visitedBoard[row-1][col-1+currTargetSize] = true;
-				else if ((lastAttackDirection == AttackDirection::Up) && (row-1+currTargetSize < boardSize.first))
-					visitedBoard[row-1+currTargetSize][col-1] = true;
-				else if ((lastAttackDirection == AttackDirection::Down) && (row-1-currTargetSize >= 0))
-					visitedBoard[row-1-currTargetSize][col-1] = true;
-
-				AttackDirection currTargetDirection = getTargetDirection(currTarget);
-				targetsMap.erase(currTarget);
-				removeRedundantTargets(row-1, col-1, currTargetDirection);
-			}
+			// The attack comes from Target mode (or self attack of the opponent)
+			notifyOnAttackInTarget(moveZeroBased, currTarget, result);
 		}
 	}
 	catch (const exception& e)
