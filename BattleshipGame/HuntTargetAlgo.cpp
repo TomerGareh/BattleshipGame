@@ -17,7 +17,7 @@ const AttackDirection HuntTargetAlgo::nonInPlaceDirections[] = {AttackDirection:
 																AttackDirection::DepthPlus, AttackDirection::DepthMinus};
 
 HuntTargetAlgo::HuntTargetAlgo():  IBattleshipGameAlgo(),
-								   playerId(-1),
+								   playerId(0),
 								   boardSize(std::make_tuple(0, 0, 0)),
 								   visitedCoords({}),
 								   lastAttackDirection(AttackDirection::InPlace)
@@ -74,7 +74,7 @@ void HuntTargetAlgo::setBoard(const BoardData& board)
 			for (int k = 0; k < std::get<2>(boardSize); ++k)
 			{
 				Coordinate coord(i, j, k);
-				if (board.charAt(coord) != static_cast<char>(battleship::BoardSquare::Empty))
+				if (board.charAt(coord) != static_cast<char>(BoardSquare::Empty))
 				{
 					visitedCoords.insert(coord);
 					markRowNeighbors(coord);
@@ -102,7 +102,7 @@ Coordinate HuntTargetAlgo::searchUnvisitedCoord()
 		}
 	}
 
-	return battleship::NO_MORE_MOVES;
+	return NO_MORE_MOVES;
 }
 
 AttackDirection HuntTargetAlgo::getTargetDirection(targetsMapEntry targetIt)
@@ -182,7 +182,7 @@ Coordinate HuntTargetAlgo::attack()
 {
 	try
 	{
-		Coordinate coord = battleship::NO_MORE_MOVES;
+		Coordinate coord = NO_MORE_MOVES;
 		if (targetsMap.empty())	// Hunt mode: we draw a random attack
 		{
 			int drawsCounter = 0;
@@ -223,14 +223,14 @@ Coordinate HuntTargetAlgo::attack()
 			}
 		}
 
-		battleship::AttackValidator validator;
+		AttackValidator validator;
 		return validator(coord, std::get<0>(boardSize), std::get<1>(boardSize), std::get<2>(boardSize));
 	}
 	catch (const exception& e)
 	{	// This should be a barrier that stops the app from failing.
 		// If the algorithm fails, let it forfeit
 		cerr << "Error: HuntTargetAlgo::attack failed on " << e.what() << endl;
-		return battleship::NO_MORE_MOVES;
+		return NO_MORE_MOVES;
 	}
 }
 
@@ -256,7 +256,7 @@ targetsMapEntry HuntTargetAlgo::updateMapOnOtherAttack(Coordinate coord, AttackR
 			return (((direct == AttackDirection::RowPlus) && (Coordinate(targetCoord.row + size + 1, targetCoord.col, targetCoord.depth) == coord))	||
 					((direct == AttackDirection::RowMinus) && (Coordinate(targetCoord.row - size - 1, targetCoord.col, targetCoord.depth) == coord)) ||
 					((direct == AttackDirection::ColPlus) && (Coordinate(targetCoord.row, targetCoord.col + size + 1, targetCoord.depth) == coord))	||
-					((direct == AttackDirection::ColMinus) && (Coordinate(targetCoord.row, targetCoord.col - size - 1, targetCoord.depth == coord))	||
+					((direct == AttackDirection::ColMinus) && (Coordinate(targetCoord.row, targetCoord.col - size - 1, targetCoord.depth) == coord)) ||
 					((direct == AttackDirection::DepthPlus) && (Coordinate(targetCoord.row, targetCoord.col, targetCoord.depth + size + 1) == coord)) ||
 					((direct == AttackDirection::DepthMinus) && (Coordinate(targetCoord.row, targetCoord.col, targetCoord.depth - size - 1) == coord)));
 		};

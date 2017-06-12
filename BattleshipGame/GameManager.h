@@ -1,13 +1,11 @@
 #pragma once
 
 #include <memory>
-#include "BattleBoard.h"
 #include "IBattleshipGameAlgo.h"
+#include "BattleBoard.h"
 #include "GameVisual.h"
-#include "AlgoLoader.h"
 
 using std::shared_ptr;
-using std::unique_ptr;
 
 namespace battleship
 {

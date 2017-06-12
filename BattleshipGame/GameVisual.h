@@ -1,6 +1,5 @@
 #pragma once
 
-#include "IBattleshipGameAlgo.h"
 #include "BattleBoard.h"
 
 namespace battleship

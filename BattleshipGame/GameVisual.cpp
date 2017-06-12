@@ -1,5 +1,5 @@
-#include "GameVisual.h"
 #include <iostream>
+#include "GameVisual.h"
 
 using std::cout;
 using std::endl;

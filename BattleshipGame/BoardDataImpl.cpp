@@ -5,7 +5,7 @@ using std::invalid_argument;
 
 namespace battleship
 {
-	BoardDataImpl::BoardDataImpl(PlayerEnum player, GamePiecesDict* gamePieces,
+	BoardDataImpl::BoardDataImpl(PlayerEnum player, const GamePiecesDict* gamePieces,
 								 int boardRows, int boardCols, int boardDepth): BoardData()
 	{
 		_rows = boardRows;

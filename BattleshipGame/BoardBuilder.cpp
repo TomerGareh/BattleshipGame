@@ -3,10 +3,8 @@
 
 namespace battleship
 {
-	BoardBuilder::BoardBuilder(int width, int height, int depth)
+	BoardBuilder::BoardBuilder(int width, int height, int depth) : boardWidth(width), boardHeight(height), boardDepth(depth)
 	{
-		// Only BoardBuilder can instantiate this class
-		_board = std::shared_ptr<BattleBoard>(new BattleBoard(width, height, depth));
 	}
 
 	BoardBuilder::~BoardBuilder()
@@ -25,59 +23,47 @@ namespace battleship
 
 	string BoardBuilder::BoardInitializeError::getErrorMsg(ErrorPriorityEnum errorType)
 	{
-		switch ((int)errorType)
+		switch (errorType)
 		{
-			case (int)ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_B_PLAYER_A:
+			case ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_B_PLAYER_A:
 			{
 				return "Wrong size or shape for ship B for player A";
 			}
-			case (int)ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_P_PLAYER_A:
+			case ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_P_PLAYER_A:
 			{
 				return "Wrong size or shape for ship P for player A";
 			}
-			case (int)ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_M_PLAYER_A:
+			case ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_M_PLAYER_A:
 			{
 				return "Wrong size or shape for ship M for player A";
 			}
-			case (int)ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_D_PLAYER_A:
+			case ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_D_PLAYER_A:
 			{
 				return "Wrong size or shape for ship D for player A";
 			}
-			case (int)ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_B_PLAYER_B:
+			case ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_B_PLAYER_B:
 			{
 				return "Wrong size or shape for ship b for player B";
 			}
-			case (int)ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_P_PLAYER_B:
+			case ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_P_PLAYER_B:
 			{
 				return "Wrong size or shape for ship p for player B";
 			}
-			case (int)ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_M_PLAYER_B:
+			case ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_M_PLAYER_B:
 			{
 				return "Wrong size or shape for ship m for player B";
 			}
-			case (int)ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_D_PLAYER_B:
+			case ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_D_PLAYER_B:
 			{
 				return "Wrong size or shape for ship d for player B";
 			}
-			case (int)ErrorPriorityEnum::TOO_MANY_SHIPS_PLAYER_A:
-			{
-				return "Too many ships for player A";
-			}
-			case (int)ErrorPriorityEnum::TOO_FEW_SHIPS_PLAYER_A:
-			{
-				return "Too few ships for player A";
-			}
-			case (int)ErrorPriorityEnum::TOO_MANY_SHIPS_PLAYER_B:
-			{
-				return "Too many ships for player B";
-			}
-			case (int)ErrorPriorityEnum::TOO_FEW_SHIPS_PLAYER_B:
-			{
-				return "Too few ships for player B";
-			}
-			case (int)ErrorPriorityEnum::ADJACENT_SHIPS_ON_BOARD:
+			case ErrorPriorityEnum::ADJACENT_SHIPS_ON_BOARD:
 			{
 				return "Adjacent Ships on Board";
+			}
+			case ErrorPriorityEnum::NO_SHIPS_AT_ALL:
+			{
+				return "There are no ships at all on the board";
 			}
 			default:
 			{
@@ -86,70 +72,70 @@ namespace battleship
 		}
 	}
 
-	BoardBuilder::ShipMask::ShipMask(BattleBoardSquare ship)
+	BoardBuilder::ShipMask::ShipMask(BattleBoardSquare ship) : maskType(ship)
 	{
-		maskType = ship;
-
-		mask = std::make_unique<ShipMaskList>();
-
 		switch (ship)
 		{
 			case BattleBoardSquare::RubberBoat:
 			{
-				mask->insert(mask->end(), { std::make_tuple(-1, 0, (char)BattleBoardSquare::Empty), std::make_tuple(0, 1, (char)BattleBoardSquare::Empty),
-										    std::make_tuple(1, 0, (char)BattleBoardSquare::Empty), std::make_tuple(0, -1, (char)BattleBoardSquare::Empty) });
+				mask = {
+					{Coordinate(1, 0, 0), BattleBoardSquare::Empty}, {Coordinate(-1, 0, 0), BattleBoardSquare::Empty},
+					{Coordinate(0, 1, 0), BattleBoardSquare::Empty}, {Coordinate(0, -1, 0), BattleBoardSquare::Empty},
+					{Coordinate(0, 0, 1), BattleBoardSquare::Empty}, {Coordinate(0, 0, -1), BattleBoardSquare::Empty}
+				};
 				break;
 			}
 			case BattleBoardSquare::RocketShip:
 			{
-				mask->insert(mask->end(), { std::make_tuple(0, 1, (char)BattleBoardSquare::RocketShip),
-											std::make_tuple(-1, 0, (char)BattleBoardSquare::Empty),
-											std::make_tuple(-1, 1, (char)BattleBoardSquare::Empty),
-											std::make_tuple(0, 2, (char)BattleBoardSquare::Empty),
-											std::make_tuple(1, 1, (char)BattleBoardSquare::Empty),
-											std::make_tuple(1, 0, (char)BattleBoardSquare::Empty),
-											std::make_tuple(0, -1, (char)BattleBoardSquare::Empty) });
+				mask = {
+					{Coordinate(0, 1, 0), BattleBoardSquare::RocketShip},
+					{Coordinate(1, 0, 0), BattleBoardSquare::Empty}, {Coordinate(-1, 0, 0), BattleBoardSquare::Empty},
+					{Coordinate(1, 1, 0), BattleBoardSquare::Empty}, {Coordinate(-1, 1, 0), BattleBoardSquare::Empty},
+					{Coordinate(0, 2, 0), BattleBoardSquare::Empty}, {Coordinate(0, -1, 0), BattleBoardSquare::Empty},
+					{Coordinate(0, 0, 1), BattleBoardSquare::Empty}, {Coordinate(0, 0, -1), BattleBoardSquare::Empty},
+					{Coordinate(0, 1, 1), BattleBoardSquare::Empty}, {Coordinate(0, 1, -1), BattleBoardSquare::Empty}
+				};
 				break;
 			}
 			case BattleBoardSquare::Submarine:
 			{
-				mask->insert(mask->end(), { std::make_tuple(0, 1, (char)BattleBoardSquare::Submarine),
-											std::make_tuple(0, 2, (char)BattleBoardSquare::Submarine),
-											std::make_tuple(-1, 0, (char)BattleBoardSquare::Empty),
-											std::make_tuple(-1, 1, (char)BattleBoardSquare::Empty),
-											std::make_tuple(-1, 2, (char)BattleBoardSquare::Empty),
-											std::make_tuple(0, 3, (char)BattleBoardSquare::Empty),
-											std::make_tuple(1, 2, (char)BattleBoardSquare::Empty),
-											std::make_tuple(1, 1, (char)BattleBoardSquare::Empty),
-											std::make_tuple(1, 0, (char)BattleBoardSquare::Empty),
-											std::make_tuple(0, -1, (char)BattleBoardSquare::Empty) });
+				mask = {
+					{Coordinate(0, 1, 0), BattleBoardSquare::Submarine}, {Coordinate(0, 2, 0), BattleBoardSquare::Submarine},
+					{Coordinate(1, 0, 0), BattleBoardSquare::Empty}, {Coordinate(-1, 0, 0), BattleBoardSquare::Empty},
+					{Coordinate(1, 1, 0), BattleBoardSquare::Empty}, {Coordinate(-1, 1, 0), BattleBoardSquare::Empty},
+					{Coordinate(1, 2, 0), BattleBoardSquare::Empty}, {Coordinate(-1, 2, 0), BattleBoardSquare::Empty},
+					{Coordinate(0, 3, 0), BattleBoardSquare::Empty}, {Coordinate(0, -1, 0), BattleBoardSquare::Empty},
+					{Coordinate(0, 0, 1), BattleBoardSquare::Empty}, {Coordinate(0, 0, -1), BattleBoardSquare::Empty},
+					{Coordinate(0, 1, 1), BattleBoardSquare::Empty}, {Coordinate(0, 1, -1), BattleBoardSquare::Empty},
+					{Coordinate(0, 2, 1), BattleBoardSquare::Empty}, {Coordinate(0, 2, -1), BattleBoardSquare::Empty}
+				};
 				break;
 			}
 			case BattleBoardSquare::Battleship:
 			{
-				mask->insert(mask->end(), { std::make_tuple(0, 1, (char)BattleBoardSquare::Battleship),
-											std::make_tuple(0, 2, (char)BattleBoardSquare::Battleship),
-											std::make_tuple(0, 3, (char)BattleBoardSquare::Battleship),
-											std::make_tuple(-1, 0, (char)BattleBoardSquare::Empty),
-											std::make_tuple(-1, 1, (char)BattleBoardSquare::Empty),
-											std::make_tuple(-1, 2, (char)BattleBoardSquare::Empty),
-											std::make_tuple(-1, 3, (char)BattleBoardSquare::Empty),
-										    std::make_tuple(0, 4, (char)BattleBoardSquare::Empty),
-											std::make_tuple(1, 3, (char)BattleBoardSquare::Empty),
-											std::make_tuple(1, 2, (char)BattleBoardSquare::Empty),
-										    std::make_tuple(1, 1, (char)BattleBoardSquare::Empty),
-											std::make_tuple(1, 0, (char)BattleBoardSquare::Empty),
-											std::make_tuple(0, -1, (char)BattleBoardSquare::Empty) });
+				mask = {
+					{Coordinate(0, 1, 0), BattleBoardSquare::Battleship}, {Coordinate(0, 2, 0), BattleBoardSquare::Battleship},
+					{Coordinate(0, 3, 0), BattleBoardSquare::Battleship},
+					{Coordinate(1, 0, 0), BattleBoardSquare::Empty}, {Coordinate(-1, 0, 0), BattleBoardSquare::Empty},
+					{Coordinate(1, 1, 0), BattleBoardSquare::Empty}, {Coordinate(-1, 1, 0), BattleBoardSquare::Empty},
+					{Coordinate(1, 2, 0), BattleBoardSquare::Empty}, {Coordinate(-1, 2, 0), BattleBoardSquare::Empty},
+					{Coordinate(1, 3, 0), BattleBoardSquare::Empty}, {Coordinate(-1, 3, 0), BattleBoardSquare::Empty},
+					{Coordinate(0, 4, 0), BattleBoardSquare::Empty}, {Coordinate(0, -1, 0), BattleBoardSquare::Empty},
+					{Coordinate(0, 0, 1), BattleBoardSquare::Empty}, {Coordinate(0, 0, -1), BattleBoardSquare::Empty},
+					{Coordinate(0, 1, 1), BattleBoardSquare::Empty}, {Coordinate(0, 1, -1), BattleBoardSquare::Empty},
+					{Coordinate(0, 2, 1), BattleBoardSquare::Empty}, {Coordinate(0, 2, -1), BattleBoardSquare::Empty},
+					{Coordinate(0, 3, 1), BattleBoardSquare::Empty}, {Coordinate(0, 3, -1), BattleBoardSquare::Empty}
+				};
 				break;
 			}
 			default:
 			{
-				mask = NULL;
+				mask = {};
 				break;
 			}
 		}
 
-		orient = Orientation::HORIZONTAL;
+		orient = Orientation::X_AXIS;
 		wrongSize = false;
 		adjacentShips = false;
 	}
@@ -158,111 +144,132 @@ namespace battleship
 	{
 	}
 
-	bool BoardBuilder::ShipMask::applyMask(const shared_ptr<BattleBoard> board, int row, int col, PlayerEnum player)
+	void BoardBuilder::ShipMask::applyMaskEntry(char boardSquare, char shipChar, MaskEntry& maskEntry, bool axisException,
+												int& matchSizeAxis, bool& wrongSizeAxis, bool& adjacentShipsAxis)
 	{
-		char currShip = (player == PlayerEnum::A) ? (char)maskType : tolower((char)maskType);
-		int i, j;
-		char currMask;
-		int matchSizeHorizontal = 1;
-		int matchSizeVertical = 1;
-		bool wrongSizeHorizontal = false;
-		bool wrongSizeVertical = false;
-		bool adjacentShipsHorizontal = false;
-		bool adjacentShipsVertical = false;
-		bool horizontalException, verticalException;
+		char maskChar = static_cast<char>(maskEntry.second);
 
-		for (auto maskItem : *mask)
+		if (!axisException)
 		{
-			i = std::get<0>(maskItem);
-			j = std::get<1>(maskItem);
-			currMask = std::get<2>(maskItem);
-			horizontalException = ((row + i < 0) || (row + i >= BOARD_SIZE) || (col + j < 0) || (col + j >= BOARD_SIZE));
-			verticalException = ((row + j < 0) || (row + j >= BOARD_SIZE) || (col + i < 0) || (col + i >= BOARD_SIZE));
-
-			if (player == PlayerEnum::B)
+			if (boardSquare == maskChar)
 			{
-				currMask = tolower(currMask);
-			}
-			
-			if (!horizontalException)
-			{
-				if (board->_matrix[row + i][col + j] == currMask)
-				{
-					if (currMask != (char)BattleBoardSquare::Empty)
-						matchSizeHorizontal++;
-				}
-				else
-				{
-					if ((board->_matrix[row + i][col + j] != (char)BattleBoardSquare::Empty) && (board->_matrix[row + i][col + j] != currShip))
-					{
-						if (matchSizeHorizontal >= (j+1))
-							adjacentShipsHorizontal = true;
-					}
-					else
-					{
-						wrongSizeHorizontal = true;
-					}
-				}
+				if (maskChar != static_cast<char>(BattleBoardSquare::Empty))
+					matchSizeAxis++;
 			}
 			else
 			{
-				if (currMask != (char)BattleBoardSquare::Empty)
-					wrongSizeHorizontal = true;
-			}
-			
-			if (!verticalException)
-			{
-				if (board->_matrix[row + j][col + i] == currMask)
+				if ((boardSquare != static_cast<char>(BattleBoardSquare::Empty)) &&	(boardSquare != shipChar))
 				{
-					if (currMask != (char)BattleBoardSquare::Empty)
-						matchSizeVertical++;
+					if (matchSizeAxis >= (maskEntry.first.col + 1))
+						adjacentShipsAxis = true;
 				}
 				else
 				{
-					if ((board->_matrix[row + j][col + i] != (char)BattleBoardSquare::Empty) && (board->_matrix[row + j][col + i] != currShip))
-					{
-						if (matchSizeVertical >= (j+1))
-							adjacentShipsVertical = true;
-					}
-					else
-					{
-						wrongSizeVertical = true;
-					}
+					wrongSizeAxis = true;
 				}
 			}
-			else
-			{
-				if (currMask != (char)BattleBoardSquare::Empty)
-					wrongSizeVertical = true;
-			}
-		}
-
-		bool isHorizontalMask = ((!wrongSizeHorizontal) && (!adjacentShipsHorizontal));
-		bool isVerticalMask = ((!wrongSizeVertical) && (!adjacentShipsVertical));
-
-		orient = (matchSizeHorizontal >= matchSizeVertical) ? Orientation::HORIZONTAL : Orientation::VERTICAL;
-		
-		wrongSize = (wrongSizeHorizontal && wrongSizeVertical);
-		
-		if (wrongSizeHorizontal && (!wrongSizeVertical))
-		{
-			adjacentShips = adjacentShipsVertical;
-		}
-		else if ((!wrongSizeHorizontal) && wrongSizeVertical)
-		{
-			adjacentShips = adjacentShipsHorizontal;
-		}
-		else if (((matchSizeHorizontal == 1) && (matchSizeVertical == 1)) 
-				|| ((matchSizeHorizontal > 1) && (matchSizeVertical > 1)))
-		{
-			adjacentShips = adjacentShipsHorizontal || adjacentShipsVertical;
 		}
 		else
 		{
-			adjacentShips = (matchSizeHorizontal > 1) ? adjacentShipsHorizontal : adjacentShipsVertical;
+			if (maskChar != static_cast<char>(BattleBoardSquare::Empty))
+				wrongSizeAxis = true;
+		}
+	}
+
+	bool BoardBuilder::ShipMask::applyMask(const map<Coordinate, char>& boardMap, tuple<int, int, int> boardSize, Coordinate coord,
+										   PlayerEnum player)
+	{
+		char shipChar = (player == PlayerEnum::A) ? static_cast<char>(maskType) : tolower(static_cast<char>(maskType));
+		int boardWidth = std::get<0>(boardSize);
+		int boardHeight = std::get<1>(boardSize);
+		int boardDepths = std::get<2>(boardSize);
+
+		int matchSizeXAxis = 1;
+		int matchSizeYAxis = 1;
+		int matchSizeZAxis = 1;
+		bool wrongSizeXAxis = false;
+		bool wrongSizeYAxis = false;
+		bool wrongSizeZAxis = false;
+		bool adjacentShipsXAxis = false;
+		bool adjacentShipsYAxis = false;
+		bool adjacentShipsZAxis = false;
+
+		for (const auto& maskEntry : mask)
+		{
+			int i = maskEntry.first.row;
+			int j = maskEntry.first.col;
+			int k = maskEntry.first.depth;
+			char currMask = static_cast<char>(maskEntry.second);
+			bool XAxisException = ((coord.row + i < 0) || (coord.row + i >= boardHeight) || (coord.col + j < 0) ||
+								   (coord.col + j >= boardWidth) || (coord.depth + k < 0) || (coord.depth + k >= boardDepths));
+			bool YAxisException = ((coord.row + j < 0) || (coord.row + j >= boardHeight) || (coord.col + i < 0) ||
+								   (coord.col + i >= boardWidth) || (coord.depth + k < 0) || (coord.depth + k >= boardDepths));
+			bool ZAxisException = ((coord.row + i < 0) || (coord.row + i >= boardHeight) || (coord.col + k < 0) ||
+								   (coord.col + k >= boardWidth) || (coord.depth + j < 0) || (coord.depth + j >= boardDepths));
+
+			if (player == PlayerEnum::B)
+				currMask = tolower(currMask);
+			
+			// Check for X_AXIS orientation
+			Coordinate XOrientCoord(coord.row + i, coord.col + j, coord.depth + k);
+			char currBoardSquare = (boardMap.find(XOrientCoord) != boardMap.end()) ?
+									boardMap.at(XOrientCoord) : static_cast<char>(BattleBoardSquare::Empty);
+			applyMaskEntry(currBoardSquare, shipChar, maskEntry, XAxisException, matchSizeXAxis, wrongSizeXAxis, adjacentShipsXAxis);
+
+			// Check for Y_AXIS orientation
+			Coordinate YOrientCoord(coord.row + j, coord.col + i, coord.depth + k);
+			currBoardSquare = (boardMap.find(YOrientCoord) != boardMap.end()) ?
+							   boardMap.at(YOrientCoord) : static_cast<char>(BattleBoardSquare::Empty);
+			applyMaskEntry(currBoardSquare, shipChar, maskEntry, YAxisException, matchSizeYAxis, wrongSizeYAxis, adjacentShipsYAxis);
+
+			// Check for Z_AXIS orientation
+			Coordinate ZOrientCoord(coord.row + i, coord.col + k, coord.depth + j);
+			currBoardSquare = (boardMap.find(ZOrientCoord) != boardMap.end()) ?
+							   boardMap.at(ZOrientCoord) : static_cast<char>(BattleBoardSquare::Empty);
+			applyMaskEntry(currBoardSquare, shipChar, maskEntry, ZAxisException, matchSizeZAxis, wrongSizeZAxis, adjacentShipsZAxis);
 		}
 
-		return (isHorizontalMask || isVerticalMask);
+		bool isXAxisMask = ((!wrongSizeXAxis) && (!adjacentShipsXAxis));
+		bool isYAxisMask = ((!wrongSizeYAxis) && (!adjacentShipsYAxis));
+		bool isZAxisMask = ((!wrongSizeZAxis) && (!adjacentShipsZAxis));
+
+		int maxMatchSize = 1;
+		if (matchSizeXAxis < matchSizeYAxis)
+		{
+			maxMatchSize = matchSizeYAxis;
+			orient = Orientation::Y_AXIS;
+		}
+		else
+		{
+			maxMatchSize = matchSizeXAxis;
+			orient = Orientation::X_AXIS;
+		}
+		if (maxMatchSize < matchSizeZAxis)
+		{
+			maxMatchSize = matchSizeZAxis;
+			orient = Orientation::Z_AXIS;
+		}
+		
+		wrongSize = (wrongSizeXAxis && wrongSizeYAxis && wrongSizeXAxis);
+		
+		if ((!wrongSizeXAxis) && wrongSizeYAxis && wrongSizeZAxis)
+		{
+			adjacentShips = adjacentShipsXAxis;
+		}
+		else if ((!wrongSizeYAxis) && wrongSizeXAxis && wrongSizeZAxis)
+		{
+			adjacentShips = adjacentShipsYAxis;
+		}
+		else if ((!wrongSizeZAxis) && wrongSizeXAxis && wrongSizeYAxis)
+		{
+			adjacentShips = adjacentShipsZAxis;
+		}
+		else
+		{
+			adjacentShips = (adjacentShipsXAxis || adjacentShipsYAxis || adjacentShipsZAxis);
+		}
+
+		return (isXAxisMask || isYAxisMask || isZAxisMask);
 	}
 
 	void BoardBuilder::ShipMask::resetMaskFlags()
@@ -271,36 +278,46 @@ namespace battleship
 		adjacentShips = false;
 	}
 
-	BoardBuilder* BoardBuilder::addPiece(int col, int row, int depth, char type)
+	BoardBuilder* BoardBuilder::addPiece(Coordinate coord, char type)
 	{
-		_board->initSquare(row, col, type);
+		boardMap[coord] = type;
 		return this;
 	}
 
-	void BoardBuilder::markVisitedSquares(bool visitedBoard[BOARD_SIZE][BOARD_SIZE], int row, int col)
+	void BoardBuilder::markVisitedCoords(unordered_set<Coordinate, CoordinateHash>& coordSet, Coordinate coord)
 	{
-		char ship = _board->_matrix[row][col];
-		int i = row;
-		int j = col;
+		char ship = boardMap[coord];	// This coordinate has came from the boardMap, so it indeed exists
+		int i = coord.row;
+		int j = coord.col;
+		int k = coord.depth;
 		bool sameCharInRow = true;
 		bool sameCharInCol = true;
-		while ((j < BOARD_SIZE) && (sameCharInRow))
+		bool sameCharInDepth = true;
+		
+		while ((j < boardWidth) && sameCharInRow)
 		{
-			i = row;
+			i = coord.row;
 			sameCharInCol = true;
-			while ((i < BOARD_SIZE) && (sameCharInCol))
+			while ((i < boardHeight) && sameCharInCol)
 			{
-				if (_board->_matrix[i][j] == ship)
+				k = coord.depth;
+				sameCharInDepth = true;
+				while ((k < boardDepth) && sameCharInDepth)
 				{
-					visitedBoard[i][j] = true;
-				}
-				else
-				{
-					sameCharInCol = false;
-					if (i == row)
+					Coordinate currCoord(i, j, k);
+					if ((boardMap.find(currCoord) != boardMap.end()) && (boardMap[currCoord] == ship))
 					{
-						sameCharInRow = false;
+						coordSet.insert(currCoord);
 					}
+					else
+					{
+						sameCharInDepth = false;
+						if (k == coord.depth)
+							sameCharInCol = false;
+						if (i == coord.row)
+							sameCharInRow = false;
+					}
+					k++;
 				}
 				i++;
 			}
@@ -309,8 +326,9 @@ namespace battleship
 	}
 
 	// This function assumes that the board contains only ship characters or space, and not any other character
-	bool BoardBuilder::isValidBoard(set<BoardInitializeError, ErrorPriorityFunction>* errorQueue)
+	bool BoardBuilder::isValidBoard(const shared_ptr<BattleBoard> board, set<BoardInitializeError, ErrorPriorityFunction>& errorQueue)
 	{
+		tuple<int, int, int> boardSize = std::make_tuple(boardWidth, boardHeight, boardDepth);
 		shared_ptr<ShipMask> rubberMask = std::make_shared<ShipMask>(BattleBoardSquare::RubberBoat);
 		shared_ptr<ShipMask> rocketMask = std::make_shared<ShipMask>(BattleBoardSquare::RocketShip);
 		shared_ptr<ShipMask> submarineMask = std::make_shared<ShipMask>(BattleBoardSquare::Submarine);
@@ -318,160 +336,116 @@ namespace battleship
 		shared_ptr<ShipMask> currMask = NULL;
 
 		bool validBoard = true;
-		char currSquare;
 		PlayerEnum player;
-		bool visitedBoard[BOARD_SIZE][BOARD_SIZE] = {false};
+		unordered_set<Coordinate, CoordinateHash> visitedCoords;
 		bool isMatch = false;
-		for (int i = 0; i < BOARD_SIZE; i++)
+		for (const auto& square : boardMap)
 		{
-			for (int j = 0; j < BOARD_SIZE; j++)
+			if (visitedCoords.find(square.first) == visitedCoords.end())
+				continue;
+
+			player = (isupper(square.second)) ? PlayerEnum::A : PlayerEnum::B;
+			const ShipType* shipType = NULL;
+
+			switch (toupper(square.second))
 			{
-				if (visitedBoard[i][j])
+			case static_cast<char>(BattleBoardSquare::RubberBoat) :
+			{
+				shipType = &BattleBoard::RUBBER_BOAT;
+				isMatch = rubberMask->applyMask(boardMap, boardSize, square.first, player);
+				if (rubberMask->wrongSize)
 				{
-					continue;
+					if (player == PlayerEnum::A)
+						errorQueue.insert(BoardInitializeError(ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_B_PLAYER_A));
+					else
+						errorQueue.insert(BoardInitializeError(ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_B_PLAYER_B));
 				}
-
-				currSquare = _board->_matrix[i][j];
-				player = (isupper(currSquare)) ? PlayerEnum::A : PlayerEnum::B;
-				const ShipType* shipType = NULL;
-
-				switch (toupper(currSquare))
-				{
-				case (char)BattleBoardSquare::RubberBoat:
-				{
-					shipType = &BattleBoard::RUBBER_BOAT;
-					isMatch = rubberMask->applyMask(_board, i, j, player);
-					if (rubberMask->wrongSize)
-					{
-						if (player == PlayerEnum::A)
-						{
-							errorQueue->insert(BoardInitializeError(ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_B_PLAYER_A));
-						}
-						else
-						{
-							errorQueue->insert(BoardInitializeError(ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_B_PLAYER_B));
-						}
-					}
-					currMask = rubberMask;
-					break;
-				}
-				case (char)BattleBoardSquare::RocketShip:
-				{
-					shipType = &BattleBoard::ROCKET_SHIP;
-					isMatch = rocketMask->applyMask(_board, i, j, player);
-					if (rocketMask->wrongSize)
-					{
-						if (player == PlayerEnum::A)
-						{
-							errorQueue->insert(BoardInitializeError(ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_P_PLAYER_A));
-						}
-						else
-						{
-							errorQueue->insert(BoardInitializeError(ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_P_PLAYER_B));
-						}
-					}
-					currMask = rocketMask;
-					break;
-				}
-				case (char)BattleBoardSquare::Submarine:
-				{
-					shipType = &BattleBoard::SUBMARINE;
-					isMatch = submarineMask->applyMask(_board, i, j, player);
-					if (submarineMask->wrongSize)
-					{
-						if (player == PlayerEnum::A)
-						{
-							errorQueue->insert(BoardInitializeError(ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_M_PLAYER_A));
-						}
-						else
-						{
-							errorQueue->insert(BoardInitializeError(ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_M_PLAYER_B));
-						}
-					}
-					currMask = submarineMask;
-					break;
-				}
-				case (char)BattleBoardSquare::Battleship:
-				{
-					shipType = &BattleBoard::BATTLESHIP;
-					isMatch = battleshipMask->applyMask(_board, i, j, player);
-					if (battleshipMask->wrongSize)
-					{
-						if (player == PlayerEnum::A)
-						{
-							errorQueue->insert(BoardInitializeError(ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_D_PLAYER_A));
-						}
-						else
-						{
-							errorQueue->insert(BoardInitializeError(ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_D_PLAYER_B));
-						}
-					}
-					currMask = battleshipMask;
-					break;
-				}
-				default:
-					break;
-				}
-
-				if (currSquare != (char)BattleBoardSquare::Empty)
-				{
-					markVisitedSquares(visitedBoard, i, j);
-					
-					if (!currMask->wrongSize)
-					{
-						_board->addGamePiece(i, j, *shipType, player, currMask->orient);
-					}
-					
-					if (!isMatch)
-					{
-						validBoard = false;
-						if (currMask->adjacentShips)
-						{
-							errorQueue->insert(BoardInitializeError(ErrorPriorityEnum::ADJACENT_SHIPS_ON_BOARD));
-						}
-					}
-
-					currMask->resetMaskFlags();
-				}
+				currMask = rubberMask;
+				break;
 			}
-		}
+			case static_cast<char>(BattleBoardSquare::RocketShip) :
+			{
+				shipType = &BattleBoard::ROCKET_SHIP;
+				isMatch = rocketMask->applyMask(boardMap, boardSize, square.first, player);
+				if (rocketMask->wrongSize)
+				{
+					if (player == PlayerEnum::A)
+						errorQueue.insert(BoardInitializeError(ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_P_PLAYER_A));
+					else
+						errorQueue.insert(BoardInitializeError(ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_P_PLAYER_B));
+				}
+				currMask = rocketMask;
+				break;
+			}
+			case static_cast<char>(BattleBoardSquare::Submarine) :
+			{
+				shipType = &BattleBoard::SUBMARINE;
+				isMatch = submarineMask->applyMask(boardMap, boardSize, square.first, player);
+				if (submarineMask->wrongSize)
+				{
+					if (player == PlayerEnum::A)
+						errorQueue.insert(BoardInitializeError(ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_M_PLAYER_A));
+					else
+						errorQueue.insert(BoardInitializeError(ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_M_PLAYER_B));
+				}
+				currMask = submarineMask;
+				break;
+			}
+			case static_cast<char>(BattleBoardSquare::Battleship) :
+			{
+				shipType = &BattleBoard::BATTLESHIP;
+				isMatch = battleshipMask->applyMask(boardMap, boardSize, square.first, player);
+				if (battleshipMask->wrongSize)
+				{
+					if (player == PlayerEnum::A)
+						errorQueue.insert(BoardInitializeError(ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_D_PLAYER_A));
+					else
+						errorQueue.insert(BoardInitializeError(ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_D_PLAYER_B));
+				}
+				currMask = battleshipMask;
+				break;
+			}
+			default:
+				return false;	// Should not reach this line
+			}
 
-		const int numOfShipsA = _board->getPlayerAShipCount();
-		const int numOfShipsB = _board->getPlayerBShipCount();
-		if (numOfShipsA > NUM_OF_SHIPS_PER_PLAYER)
-		{
-			validBoard = false;
-			errorQueue->insert(BoardInitializeError(ErrorPriorityEnum::TOO_MANY_SHIPS_PLAYER_A));
+			markVisitedCoords(visitedCoords, square.first);
+
+			if (!currMask->wrongSize)
+				board->addGamePiece(square.first, *shipType, player, currMask->orient);
+
+			if (!isMatch)
+			{
+				validBoard = false;
+				if (currMask->adjacentShips)
+					errorQueue.insert(BoardInitializeError(ErrorPriorityEnum::ADJACENT_SHIPS_ON_BOARD));
+			}
+
+			currMask->resetMaskFlags();
 		}
-		else if (numOfShipsA < NUM_OF_SHIPS_PER_PLAYER)
+		
+		if ((board->getPlayerAShipCount() == 0) && (board->getPlayerBShipCount() == 0))
 		{
 			validBoard = false;
-			errorQueue->insert(BoardInitializeError(ErrorPriorityEnum::TOO_FEW_SHIPS_PLAYER_A));
-		}
-		if (numOfShipsB > NUM_OF_SHIPS_PER_PLAYER)
-		{
-			validBoard = false;
-			errorQueue->insert(BoardInitializeError(ErrorPriorityEnum::TOO_MANY_SHIPS_PLAYER_B));
-		}
-		else if (numOfShipsB < NUM_OF_SHIPS_PER_PLAYER)
-		{
-			validBoard = false;
-			errorQueue->insert(BoardInitializeError(ErrorPriorityEnum::TOO_FEW_SHIPS_PLAYER_B));
+			errorQueue.insert(BoardInitializeError(ErrorPriorityEnum::NO_SHIPS_AT_ALL));
 		}
 
 		return validBoard;
 	}
 
-	void BoardBuilder::printErrors(set<BoardInitializeError, ErrorPriorityFunction>* errorQueue)
+	void BoardBuilder::printErrors(const set<BoardInitializeError, ErrorPriorityFunction>& errorQueue)
 	{
-		for (auto err : *errorQueue)
+		for (const auto& err : errorQueue)
 		{
 			std::cout << err.getMsg() << std::endl;
 		}
 	}
 
-	bool BoardBuilder::validate()
+	shared_ptr<BattleBoard> BoardBuilder::build()
 	{
+		// Only BoardBuilder can instantiate this class
+		shared_ptr<BattleBoard> board(new BattleBoard(boardWidth, boardHeight, boardDepth));
+		
 		ErrorPriorityFunction sortFunc = [](const BoardInitializeError& err1, const BoardInitializeError& err2)
 		{
 			return err1.getPriority() < err2.getPriority();
@@ -482,16 +456,10 @@ namespace battleship
 		set<BoardInitializeError, ErrorPriorityFunction> errorQueue(sortFunc);
 		
 		// Call validation process here, add errors to errorQueue
-		bool validBoard = isValidBoard(&errorQueue);
+		bool validBoard = isValidBoard(board, errorQueue);
 
-		printErrors(&errorQueue);
+		printErrors(errorQueue);
 
-		return validBoard;
-	}
-
-	shared_ptr<BattleBoard> BoardBuilder::build()
-	{
-		bool isBoardValid = validate();
-		return isBoardValid ? _board : NULL;
+		return validBoard ? board : NULL;
 	}
 }

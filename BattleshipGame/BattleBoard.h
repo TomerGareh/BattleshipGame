@@ -2,19 +2,19 @@
 
 #include <memory>
 #include <string>
-#include <unordered_map>
 #include <set>
+#include <unordered_map>
 #include <utility>
 #include <functional>
-#include "AlgoCommon.h"
 #include "IBattleshipGameAlgo.h"
+#include "AlgoCommon.h"
 
-using std::string;
-using std::unordered_map;
-using std::set;
-using std::pair;
-using std::unique_ptr;
 using std::shared_ptr;
+using std::unique_ptr;
+using std::string;
+using std::pair;
+using std::set;
+using std::unordered_map;
 using std::function;
 
 namespace battleship
@@ -26,7 +26,7 @@ namespace battleship
 	/* -- Type defs -- */
 
 	// A mapping type for game pieces by 3d coordinates.
-	using GamePiecesDict = unordered_map<Coordinate, shared_ptr<GamePiece>>;
+	using GamePiecesDict = unordered_map<Coordinate, shared_ptr<GamePiece>, CoordinateHash>;
 
 	/* -- Enums & consts -- */
 
@@ -63,7 +63,7 @@ namespace battleship
 	};
 
 	/** Orientation of the ship on the battle board */
-	enum class Orientation: bool
+	enum class Orientation
 	{
 		X_AXIS,
 		Y_AXIS,

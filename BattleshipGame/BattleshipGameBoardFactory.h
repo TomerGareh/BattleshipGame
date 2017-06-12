@@ -2,14 +2,16 @@
 
 #include <memory>
 #include <string>
+#include <vector>
+#include "BoardBuilder.h"
+#include "BattleBoard.h"
 
 using std::shared_ptr;
 using std::string;
+using std::vector;
 
 namespace battleship
 {
-	class BattleBoard;
-
 	/** 
 	 * A factory class for instantiating BattleBoard classes using various methods
 	 * (currently load from file, possibly in the future "set manually" or "random").

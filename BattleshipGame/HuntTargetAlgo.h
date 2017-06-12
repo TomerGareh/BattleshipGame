@@ -6,6 +6,7 @@
 #include <map>
 #include <unordered_set>
 #include "IBattleshipGameAlgo.h"
+#include "AlgoCommon.h"
 
 using std::string;
 using std::tuple;
@@ -54,7 +55,7 @@ private:
 	tuple<int, int, int> boardSize;
 
 	// An unordered set of the coordinates that have already been visited (by us or by the opponent)
-	unordered_set<Coordinate, battleship::CoordinateHash> visitedCoords;
+	unordered_set<Coordinate, CoordinateHash> visitedCoords;
 	
 	// Our last attack direction. If the last attack was in Hunt mode this field is not relevant
 	AttackDirection lastAttackDirection;

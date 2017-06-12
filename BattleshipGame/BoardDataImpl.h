@@ -1,19 +1,18 @@
 #pragma once
-#include "IBattleshipGameAlgo.h"
-#include "AlgoCommon.h"
-#include "BattleBoard.h"
-#include <tuple>
+
 #include <unordered_map>
+#include "IBattleshipGameAlgo.h"
+#include "BattleBoard.h"
+#include "AlgoCommon.h"
 
 using std::unordered_map;
-using std::tuple;
 
 namespace battleship
 {
 	class BoardDataImpl : public BoardData
 	{
 	public:
-		BoardDataImpl(PlayerEnum player, GamePiecesDict* gamePieces,
+		BoardDataImpl(PlayerEnum player, const GamePiecesDict* gamePieces,
 					  int rows, int cols, int depth);
 
 		virtual ~BoardDataImpl() = default;
@@ -25,6 +24,6 @@ namespace battleship
 		int depth() const { return _depth; }
 
 	private:
-		unordered_map<Coordinate, char> _visiblePieces;
+		unordered_map<Coordinate, char, CoordinateHash> _visiblePieces;
 	};
 }
