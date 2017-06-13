@@ -1,6 +1,7 @@
 #include <iostream>
 #include "GameManager.h"
 #include "AlgoCommon.h"
+#include "BoardDataImpl.h"
 
 using std::cout;
 using std::endl;
@@ -9,18 +10,6 @@ namespace battleship
 {
 	GameManager::GameManager()
 	{
-	}
-
-	void GameManager::setupGame(shared_ptr<IBattleshipGameAlgo> playerA,
-								shared_ptr<IBattleshipGameAlgo> playerB,
-								shared_ptr<BattleBoard> board)
-	{
-		playerA->setPlayer(0);
-		playerB->setPlayer(1);
-
-		// TODO: The player can query this view later too?
-		playerA->setBoard(*board->getBoardPlayerView(static_cast<PlayerEnum>(0)).get());
-		playerB->setBoard(*board->getBoardPlayerView(static_cast<PlayerEnum>(1)).get());
 	}
 
 	bool GameManager::isPlayerShipsLeft(const BattleBoard *const board, PlayerEnum player) const
@@ -84,25 +73,35 @@ namespace battleship
 		}
 	}
 
-	void GameManager::updateScoreboard(const BattleBoard *const board)
+	PlayerEnum GameManager::getWinner(const BattleBoard *const board) const
 	{
 		if (board->getPlayerAShipCount() == 0)
 		{
-			_playerBWins++;
+			return PlayerEnum::B;
 		}
 		else if (board->getPlayerBShipCount() == 0)
 		{
-			_playerAWins++;
+			return PlayerEnum::A;
 		}
-
-		// Otherwise - this is a tie
+		else
+		{
+			// Otherwise - this is a tie
+			return PlayerEnum::NONE;
+		}
 	}
 
-	void GameManager::startGame(shared_ptr<BattleBoard> board,
-								shared_ptr<IBattleshipGameAlgo> playerA, shared_ptr<IBattleshipGameAlgo> playerB,
-								GameVisual& visualizer)
+	shared_ptr<GameResults> GameManager::runGame(shared_ptr<BattleBoard> board,
+												 shared_ptr<IBattleshipGameAlgo> playerA,
+												 shared_ptr<IBattleshipGameAlgo> playerB) const
 	{
-		visualizer.visualizeBeginGame(board);
+		playerA->setPlayer(0);
+		playerB->setPlayer(1);
+
+		// Player views will be kept alive for the duration of the game (this scope)
+		BoardDataImpl playerAView(PlayerEnum::A, board);
+		BoardDataImpl playerBView(PlayerEnum::B, board);
+		playerA->setBoard(playerAView);
+		playerB->setBoard(playerBView);
 
 		IBattleshipGameAlgo* currentPlayer = playerA.get();
 		bool isPlayerAForfeit = false;
@@ -171,7 +170,13 @@ namespace battleship
 			playerB->notifyOnAttackResult(attackingPlayerNumber, target, attackResult);
 		}
 
-		updateScoreboard(board.get());
-		visualizer.visualizeEndGame(board, playerAPoints, playerBPoints);
+		auto winner = getWinner(board.get());
+
+		shared_ptr<GameResults> results = std::make_shared<GameResults>();
+		results->winner = winner;
+		results->playerAPoints = playerAPoints;
+		results->playerBPoints = playerBPoints;
+
+		return results;
 	}
 }

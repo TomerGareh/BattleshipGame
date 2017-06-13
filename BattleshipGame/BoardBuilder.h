@@ -94,7 +94,12 @@ namespace battleship
 		 *	In the end the constructed BattleBoard instance is returned, or NULL if errors have occured in the process.
 		 *	Any validation errors that might occur will be printed by this routine, in descending priority order.
 		 */
-		shared_ptr<BattleBoard> build();
+		unique_ptr<BattleBoard> build();
+
+		/** Creates a new instance of the battle board out of the given prototype.
+		 *  Boards will be identical in data, but will not share the same game pieces.
+		 */
+		static shared_ptr<BattleBoard> clone(const BattleBoard& prototype);
 
 	private:
 		/** A helper class for validating the legal formation of game-pieces on the board. */

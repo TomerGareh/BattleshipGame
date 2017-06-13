@@ -10,21 +10,23 @@ using std::tuple;
 
 namespace battleship
 {
+	class BattleBoard;
+
+	/** A player's view of the given wrapped battleboard.
+	 *	The inner battleboard is immutable to this class.
+	 */
 	class BoardDataImpl : public BoardData
 	{
 	public:
-		BoardDataImpl(PlayerEnum player, GamePiecesDict* gamePieces,
-					  int rows, int cols, int depth);
-
+		/** Construct view of the board from given player point of view */
+		BoardDataImpl(PlayerEnum player, shared_ptr<BattleBoard> board);
 		virtual ~BoardDataImpl() = default;
 
-		virtual char charAt(Coordinate c) const override; //returns only selected players' chars
-
-		int rows()  const { return _rows; }
-		int cols()  const { return _cols; }
-		int depth() const { return _depth; }
+		// Returns only selected players' chars
+		virtual char charAt(Coordinate c) const override;
 
 	private:
-		unordered_map<Coordinate, char> _visiblePieces;
+		PlayerEnum _player;
+		shared_ptr<BattleBoard> _board;
 	};
 }

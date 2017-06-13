@@ -115,10 +115,14 @@
     <ClInclude Include="BattleshipGameBoardFactory.h" />
     <ClInclude Include="BoardBuilder.h" />
     <ClInclude Include="BoardDataImpl.h" />
+    <ClInclude Include="CompetitionManager.h" />
+    <ClInclude Include="Configuration.h" />
     <ClInclude Include="GameManager.h" />
-    <ClInclude Include="GameVisual.h" />
     <ClInclude Include="Logger.h" />
     <ClInclude Include="MainGame.h" />
+    <ClInclude Include="Scoreboard.h" />
+    <ClInclude Include="SingleGameTask.h" />
+    <ClInclude Include="WorkerThreadResourcePool.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AlgoLoader.cpp" />
@@ -126,10 +130,14 @@
     <ClCompile Include="BattleshipGameBoardFactory.cpp" />
     <ClCompile Include="BoardBuilder.cpp" />
     <ClCompile Include="BoardDataImpl.cpp" />
+    <ClCompile Include="CompetitionManager.cpp" />
+    <ClCompile Include="Configuration.cpp" />
     <ClCompile Include="GameManager.cpp" />
-    <ClCompile Include="GameVisual.cpp" />
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="MainGame.cpp" />
+    <ClCompile Include="Scoreboard.cpp" />
+    <ClCompile Include="SingleGameTask.cpp" />
+    <ClCompile Include="WorkerThreadResourcePool.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AlgoCommonsProj\AlgoCommonsProj.vcxproj">

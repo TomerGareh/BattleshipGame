@@ -4,32 +4,30 @@
 #include <ctime>
 #include <sstream>
 
+using std::cout;
 using std::cerr;
 using std::endl;
+using std::lock_guard;
 
 namespace battleship
-{
-	const string Logger::LOG_FILE = "game.log";
-		
-	Logger::Logger()
+{		
+	Logger::Logger():
+		_limit(Severity::DEBUG_LEVEL), // Default log level: show everything
+		_path(nullptr)
 	{
-		fs.open(LOG_FILE, std::fstream::trunc | std::fstream::out | std::fstream::app);
-
-		if (!fs.is_open() || !fs.good())
-		{
-			cerr << "Error: IO error when creating logger file: " << LOG_FILE << endl;
-		}
 	} 
 
 	Logger::~Logger()
 	{
-		fs.close();
+		log(Severity::INFO_LEVEL, "Terminating logger..");
+		_fs.close();
 
 		// Stream errors are guaranteed to appear only after "flush",
 		// which is only guaranteed when we explicitly flush or close the file for writing
-		if (!fs)
+		if (!_fs)
 		{
-			cerr << "Error: IO error when flushing logger content to " << LOG_FILE << endl;
+			auto logFilePath = *_path + "\\" + LOG_FILE;
+			cerr << "Error: IO error when flushing logger content to " << logFilePath << endl;
 		}
 	}
 
@@ -42,21 +40,72 @@ namespace battleship
 		return instance;
 	}
 
-	void Logger::log(Severity severity, const string& msg)
+	void Logger::log(Severity severity, const string& msg, bool isPrintToConsole)
 	{
+		// Don't log messages before the logger is completely loaded
+		if ((_path == nullptr) || (!_fs))
+			return;
+
+		// Filter messages that don't pass the bar of severity
+		if (severity < _limit)
+			return;
+
 		string severityStr;
 
 		if (severity == Severity::ERROR_LEVEL)
 			severityStr = "ERROR";
 		else if (severity == Severity::WARNING_LEVEL)
 			severityStr = "WARNING";
-		else
+		else if (severity == Severity::INFO_LEVEL)
 			severityStr = "INFO";
+		else
+			severityStr = "DEBUG";
 
-		// Get current date-time
-		auto t = std::time(nullptr);
-		auto tm = *std::localtime(&t);
+		{ // Keep output synchronized for multiple threads accessing it
+			lock_guard<mutex> lock(_outputLock);
 
-		fs << "[" << std::put_time(&tm, "%d-%m-%Y %H-%M-%S") << "][" << severityStr << "] " << msg << endl;
+			// Get current date-time
+			auto t = std::time(nullptr);
+			auto tm = *std::localtime(&t);
+			_fs << "[" << std::put_time(&tm, "%d-%m-%Y %H-%M-%S") << "][" << severityStr << "] " << msg << endl;
+
+			if (isPrintToConsole)
+			{
+				if (severity == Severity::ERROR_LEVEL)
+					cerr << msg << endl;
+				else
+					cout << msg << endl;
+			}
+		}
+	}
+
+	Logger* Logger::setLevel(Severity limit)
+	{
+		_limit = limit;
+		return this;
+	}
+
+	Logger* Logger::setPath(const string& path)
+	{
+		// Avoid incorrect usage
+		if (_path)
+		{
+			return this;
+		}
+
+		_path = std::make_unique<string>(path);
+
+		auto logFilePath = *_path + "\\" + LOG_FILE;
+
+		// This should create the logger
+		_fs.open(logFilePath, std::fstream::trunc | std::fstream::out | std::fstream::app);
+
+		if (!_fs.is_open() || !_fs.good())
+		{
+			cerr << "Error: IO error when creating logger file at: " << logFilePath << endl <<
+				    "[Game will proceed without logging]" << endl;
+		}
+
+		return this;
 	}
 }

@@ -14,6 +14,12 @@ namespace battleship
 {
 	const string BattleshipGameBoardFactory::BOARD_SUFFIX = "sboard";
 
+	BattleshipGameBoardFactory::BattleshipGameBoardFactory(const string& path)
+	{
+		Logger::getInstance().log(Severity::DEBUG_LEVEL, "BattleshipGameBoardFactory started..");
+		_loadedBoards = loadAllBattleBoards(path);
+	}
+
 	bool BattleshipGameBoardFactory::parseHeader(string& nextLine, int& rows, int& cols, int& depth)
 	{
 		bool isValidFile = true;
@@ -90,7 +96,7 @@ namespace battleship
 		}
 	}
 
-	shared_ptr<BattleBoard> BattleshipGameBoardFactory::buildBoardFromFile(const string& boardFile)
+	unique_ptr<BattleBoard> BattleshipGameBoardFactory::buildBoardFromFile(const string& boardFile)
 	{
 		unique_ptr<BoardBuilder> builder;
 
@@ -103,8 +109,8 @@ namespace battleship
 		int rowCounter = 0;
 		int depthCounter = 0;
 
-		auto headerParser = [&builder, &rows, &cols, &depth](string& nextLine, int lineNum,
-															 bool& isHeader, bool& isValidFile)
+		auto headerParser = [this, &builder, &rows, &cols, &depth](string& nextLine, int lineNum,
+																   bool& isHeader, bool& isValidFile)
 		{
 			if (lineNum == 1)
 			{
@@ -120,7 +126,7 @@ namespace battleship
 			}
 		};
 
-		auto lineParser = [&builder, &cols, &rows, &depth,
+		auto lineParser = [this, &builder, &cols, &rows, &depth,
 						   &rowCounter, &depthCounter](string& nextLine)
 		{
 			if (depthCounter >= depth)
@@ -153,28 +159,9 @@ namespace battleship
 		return board;
 	}
 
-	shared_ptr<BattleBoard> BattleshipGameBoardFactory::loadBattleBoard(const string& path)
+	BattleshipGameBoardFactory::LoadedBoardsIndex BattleshipGameBoardFactory::loadAllBattleBoards(const string& path)
 	{
-		auto boardFiles = IOUtil::listFilesInPath(path, BOARD_SUFFIX);
-
-		if (boardFiles.size() == 0)
-		{ // No board files found
-			cout << "No board files (*.sboard) looking in path: " << path << endl;
-			Logger::getInstance().log(Severity::ERROR_LEVEL,
-									  "No board files (*.sboard) looking in path: " + path);
-			return NULL;
-		}
-
-		// Choose the first board file found, lexicographically
-		// Start parsing the file, line by line
-		string boardFile = path + "\\" + boardFiles[0];
-
-		return buildBoardFromFile(boardFile);
-	}
-
-	vector<shared_ptr<BattleBoard>> BattleshipGameBoardFactory::loadAllBattleBoards(const string& path)
-	{
-		vector<shared_ptr<BattleBoard>> loadedBoards;
+		LoadedBoardsIndex loadedBoards;
 		auto boardFiles = IOUtil::listFilesInPath(path, BOARD_SUFFIX);
 
 		// Load each of the battle boards
@@ -187,13 +174,39 @@ namespace battleship
 			// Accumulate only valid boards
 			if (NULL != nextBoard)
 			{
-				loadedBoards.push_back(nextBoard);
+				loadedBoards.emplace(boardFilename, nextBoard);
+				_loadedBoardNames.push_back(boardFilename);
 				Logger::getInstance().log(Severity::INFO_LEVEL,
 										  "Battle board " + boardFilename + " loaded successfully");
+			}
+			else
+			{
+				Logger::getInstance().log(Severity::WARNING_LEVEL,
+										  "Battle board " + boardFilename + " is invalid");
 			}
 		}
 
 		// Compiler expected to perform return value optimization (vector is moved)
 		return loadedBoards;
+	}
+
+	shared_ptr<BattleBoard> BattleshipGameBoardFactory::requestBattleboard(const string& path)
+	{
+		auto boardIt = _loadedBoards.find(path);
+
+		if (boardIt == _loadedBoards.end())
+		{
+			return NULL;
+		}
+		else
+		{
+			Logger::getInstance().log(Severity::DEBUG_LEVEL, path + " BattleBoard new instance created..");
+			return BoardBuilder::clone(*boardIt->second); // Prototype pattern
+		}
+	}
+
+	const vector<string>& BattleshipGameBoardFactory::boardsList() const
+	{
+		return _loadedBoardNames;
 	}
 }

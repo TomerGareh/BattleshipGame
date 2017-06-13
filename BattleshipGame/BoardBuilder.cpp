@@ -489,9 +489,14 @@ namespace battleship
 		return validBoard;
 	}
 
-	shared_ptr<BattleBoard> BoardBuilder::build()
+	unique_ptr<BattleBoard> BoardBuilder::build()
 	{
 		bool isBoardValid = validate();
 		return isBoardValid ? _board : NULL;
+	}
+
+	shared_ptr<BattleBoard> clone(const BattleBoard& prototype)
+	{
+		return std::make_shared<BattleBoard>(prototype); // Invoke copy constructor
 	}
 }

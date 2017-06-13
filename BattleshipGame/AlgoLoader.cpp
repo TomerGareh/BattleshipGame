@@ -1,132 +1,18 @@
 #include "AlgoLoader.h"
-#include <iostream>
 #include <functional>
 #include <algorithm>
 #include "IBattleshipGameAlgo.h"
 #include "IOUtil.h"
+#include "Logger.h"
 
-using std::cout;
-using std::endl;
 using std::function;
 
 namespace battleship
 {
-	const string AlgoLoader::LOAD_DLL_ERROR_STRING = "Cannot load dll: ";
-	const string AlgoLoader::MISSING_DLL_ERROR_STRING = "Missing an algorithm (dll) file looking in path: ";
-	const string AlgoLoader::NON_EXISTING_ALGO_ERROR_STRING = "Error: Game tried to access a non-existing algorithm";
-
-	AlgoLoader::AlgoLoader()
-	{	
-	}
-
-	AlgoLoader::~AlgoLoader()
+	void AlgoLoader::fetchDLLs(const string& path)
 	{
-		// Close all the dynamic libs we opened
-		for (auto algIter = _loadedGameAlgos.begin(); algIter != _loadedGameAlgos.end(); ++algIter)
-		{
-			// Free HINSTANCE loaded, which resides in the 2nd cell of the algo tuple
-			FreeLibrary(std::get<1>(*algIter));
-		}
+		Logger::getInstance().log(Severity::DEBUG_LEVEL, "AlgoLoader Fetching list of available DLLs..");
 
-		_loadedGameAlgos.clear();
-	}
-
-	IBattleshipGameAlgo* AlgoLoader::loadAlgorithm(const string& algoFullpath)
-	{
-		// Load dynamic library
-		// Again using Unicode compatible version of LoadLibrary
-		HINSTANCE hDll = LoadLibraryA(algoFullpath.c_str());
-		if (!hDll)
-		{
-			cout << LOAD_DLL_ERROR_STRING << algoFullpath << endl;
-			return NULL;
-		}
-
-		// Get function pointer
-		GetAlgorithmFuncType getAlgorithmFunc = (GetAlgorithmFuncType)GetProcAddress(hDll, "GetAlgorithm");
-		if (!getAlgorithmFunc)
-		{
-			cout << LOAD_DLL_ERROR_STRING << algoFullpath << endl;
-			FreeLibrary(hDll); // Make sure to release loaded library, as AlgoLoader doesn't manage it yet
-			return NULL;
-		}
-
-		// Keep algorithm in list of loaded algos
-		_loadedGameAlgos.push_back(std::make_tuple(algoFullpath, hDll, getAlgorithmFunc));
-
-		// Call GetAlgorithm for the specified algorithm, this should create a new instance for that algo type 
-		IBattleshipGameAlgo* algo = getAlgorithmFunc();
-		if (NULL == algo)
-		{
-			cout << LOAD_DLL_ERROR_STRING << algoFullpath << endl;
-			return NULL;
-		}
-
-		return algo;
-	}
-
-	const string AlgoLoader::getAlgoPathByIndex(unsigned int index) const
-	{
-		// Avoid array out of bounds, return an empty string
-		if (index >= _availableGameAlgos.size())
-		{
-			cout << NON_EXISTING_ALGO_ERROR_STRING << endl;
-			return "";
-		}
-
-		const string algoPath = _availableGameAlgos.at(index);
-		
-		return algoPath;
-	}
-
-	shared_ptr<IBattleshipGameAlgo> AlgoLoader::loadAlgoByPath(const string& algoPath)
-	{
-		IBattleshipGameAlgo* algo = NULL;
-
-		// Search if algo was already loaded before
-		auto it = std::find_if(_loadedGameAlgos.begin(), _loadedGameAlgos.end(),
-			[&algoPath](const AlgoDescriptor& ad) { return std::get<0>(ad) == algoPath; });
-
-		if (it == _loadedGameAlgos.end())
-		{
-			// Not loaded before, so load and cache here
-			algo = loadAlgorithm(algoPath);
-		}
-		else
-		{	// Loaded before
-			// Retrieve algorithm descriptor
-			AlgoDescriptor& algoDesc = *it;
-			auto getAlgorithmFunc = std::get<2>(algoDesc); // 3rd element holds the function pointer
-
-			// Call GetAlgorithm for the specified algorithm,
-			// this should create a new instance for that algo type 
-			IBattleshipGameAlgo* algo = getAlgorithmFunc();
-			if (NULL == algo)
-			{
-				cout << LOAD_DLL_ERROR_STRING << std::get<0>(algoDesc) << endl;
-				return NULL;
-			}
-		}
-
-		// Wrap in a smart pointer, so consumers don't have to deal with memory deallocation manually
-		return shared_ptr<IBattleshipGameAlgo>(algo);
-	}
-
-	shared_ptr<IBattleshipGameAlgo> AlgoLoader::loadAlgoByLexicalOrder(unsigned int index)
-	{
-		// Avoid array out of bounds, return NULL
-		if (index >= _availableGameAlgos.size())
-		{
-			cout << NON_EXISTING_ALGO_ERROR_STRING << endl;
-			return NULL;
-		}
-
-		const string algoPath = _availableGameAlgos.at(index);
-		return loadAlgoByPath(algoPath);
-	}
-
-	bool AlgoLoader::fetchDLLs(const string& path)
-	{
 		_availableGameAlgos.clear();
 		vector<string> foundDlls = IOUtil::listFilesInPath(path, "dll");
 
@@ -135,36 +21,113 @@ namespace battleship
 		{
 			string fullFileName = path + "\\" + nextDllFilename;
 			_availableGameAlgos.push_back(fullFileName);
+			Logger::getInstance().log(Severity::DEBUG_LEVEL, fullFileName + " found");
 		}
-
-		// A game must have 2 algorithms to function properly
-		if (_availableGameAlgos.size() < 2)
-		{
-			cout << MISSING_DLL_ERROR_STRING << path << endl;
-			return false;
-		}
-
-		return true;
 	}
 
-	vector<shared_ptr<IBattleshipGameAlgo>> AlgoLoader::loadAllAlgorithms(const string& path)
+	void AlgoLoader::loadAlgorithm(const string& algoFullpath)
 	{
-		vector<shared_ptr<IBattleshipGameAlgo>> algorithms;
-
-		if (!fetchDLLs(path))
-			return algorithms;
-
-		for (const string& algoPath : _availableGameAlgos)
+		// Load dynamic library
+		// Again using Unicode compatible version of LoadLibrary
+		HINSTANCE hDll = LoadLibraryA(algoFullpath.c_str());
+		if (!hDll)
 		{
-			auto algo = loadAlgoByPath(algoPath);
-
-			if (algo != NULL)
-			{
-				algorithms.push_back(algo);
-			}
+			Logger::getInstance().log(Severity::WARNING_LEVEL, "Cannot load dll: " + algoFullpath);
+			return;
 		}
 
-		// Compiler is expected to perform RVO on vector return value
-		return algorithms;
+		// Get function pointer
+		GetAlgorithmFuncType getAlgorithmFunc = (GetAlgorithmFuncType)GetProcAddress(hDll, "GetAlgorithm");
+		if (!getAlgorithmFunc)
+		{
+			Logger::getInstance().log(Severity::WARNING_LEVEL, "Cannot load dll: " + algoFullpath);
+			FreeLibrary(hDll); // Make sure to release loaded library, as AlgoLoader doesn't manage it yet
+			return;
+		}
+
+		// Keep algorithm in list of loaded algos
+		auto algoDescriptor = std::make_shared<AlgoDescriptor>(algoFullpath, hDll, getAlgorithmFunc);
+		_loadedGameAlgos.push_back(algoDescriptor);
+		_loadedGameAlgoNames.push_back(algoFullpath);
+
+		Logger::getInstance().log(Severity::INFO_LEVEL, algoFullpath + " loaded successfully");
+	}
+
+	AlgoLoader::AlgoLoader(const string& path)
+	{	
+		Logger::getInstance().log(Severity::INFO_LEVEL, "AlgoLoader started..");
+
+		// Fetch DLL list
+		fetchDLLs(path);
+
+		// Try to load all algorithms available
+		for (const string& algoPath : _availableGameAlgos)
+		{
+			loadAlgorithm(algoPath);
+		}
+	}
+
+	AlgoLoader::~AlgoLoader()
+	{
+		// Close all the dynamic libs we opened
+		for (auto algIter = _loadedGameAlgos.begin(); algIter != _loadedGameAlgos.end(); ++algIter)
+		{
+			// Free HINSTANCE loaded, which resides in the 2nd cell of the algo tuple
+			auto descriptor = *(algIter);
+			Logger::getInstance().log(Severity::DEBUG_LEVEL, "Freeing algorithm: " + descriptor->path);
+			FreeLibrary(descriptor->dll);
+		}
+
+		Logger::getInstance().log(Severity::INFO_LEVEL, "AlgoLoader destroyed..");
+	}
+
+	shared_ptr<IBattleshipGameAlgo> AlgoLoader::requestAlgo(const string& algoPath) const
+	{
+		shared_ptr<AlgoDescriptor> algoDescriptor = NULL;
+
+		// Verify algo was already loaded before
+		auto it = std::find_if(_loadedGameAlgos.begin(), _loadedGameAlgos.end(),
+			[&algoPath](shared_ptr<AlgoDescriptor> const& ad) { return ad->path == algoPath; });
+
+		if (it == _loadedGameAlgos.end())
+		{
+			// Not loaded before, meaning a wrong algoPath given
+			Logger::getInstance().log(Severity::ERROR_LEVEL,
+									  "Error: Trying to load algorithm from " + algoPath +
+									  " but this DLL isn't managed by the AlgoLoader");
+			return NULL;
+		}
+		else
+		{	// Algo's DLL loaded before
+			// Retrieve algorithm descriptor & create an instance out of it
+			algoDescriptor = *it;
+		}
+
+		auto getAlgorithmFunc = algoDescriptor->algoFunc;
+
+		// Call GetAlgorithm for the specified algorithm,
+		// this should create a new instance for that algo type 
+		IBattleshipGameAlgo* algo = getAlgorithmFunc();
+		if (NULL == algo)
+		{
+			Logger::getInstance().log(Severity::ERROR_LEVEL,
+									  "Error: Cannot create instance out of dll: " + algoDescriptor->path);
+			return NULL;
+		}
+
+		Logger::getInstance().log(Severity::DEBUG_LEVEL, algoPath + " new instance created");
+
+		// Wrap in a smart pointer, so consumers don't have to deal with memory deallocation manually
+		return shared_ptr<IBattleshipGameAlgo>(algo);
+	}
+
+	const vector<string>& AlgoLoader::availableGameAlgos() const
+	{
+		return _availableGameAlgos;
+	}
+
+	const vector<string>& AlgoLoader::loadedGameAlgos() const
+	{
+		return _loadedGameAlgoNames;
 	}
 }

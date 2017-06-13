@@ -36,15 +36,23 @@ namespace battleship
 		 *	which sets isHeader=false when we're done finishing reading the header, or 
 		 *  isValidFile=false if the file header is invalid.
 		 *  This helper function deals with IO errors and managing external file resources.
-		 *  Returns true for a valid file, false for an invalid file.
+		 *  Returns true for a valid file, false for an invalid file or on io errors.
 		 */
 		static bool parseFile(const string& filename,
 					  	      function<void(string& nextReadLine)> lineParser,
 							  function<void(string& nextReadLine, int lineNum,
 										    bool& isHeader, bool& isValidFile)> headerParser = NULL);
 
+		/** Returns true if fullString starts with prefix */
+		static bool startsWith(const string& fullString, const string& prefix);
+
 		/** Returns true if fullString ends with ending as a suffix */
 		static bool endsWith(const string& fullString, const string& ending);
+
+		/** Removes the prefix from the fullString. Assumes the fullString begins with prefix,
+		 *  otherwise behaviour is undefined.
+		 */
+		static void removePrefix(string& fullString, const string& prefix);
 
 		/** Returns true if the path argument points to a real valid path on disk, false if not. */
 		static bool validatePath(const string& path);

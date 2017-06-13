@@ -1,5 +1,4 @@
 #include "BattleBoard.h"
-#include "BoardDataImpl.h"
 
 namespace battleship
 {
@@ -68,6 +67,48 @@ namespace battleship
 		other._boardWidth = 0;
 		other._boardHeight = 0;
 		other._boardDepth = 0;
+
+		return *this;
+	}
+
+	// Copy ctor
+	BattleBoard::BattleBoard(BattleBoard const& other):
+		_playerAShipCount(other._playerAShipCount),
+		_playerBShipCount(other._playerBShipCount),
+		_boardWidth(other._boardWidth),
+		_boardHeight(other._boardHeight),
+		_boardDepth(other._boardDepth)
+	{
+		// Perform deep copy for game pieces as they contain data that may change along the game and shouldn't
+		// be shared among common boards
+		for (auto it = other._gamePieces.begin(); it != other._gamePieces.end(); ++it)
+		{
+			_gamePieces.emplace(it->first, std::make_shared<GamePiece>(it->second));
+		}
+	}
+	
+	// Copy asignment operator
+	BattleBoard& BattleBoard::operator=(BattleBoard const& other)
+	{
+		// Check for self-assignment
+		if (&other != this)
+		{
+			_playerAShipCount = other._playerAShipCount;
+			_playerBShipCount = other._playerBShipCount;
+			_boardWidth = other._boardWidth;
+			_boardHeight = other._boardHeight;
+			_boardDepth = other._boardDepth;
+
+			_gamePieces.clear(); 
+
+			// Perform deep copy for game pieces as they contain data that may change along the game and shouldn't
+			// be shared among common boards
+			for (auto it = other._gamePieces.begin(); it != other._gamePieces.end(); ++it)
+			{
+				_gamePieces.emplace(it->first, std::make_shared<GamePiece>(it->second));
+			}
+		}
+
 		return *this;
 	}
 
@@ -169,11 +210,6 @@ namespace battleship
 
 	// Getters & Setters
 
-	unique_ptr<BoardData> BattleBoard::getBoardPlayerView(PlayerEnum player) const
-	{
-		return std::make_unique<BoardDataImpl>(player, &_gamePieces, _boardHeight, _boardWidth, _boardDepth);
-	}
-
 	const int BattleBoard::getPlayerAShipCount() const
 	{
 		return _playerAShipCount;
@@ -196,6 +232,21 @@ namespace battleship
 		{
 			shared_ptr<GamePiece> gamePiece = dictIter->second;
 			return gamePiece->_player;
+		}
+	}
+
+	shared_ptr<const GamePiece> BattleBoard::pieceAt(const Coordinate& c) const
+	{
+		auto gamePieceIt = _gamePieces.find(c);
+
+		// If not entry exists return EMPTY
+		if (gamePieceIt == _gamePieces.end())
+		{
+			return NULL;
+		}
+		else
+		{ // If an entry exists return the game piece
+			return gamePieceIt->second;
 		}
 	}
 

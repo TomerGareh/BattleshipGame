@@ -3,13 +3,13 @@
 #include <memory>
 #include <windows.h>
 #include <vector>
-#include <tuple>
 #include <string>
+#include <unordered_map>
 #include "IBattleshipGameAlgo.h"
 
 using std::shared_ptr;
 using std::vector;
-using std::tuple;
+using std::unordered_map;
 using std::string;
 
 namespace battleship
@@ -22,7 +22,7 @@ namespace battleship
 		/** Constructs a new instance of AlgoLoader, used to create new IBattleshipGameAlgo instances
 		 *	from available DLLs.
 		 */
-		AlgoLoader();
+		AlgoLoader(const string& path);
 
 		/** Releases all dynamic libraries loaded by this algorithm loader */
 		virtual ~AlgoLoader();
@@ -32,53 +32,57 @@ namespace battleship
 		AlgoLoader(AlgoLoader&& other) noexcept = delete;			  // Disable moving
 		AlgoLoader& operator= (AlgoLoader&& other) noexcept = delete; // Disable moving (assignment)
 
-		/** Loads & returns all algorithms available.
+		/** Get list of algorithms available for loading (their dll is present in the game dir) */
+		const vector<string>& availableGameAlgos() const;
+
+		/** Get list of algorithm whose dll was successfully loaded */
+		const vector<string>& loadedGameAlgos() const;
+
+		/** Creates a new instance of the algorithm in the given path.
+		 *  This method assumes algoPath was loaded successfully by this object.
+		 *  (algoPath should appear in "loadedAlgos()")
+		 *  This method is thread safe.
 		 */
-		vector<shared_ptr<IBattleshipGameAlgo>> loadAllAlgorithms(const string& path);
+		shared_ptr<IBattleshipGameAlgo> requestAlgo(const string& algoPath) const;
 
 	private:
-
-		// Error message strings
-		static const string LOAD_DLL_ERROR_STRING;
-		static const string MISSING_DLL_ERROR_STRING;
-		static const string NON_EXISTING_ALGO_ERROR_STRING;
 
 		/** Typedef for object creating new IBattleshipGameAlgo objects from Dlls */
 		using GetAlgorithmFuncType = IBattleshipGameAlgo *(*)();
 
-		/** Typedef of descriptor for IBattleshipGameAlgo available for loading.
+		/** Descriptor for IBattleshipGameAlgo available for loading.
 		 *	This is essentially all the information available on an algorithm we can load.
 		 */
-		using AlgoDescriptor = tuple<string, HINSTANCE, GetAlgorithmFuncType>;
+		struct AlgoDescriptor
+		{
+			string path;
+			HINSTANCE dll;
+			GetAlgorithmFuncType algoFunc;
+
+			AlgoDescriptor(string& aPath, HINSTANCE aDll, GetAlgorithmFuncType aAlgoFunc)
+			{
+				path = aPath;
+				dll = aDll;
+				algoFunc = aAlgoFunc;
+			}
+		};
 
 		/** Vector of available algorithms for loading: <Algorithm name> */
 		vector<string> _availableGameAlgos;
 
-		/** Vector of loaded algorithms: <Algorithm name, dll handle, GetAlgorithm function ptr> */
-		vector<AlgoDescriptor> _loadedGameAlgos;
+		/** Vector of loaded algorithm names */
+		vector<string> _loadedGameAlgoNames;
 
-		/** Loads the algorithm in the given path. */
-		IBattleshipGameAlgo* AlgoLoader::loadAlgorithm(const string& algoFullpath);
+		/** Vector of loaded algorithms: <Algorithm name, dll handle, GetAlgorithm function ptr> */
+		vector<shared_ptr<AlgoDescriptor>> _loadedGameAlgos;
+
+		/** Loads the algorithm's DLL in the given path */
+		void loadAlgorithm(const string& algoFullpath);
 
 		/** Fetches names for all algorithms available in the given path.
 	 	 *	(populates the AlgoLoad with available dlls for loading)
 		 */
-		bool fetchDLLs(const string& path);
-
-		/** Loads & returns the algorithm available in lexicographical order by index.
-		 *	Algorithms can only be loaded after their dll have been fetched.
-		 */
-		shared_ptr<IBattleshipGameAlgo> loadAlgoByLexicalOrder(unsigned int index);
-
-		/** Loads & returns the algorithm in the given path.
-		 *  This method assumes algoPath was returned by previous call of fetchDLLs.
-		 */
-		shared_ptr<IBattleshipGameAlgo> loadAlgoByPath(const string& algoPath);
-
-		/** Returns the algorithm name at the given index (algorithms are sorted in a list)
-		 *	If an error occurs, an empty string is returned.
-		 */
-		const string getAlgoPathByIndex(unsigned int index) const;
+		void fetchDLLs(const string& path);
 	};
 
 }

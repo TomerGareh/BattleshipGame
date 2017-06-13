@@ -89,6 +89,9 @@ namespace battleship
 
 		set<Coordinate> _damagedCoords;
 		GamePiece(Coordinate firstPos, const ShipType *const type, PlayerEnum player, Orientation orientation);
+		GamePiece(GamePiece const&) = default; // Enable copying
+		GamePiece& operator=(GamePiece const&) = default; // Enable copying (assignment)
+
 		virtual ~GamePiece() = default;
 	};
 
@@ -111,13 +114,6 @@ namespace battleship
 		 */
 		shared_ptr<const GamePiece> executeAttack(const Coordinate& target);
 
-		/** Returns a view of the board as the player sees it.
-		 *	The view is temporary and should not be held by consumers.
-		 *	When the view is done being used (object is no longer referenced), it will get automatically
-		 *	deallocated
-		 */
-		unique_ptr<BoardData> getBoardPlayerView(PlayerEnum player) const;
-
 		/** Returns the number of ships for player A */
 		const int getPlayerAShipCount() const;
 
@@ -129,6 +125,10 @@ namespace battleship
 		 *  Coordinates are defined in the range [0, BOARD_SIZE-1]
 		 */
 		const PlayerEnum whichPlayerOwnsSquare(const Coordinate& pos) const;
+
+		/** Returns game piece at given coordinate or NULL if this is an empty square.
+		 */
+		shared_ptr<const GamePiece> pieceAt(const Coordinate& c) const;
 
 		/** Returns the board width */
 		int width() const;
@@ -166,12 +166,11 @@ namespace battleship
 		// this object type.
 		BattleBoard(int width, int height, int depth);
 
-		// BattleBoard contains a pointer to a 2d buffer containing the visual data,
-		// we avoid shallow copies of such objects since the new copy will share the same visual data
-		// pointer, which is an error. BattleBoards shouldn't be copied around anyway, so we
-		// simply disable them.
-		BattleBoard(BattleBoard const&) = delete; // Disable copying
-		BattleBoard& operator=(BattleBoard const&) = delete; // Disable copying (assignment)
+		// BattleBoards shouldn't normally be copied around as they are considered "heavy objects",
+		// so the copy constructor is private.
+		// An explicit call here can create additional boards from the board prototype when the builder requires it
+		BattleBoard(BattleBoard const& other); // Enable private copying (cloning from prototype)
+		BattleBoard& operator=(BattleBoard const& other); // Enable private copying (assignment)
 
 		/* Called when the board is initialized, to assemble game pieces list.
 		 * This method is expected to get called before the game starts.

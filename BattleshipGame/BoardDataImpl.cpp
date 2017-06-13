@@ -1,44 +1,36 @@
 #include "BoardDataImpl.h"
+#include "BattleBoard.h"
 #include <stdexcept>
 
 using std::invalid_argument;
 
 namespace battleship
 {
-	BoardDataImpl::BoardDataImpl(PlayerEnum player, GamePiecesDict* gamePieces,
-								 int boardRows, int boardCols, int boardDepth): BoardData()
+	BoardDataImpl::BoardDataImpl(PlayerEnum player, shared_ptr<BattleBoard> board):
+		BoardData(),
+		_player(player),
+		_board(board)
 	{
-		_rows = boardRows;
-		_cols = boardCols;
-		_depth = boardDepth;
-
-		// Iterate all game pieces
-		for (auto const &pieceEntry : *gamePieces)
-		{
-			auto gamePiece = pieceEntry.second;
-
-			// Add only the player's ships (sparse representation)
-			if (gamePiece->_player == player)
-			{
-				char shipSymbol = static_cast<char>(gamePiece->_shipType->_representation);
-				_visiblePieces.emplace(pieceEntry.first, // Coordinate
-									   shipSymbol);
-			}
-		}
+		_rows = board->height();
+		_cols = board->width();
+		_depth = board->depth();
 	}
 
 	char BoardDataImpl::charAt(Coordinate c) const
 	{
-		auto gamePieceIt = _visiblePieces.find(c);
+		auto gamePiece = _board->pieceAt(c);
 		
-		// If not entry exists return EMPTY
-		if (gamePieceIt == _visiblePieces.end())
+		if (gamePiece == NULL)
 		{
-			return static_cast<char>(BoardSquare::Empty);
+			return static_cast<char>(BoardSquare::Empty); // Empty square
+		}
+		else if (gamePiece->_player != _player)
+		{
+			return static_cast<char>(BoardSquare::Empty); // Enemy piece
 		}
 		else
-		{ // If an entry exists return the game piece
-			return gamePieceIt->second;
+		{
+			return static_cast<char>(gamePiece->_shipType->_representation); // Friendly ship
 		}
 	}
 }

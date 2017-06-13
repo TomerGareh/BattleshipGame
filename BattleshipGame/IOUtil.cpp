@@ -1,5 +1,4 @@
 #include "IOUtil.h"
-#include <iostream>
 #include <stdio.h>
 #include <fstream>
 #include <string>
@@ -8,6 +7,7 @@
 #include <cerrno>
 #include <sstream>
 #include <windows.h>
+#include "Logger.h"
 
 namespace battleship
 {
@@ -68,7 +68,11 @@ namespace battleship
 		ifstream fs(filename);
 
 		if (!fs.is_open())
-			std::cerr << "Error: Failed to open file " << filename << std::endl;
+		{
+			string errorMsg = "Failed to open file " + filename;
+			Logger::getInstance().log(Severity::ERROR_LEVEL, errorMsg);
+			return false;
+		}
 
 		bool isHeader = (NULL != headerParser);
 		int lineNum = 0;
@@ -100,13 +104,20 @@ namespace battleship
 
 		// This term is activated only in the case when ifstream's badbit is set
 		if (fs.bad()) {
-			std::cerr << "Error: IO error occured while reading file " << filename << std::endl;
+			string errorMsg = "IO error occured while reading file " + filename;
+			Logger::getInstance().log(Severity::ERROR_LEVEL, errorMsg);
 			return false;
 		}
 
 		fs.close();
 
 		return true;
+	}
+
+	bool IOUtil::startsWith(const string& fullString, const string& prefix) {
+
+		return (prefix.length() <= fullString.length()) &&
+			   (equal(prefix.begin(), prefix.end(), fullString.begin()));
 	}
 
 	bool IOUtil::endsWith(const string& fullString, const string& ending)
@@ -119,6 +130,11 @@ namespace battleship
 		{
 			return false;
 		}
+	}
+
+	void IOUtil::removePrefix(string& fullString, const string& prefix)
+	{
+		fullString.erase(0, prefix.length());
 	}
 
 	bool IOUtil::validatePath(const string& path)
