@@ -1,14 +1,10 @@
 #include <iostream>
-#include <vector>
 #include "BattleshipGameBoardFactory.h"
-#include "BattleBoard.h"
-#include "BoardBuilder.h"
 #include "IOUtil.h"
 #include "Logger.h"
 
 using std::cout;
 using std::endl;
-using std::vector;
 
 namespace battleship
 {
@@ -55,6 +51,17 @@ namespace battleship
 				break;
 			}
 		}
+		
+		// Parse the rest of the line (last dimension)
+		if (IOUtil::isInteger(nextLine))
+		{
+			depth = stoi(nextLine);
+			dimensionIndex++;
+		}
+		else
+		{
+			isValidFile = false;
+		}
 
 		isValidFile = isValidFile && (dimensionIndex == 3);
 
@@ -84,10 +91,9 @@ namespace battleship
 		for (char& nextChar : nextLine)
 		{
 			// Add to board only squares with real game pieces
-			if (nextChar == (char)BattleBoardSquare::Empty)
-				continue;
+			if (!(nextChar == static_cast<char>(BattleBoardSquare::Empty)))
+				builder.addPiece(Coordinate(rowIndex, colCounter, depthIndex), nextChar);
 
-			builder.addPiece(colCounter, rowIndex, depthIndex, nextChar);
 			colCounter++;
 
 			// Read at most "width" amount of cols characters from each line, skip the rest

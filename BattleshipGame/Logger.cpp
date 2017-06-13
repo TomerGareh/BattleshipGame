@@ -65,9 +65,12 @@ namespace battleship
 			lock_guard<mutex> lock(_outputLock);
 
 			// Get current date-time
-			auto t = std::time(nullptr);
-			auto tm = *std::localtime(&t);
-			_fs << "[" << std::put_time(&tm, "%d-%m-%Y %H-%M-%S") << "][" << severityStr << "] " << msg << endl;
+		time_t t = time(NULL);
+		struct tm timeinfo;
+		int rc = localtime_s(&timeinfo, &t);
+
+		if (!rc)
+			_fs << "[" << std::put_time(&timeinfo, "%d-%m-%Y %H-%M-%S") << "][" << severityStr << "] " << msg << endl;
 
 			if (isPrintToConsole)
 			{

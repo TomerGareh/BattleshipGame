@@ -1,26 +1,31 @@
 #pragma once
 
-#include <memory>
 #include <string>
+#include <tuple>
 #include <vector>
 #include <map>
+#include <unordered_set>
 #include "IBattleshipGameAlgo.h"
+#include "AlgoCommon.h"
 
 using std::string;
-using std::pair;
+using std::tuple;
 using std::vector;
 using std::map;
+using std::unordered_set;
 
-using targetsMapEntry = map<pair<int, int>, vector<int>>::iterator;
-
-enum class AttackDirection : int
+enum class AttackDirection
 {
-	InPlace = 0,
-	Right = 1,
-	Left = 2,
-	Up = 3,
-	Down = 4
+	InPlace,
+	RowPlus,
+	RowMinus,
+	ColPlus,
+	ColMinus,
+	DepthPlus,
+	DepthMinus
 };
+
+using targetsMapEntry = map<Coordinate, map<AttackDirection, int>>::iterator;
 
 class HuntTargetAlgo : public IBattleshipGameAlgo
 {
@@ -33,13 +38,13 @@ public:
 	HuntTargetAlgo(HuntTargetAlgo&& other) noexcept = delete; // Disable moving
 	HuntTargetAlgo& operator= (HuntTargetAlgo&& other) noexcept = delete; // Disable moving (assignment)
 
-	void setBoard(int player, const char** board, int numRows, int numCols) override;
+	void setPlayer(int player) override;
 
-	bool init(const string& path) override;	// Ignored by this algorithm (always return true)
+	void setBoard(const BoardData& board) override;
 
-	pair<int, int> attack() override;
+	Coordinate attack() override;
 
-	void notifyOnAttackResult(int player, int row, int col, AttackResult result) override;
+	void notifyOnAttackResult(int player, Coordinate move, AttackResult result) override;
 
 private:
 	static const int MAX_NUM_OF_DRAWS;
@@ -47,46 +52,50 @@ private:
 
 	int playerId;
 
-	pair<int, int> boardSize;
+	tuple<int, int, int> boardSize;
 
-	// A board of booleans, indicating the squares we already visited
-	bool** visitedBoard;
+	// An unordered set of the coordinates that have already been visited (by us or by the opponent)
+	unordered_set<Coordinate, CoordinateHash> visitedCoords;
 	
 	// Our last attack direction. If the last attack was in Hunt mode this field is not relevant
 	AttackDirection lastAttackDirection;
 
 	// A map from the pending targets to their surrounding. 
-	// The surrounding is a vector of ints, representing the target square itself and the four directions according
-	// to AttackDirection enum. In each cell we keep the size of progression in that direction. Size of -1 is
-	// indicating that we failed to attack in that direction.
-	map<pair<int, int>, vector<int>> targetsMap;
+	// The surrounding itself is also a map from the attack directions to the size of progression in that direction.
+	// Size of -1 is indicating that we failed to attack in that direction.
+	map<Coordinate, map<AttackDirection, int>> targetsMap;
 
-	void allocateVisitedBoard();
-
-	// row and col are in the range 0 to board size - 1
-	void markRightLeftAsVisited(int row, int col);
+	// coord is in the range 0 to board size - 1
+	void markRowNeighbors(Coordinate coord);
 	
-	// row and col are in the range 0 to board size - 1
-	void markUpDownAsVisited(int row, int col);
+	// coord is in the range 0 to board size - 1
+	void markColNeighbors(Coordinate coord);
+
+	// coord is in the range 0 to board size - 1
+	void markDepthNeighbors(Coordinate coord);
 
 	AttackDirection getTargetDirection(targetsMapEntry targetIt);
 
-	int getTargetSize(vector<int>* targetSurround);
+	int getTargetSize(const map<AttackDirection, int>& targetSurround);
 
-	pair<int, int> advanceInDirection(int row, int col, AttackDirection direction, int size);
+	void advanceInDirection(Coordinate& coord, AttackDirection direction, int size);
 
-	// Check if the try to attack around a target is a valid attack, i.e. doesn't exceed the borders of the board
+	// Search for an unvisited coordinate in 'visitedCoords'. The returned coordiante is in the range 1 to board size.
+	// If no square was found, battleship::NO_MORE_MOVES is returned.
+	Coordinate searchUnvisitedCoord();
+
+	// Check if the attempt to attack around a target is a valid attack, i.e. doesn't exceed the borders of the board
 	// and not yet visited.
-	// row and col are in the range 1 to board size.
-	bool calcTargetNext(int& row, int& col, AttackDirection direction, int size);
+	// coord is in the range 1 to board size.
+	bool calcTargetNext(Coordinate& coord, AttackDirection direction, int size);
 
-	// row and col are in the range 0 to board size - 1
-	targetsMapEntry updateMapOnOtherAttack(int row, int col, AttackResult result);
+	// coord is in the range 0 to board size - 1
+	targetsMapEntry updateMapOnOtherAttack(Coordinate coord, AttackResult result);
 
-	// row and col are in the range 0 to board size - 1
-	void removeRedundantTargets(int row, int col, AttackDirection direction);
+	// coord is in the range 0 to board size - 1
+	void removeRedundantTargets(Coordinate coord, AttackDirection direction);
 
-	// Search for unvisited square in 'visitedBoard' and return the result into row and col.
-	// If no square was found, battleship::NO_MORE_MOVES is returned (inside row and col).
-	void searchUnvisitedSquare(int& row, int& col);
+	// Handle the case that the attack came from Target mode (or a self attack of the opponent), i.e. the attack belongs
+	// to a target in 'targetsMap'
+	void notifyOnAttackInTarget(Coordinate moveZeroBased, targetsMapEntry target, AttackResult result);
 };

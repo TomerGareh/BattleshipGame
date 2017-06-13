@@ -75,7 +75,7 @@ namespace battleship
 		}
 
 		bool isHeader = (NULL != headerParser);
-		int lineNum = 0;
+		int lineNum = 1;
 
 		// Read the next line from the file, in case of an error this is skipped
 		while (getline(fs, nextLine))
@@ -84,7 +84,6 @@ namespace battleship
 			if (nextLine.size() && nextLine[nextLine.size() - 1] == '\r')
 			{
 				nextLine = nextLine.substr(0, nextLine.size() - 1);
-				lineNum++;
 			}
 
 			if (isHeader)
@@ -100,6 +99,8 @@ namespace battleship
 				// Invoke parser on next line read
 				lineParser(nextLine);
 			}
+
+			lineNum++;
 		}
 
 		// This term is activated only in the case when ifstream's badbit is set

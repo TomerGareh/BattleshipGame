@@ -3,39 +3,39 @@
 #include <memory>
 #include <string>
 #include <tuple>
-#include <list>
 #include <set>
+#include <map>
+#include <unordered_set>
 #include <functional>
+#include "IBattleshipGameAlgo.h"
 #include "BattleBoard.h"
 
-using std::string;
-using std::tuple;
-using std::list;
-using std::set;
-using std::function;
 using std::shared_ptr;
-using std::unique_ptr;
+using std::string;
+using std::pair;
+using std::tuple;
+using std::set;
+using std::map;
+using std::unordered_set;
+using std::function;
 
 namespace battleship
 {
 	/* List of possible validation error types, with priority values assigned.
 	 * Lower index means higher priority when the errors list is outputted.
 	 */
-	enum class ErrorPriorityEnum: int
+	enum class ErrorPriorityEnum
 	{
-		WRONG_SIZE_SHAPE_FOR_SHIP_B_PLAYER_A = 0,
-		WRONG_SIZE_SHAPE_FOR_SHIP_P_PLAYER_A = 1,
-		WRONG_SIZE_SHAPE_FOR_SHIP_M_PLAYER_A = 2,
-		WRONG_SIZE_SHAPE_FOR_SHIP_D_PLAYER_A = 3,
-		WRONG_SIZE_SHAPE_FOR_SHIP_B_PLAYER_B = 4,
-		WRONG_SIZE_SHAPE_FOR_SHIP_P_PLAYER_B = 5,
-		WRONG_SIZE_SHAPE_FOR_SHIP_M_PLAYER_B = 6,
-		WRONG_SIZE_SHAPE_FOR_SHIP_D_PLAYER_B = 7,
-		TOO_MANY_SHIPS_PLAYER_A = 8,
-		TOO_FEW_SHIPS_PLAYER_A = 9,
-		TOO_MANY_SHIPS_PLAYER_B = 10,
-		TOO_FEW_SHIPS_PLAYER_B = 11,
-		ADJACENT_SHIPS_ON_BOARD = 12
+		WRONG_SIZE_SHAPE_FOR_SHIP_B_PLAYER_A,
+		WRONG_SIZE_SHAPE_FOR_SHIP_P_PLAYER_A,
+		WRONG_SIZE_SHAPE_FOR_SHIP_M_PLAYER_A,
+		WRONG_SIZE_SHAPE_FOR_SHIP_D_PLAYER_A,
+		WRONG_SIZE_SHAPE_FOR_SHIP_B_PLAYER_B,
+		WRONG_SIZE_SHAPE_FOR_SHIP_P_PLAYER_B,
+		WRONG_SIZE_SHAPE_FOR_SHIP_M_PLAYER_B,
+		WRONG_SIZE_SHAPE_FOR_SHIP_D_PLAYER_B,
+		ADJACENT_SHIPS_ON_BOARD,
+		NO_SHIPS_AT_ALL
 	};
 
 	/** A Builder pattern class, for creating instances of the BattleBoard class.
@@ -87,7 +87,7 @@ namespace battleship
 		/** Defines a value for a single game-square on the battle-board.
 		 *  This method will not generate a game-piece in the real BattleBoard object just yet.
 		 */
-		BoardBuilder* addPiece(int col, int row, int depth, char type);
+		BoardBuilder* addPiece(Coordinate coord, char type);
 
 		/** Finailize the creation of the BattleBoard.
 		 *	Validation occurs here, and logical game pieces data is initialized for the BattleBoard object.
@@ -108,50 +108,50 @@ namespace battleship
 		public:
 			BattleBoardSquare maskType;
 
-			/** A list of squares that compose the mask*/
-			typedef list<tuple<int, int, char>> ShipMaskList;
-			typedef unique_ptr<ShipMaskList> ShipMaskListPtr;
-			
-			ShipMaskListPtr mask;
+			/** A map of squares that compose the mask. The coordinate is a relative coordinate. */
+			map<Coordinate, BattleBoardSquare> mask;
+			using MaskEntry = const pair<Coordinate, BattleBoardSquare>;
 			
 			Orientation orient;
 			bool wrongSize;
 			bool adjacentShips;
 
+			/** Constructs a new mask according to ship type (which is represented by the BattleBoardSquare in this case) */
+			ShipMask(BattleBoardSquare ship);
+
 			virtual ~ShipMask();
 
-			/** Apply ship mask to the board, and return whether the current formation for the (row, col) square
+			/** Apply ship mask to the board, and return whether the current formation for the (row, col, depth) square
 			 *	is valid.
 			 */
-			bool applyMask(const shared_ptr<BattleBoard> board, int row, int col, PlayerEnum player);
+			bool applyMask(const map<Coordinate, char>& boardMap, tuple<int, int, int> boardSize, Coordinate coord, PlayerEnum player);
+
+			void applyMaskEntry(char boardSquare, char shipChar, MaskEntry& maskEntry, bool axisException, int& matchSizeAxis,
+								bool& wrongSizeAxis, bool& adjacentShipsAxis);
 
 			/** Clean state and prepare for next comparison */
 			void resetMaskFlags();
-
-			/** Constructs a new mask according to ship type (which is represented by the BattleBoardSquare in this case) */
-			ShipMask(BattleBoardSquare ship);
 
 			/** BoardBuilder is the only class which is allowed to instantiate ShipMasks */
 			friend class BoardBuilder;
 		};
 
-		/** The BattleBoard instance being gradually created by this builder object */
-		shared_ptr<BattleBoard> _board;
+		int boardWidth;
+		int boardHeight;
+		int boardDepth;
+
+		/** The board itself as a map from Coordinate to char */
+		map<Coordinate, char> boardMap;
 
 		/** Mark given squares as already validated */
-		void markVisitedSquares(bool visitedBoard[BOARD_SIZE][BOARD_SIZE], int row, int col);
-
-		/** Prepares the error queue, calls isValidBoard to validate the board and prints the generated errors
-		 *	in the end of the process.
-		 */
-		bool validate();
+		void markVisitedCoords(unordered_set<Coordinate, CoordinateHash>& coordSet, Coordinate coord);
 
 		/** Returns true if the BattleBoard contains a legal formation, false if not.
 		 *  This function is used by BoardBuilder::validate()
 		 */
-		bool isValidBoard(set<BoardInitializeError, ErrorPriorityFunction>* errorQueue);
+		bool isValidBoard(const shared_ptr<BattleBoard> board, set<BoardInitializeError, ErrorPriorityFunction>& errorQueue);
 
 		/** Prints the validation errors in the queue, in descending priority order */
-		void printErrors(set<BoardInitializeError, ErrorPriorityFunction>* errorQueue);
+		void printErrors(const set<BoardInitializeError, ErrorPriorityFunction>& errorQueue);
 	};
 }

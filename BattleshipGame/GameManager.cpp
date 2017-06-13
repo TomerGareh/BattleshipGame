@@ -127,7 +127,7 @@ namespace battleship
 			}
 			else 
 			{
-				battleship::AttackValidator validator;
+				AttackValidator validator;
 
 				if (NO_MORE_MOVES == validator(target, board->height(), board->width(), board->depth()))
 				{
