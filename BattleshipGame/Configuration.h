@@ -50,6 +50,12 @@ namespace battleship
 		// Header of threads arg in configuration file
 		static constexpr auto CONFIG_HEADER_THREADS = "THREADS=";
 
+		// Beginning of comments in config file - to be ignored by the parser
+		static constexpr auto CONFIG_HEADER_COMMENT = "%%";
+
+		// The character that may optionally surround values in the config file ("value")
+		static constexpr auto CONFIG_VALUE_MARKER = "\"";
+
 		/** Parses the configuration file and sets the configuration accordingly.
 		 *  Returns true if configuration file loaded successfuly or false if not.
 		 */
@@ -57,5 +63,8 @@ namespace battleship
 
 		/** Loads default values for configuration (last fallback) */
 		void loadDefaults();
+
+		/** Normalizes the value given: if it starts and ends with quotation marks they will be removed */
+		static void normalizeValue(string& value);
 	};
 }

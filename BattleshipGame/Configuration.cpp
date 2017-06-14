@@ -1,7 +1,6 @@
 #include "Configuration.h"
 #include "IOUtil.h"
 #include <iostream>
-#include <cstdlib>
 
 using std::cout;
 using std::cerr;
@@ -35,7 +34,7 @@ namespace battleship
 					string argVal = argv[i + 1];
 					if (IOUtil::isInteger(argVal))
 					{
-						this->threads = atoi(argv[i + 1]);
+						this->threads = std::stoi(argv[i + 1]);
 
 						if (this->threads <= 0)	// Invalid thread count value
 						{
@@ -60,6 +59,21 @@ namespace battleship
 		return true;
 	}
 
+	void Configuration::normalizeValue(string& value)
+	{
+		// Nothing to normalize
+		if (value.empty())
+			return;
+
+		// IF starts and ends with value marker ("quotation marks") - remove them
+		if (IOUtil::startsWith(value, CONFIG_VALUE_MARKER) &&
+			IOUtil::endsWith(value, CONFIG_VALUE_MARKER))
+		{
+			value.erase(0, 1);
+			value.erase(value.length() - 1, 1);
+		}
+	}
+
 	bool Configuration::loadConfigFile()
 	{
 		auto config = [this](string& nextLine, int lineNum, bool& isHeader, bool& isValidFile)
@@ -70,15 +84,17 @@ namespace battleship
 			if (IOUtil::startsWith(nextLine, CONFIG_HEADER_PATH)) // Path parameter (string)
 			{
 				IOUtil::removePrefix(nextLine, CONFIG_HEADER_PATH);
+				normalizeValue(nextLine);
 				this->path = nextLine;
 			}
 			else if (IOUtil::startsWith(nextLine, CONFIG_HEADER_THREADS)) // Threads parameter (int)
 			{
 				IOUtil::removePrefix(nextLine, CONFIG_HEADER_THREADS);
+				normalizeValue(nextLine);
 
 				if (IOUtil::isInteger(nextLine)) // Only use the value if this is a valid int
 				{
-					this->threads = atoi(nextLine.c_str());
+					this->threads = std::stoi(nextLine.c_str());
 
 					if (this->threads <= 0)	// Invalid thread count value
 						isValidFile = false;
@@ -87,6 +103,11 @@ namespace battleship
 				{
 					isValidFile = false;
 				}
+			}
+			else if ((IOUtil::startsWith(nextLine, CONFIG_HEADER_COMMENT)) ||  // Comment %%
+					 (IOUtil::isContainOnlyWhitespaces(nextLine))) // Empty line
+			{
+				// Ignore this line
 			}
 			else // Unknown parameter
 			{

@@ -19,6 +19,7 @@ using std::cout;
 using std::cerr;
 using std::endl;
 using std::string;
+using std::to_string;
 
 const int SUCCESS_CODE = 0;
 const int ERROR_CODE = -1;
@@ -37,6 +38,8 @@ int main(int argc, char* argv[])
 		// #2 - Start logger
 		Logger::getInstance().setPath(config.path)->setLevel(Severity::INFO_LEVEL);
 		Logger::getInstance().log(Severity::INFO_LEVEL, "Battleship game started.");
+		Logger::getInstance().log(Severity::INFO_LEVEL, "Path = " + config.path);
+		Logger::getInstance().log(Severity::INFO_LEVEL, "Worker threads count = " + to_string(config.threads));
 		bool isPrintToConsole = true; // Specifier for messages that go to the console
 
 		// #3 - Load and build game resources: board & algorithms
@@ -45,6 +48,7 @@ int main(int argc, char* argv[])
 		if (!IOUtil::validatePath(config.path))
 		{
 			Logger::getInstance().log(Severity::ERROR_LEVEL, "Wrong path: " + config.path, isPrintToConsole);
+			Logger::getInstance().log(Severity::INFO_LEVEL, "Battleship game ended.");
 			return ERROR_CODE;
 		}
 
@@ -72,7 +76,10 @@ int main(int argc, char* argv[])
 
 		// Validation #2: Missing board path, Invalid board setup, Missing dll files
 		if (validBoards.empty() || availableAlgos.size() < 2)
+		{
+			Logger::getInstance().log(Severity::INFO_LEVEL, "Battleship game ended.");
 			return ERROR_CODE;
+		}
 
 		Logger::getInstance().log(Severity::INFO_LEVEL,
 								  "Number of legal players: " + algoLoader->loadedGameAlgos().size(),

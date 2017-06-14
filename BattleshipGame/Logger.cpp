@@ -61,16 +61,16 @@ namespace battleship
 		else
 			severityStr = "DEBUG";
 
-		{ // Keep output synchronized for multiple threads accessing it
+		{	// Keep output synchronized for multiple threads accessing it
 			lock_guard<mutex> lock(_outputLock);
 
 			// Get current date-time
-		time_t t = time(nullptr);
-		struct tm timeinfo;
-		int rc = localtime_s(&timeinfo, &t);
+			time_t t = time(nullptr);
+			struct tm timeinfo;
+			int rc = localtime_s(&timeinfo, &t);
 
-		if (!rc)
-			_fs << "[" << std::put_time(&timeinfo, "%d-%m-%Y %H-%M-%S") << "][" << severityStr << "] " << msg << endl;
+			if (!rc)
+				_fs << "[" << std::put_time(&timeinfo, "%d-%m-%Y %H-%M-%S") << "][" << severityStr << "] " << msg << endl;
 
 			if (isPrintToConsole)
 			{
@@ -101,7 +101,7 @@ namespace battleship
 		auto logFilePath = *_path + "\\" + LOG_FILE;
 
 		// This should create the logger
-		_fs.open(logFilePath, std::fstream::trunc | std::fstream::out | std::fstream::app);
+		_fs.open(logFilePath, std::fstream::out | std::fstream::app);
 
 		if (!_fs.is_open() || !_fs.good())
 		{

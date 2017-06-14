@@ -21,6 +21,9 @@ namespace battleship
 		/** Returns if the given string can be safely converted to an integer or not */
 		static bool isInteger(const std::string & s);
 
+		/** Returns true if the line contains only whitespaces: space, tab characters, etc */
+		static bool isContainOnlyWhitespaces(const string& str);
+
 		/** Replaces all illegal characters - which are all characters that are not specified in legalChars
 		 *  with the replacementChar given in the line string.
 		 */

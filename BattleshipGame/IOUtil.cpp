@@ -24,6 +24,12 @@ namespace battleship
 		return (*p == 0);
 	}
 
+	bool IOUtil::isContainOnlyWhitespaces(const string& str)
+	{
+		return (str.empty() ||
+				str.find_first_not_of(" \t\n\v\f\r") == std::string::npos);
+	}
+
 	void IOUtil::replaceIllegalCharacters(string& line, const char replacementChar, initializer_list<char> legalChars)
 	{
 		// This lambda expression replaces all illegal characters with replacementChar
@@ -49,12 +55,15 @@ namespace battleship
 
 	void IOUtil::removeLeadingTrailingSpaces(string& line)
 	{
-		// Remove all leading and trailing spaces
-		size_t first = line.find_first_not_of("\t ");
-		first = (first == string::npos) ? 1 : first;
-		size_t last = line.find_last_not_of("\t ");
-		last = (last == string::npos) ? 1 : (last + 1);
-		line = line.substr(first, (last - first));
+		if (!line.empty())
+		{
+			// Remove all leading and trailing spaces
+			size_t first = line.find_first_not_of("\t ");
+			first = (first == string::npos) ? 1 : first;
+			size_t last = line.find_last_not_of("\t ");
+			last = (last == string::npos) ? 1 : (last + 1);
+			line = line.substr(first, (last - first));
+		}
 	}
 
 	bool IOUtil::parseFile(const string& filename,
