@@ -2,7 +2,6 @@
 
 #include <memory>
 #include <unordered_map>
-#include <string>
 #include "BattleshipGameBoardFactory.h"
 #include "AlgoLoader.h"
 #include "IBattleshipGameAlgo.h"
@@ -35,7 +34,7 @@ namespace battleship
 		 *  Requested board are assumed to be loaded and valid.
 		 *  On error, NULL is returned.
 		 */
-		shared_ptr<BattleBoard> requestBoard(const string& boardPath);
+		shared_ptr<BattleBoard> requestBoard(const string& boardPath) const;
 
 	private:
 		/** Loaders for boards and algorithms */

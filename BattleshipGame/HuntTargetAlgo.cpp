@@ -2,10 +2,8 @@
 #include "AlgoCommon.h"
 #include <stdlib.h>
 #include <algorithm>
-#include <numeric>
 #include <time.h>
 #include <iostream>
-#include <exception>
 
 using std::exception;
 using std::cerr;
@@ -85,7 +83,7 @@ void HuntTargetAlgo::setBoard(const BoardData& board)
 		}
 	}
 
-	srand(static_cast<unsigned int>(time(NULL)));	// Initialize random seed
+	srand(static_cast<unsigned int>(time(nullptr)));	// Initialize random seed
 }
 
 Coordinate HuntTargetAlgo::searchUnvisitedCoord()

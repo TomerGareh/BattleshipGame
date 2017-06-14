@@ -1,8 +1,15 @@
 #include "Scoreboard.h"
-#include <unique_lock>
+#include <iostream>
+#include <iomanip>
+#include <algorithm>
 
 using std::lock_guard;
 using std::unique_lock;
+using std::min;
+using std::setw;
+using std::setprecision;
+using std::cout;
+using std::endl;
 
 namespace battleship
 {
@@ -18,19 +25,19 @@ namespace battleship
 									   pointsFor(aPointsFor),
 									   pointsAgainst(aPointsAgainst),
 									   wins(aWins), loses(aLoses),
-									   rating(aWins / (aWins + aLoses))
+									   rating(static_cast<float>(aWins) / static_cast<float>(aWins + aLoses))
 	{
 	}
 
-	shared_ptr<PlayerStatistics> PlayerStatistics::updateStatistics(int addedPointsFor,
-																    int addedPointsAgainst,
-																	bool isWin, bool isLose)
+	PlayerStatistics PlayerStatistics::updateStatistics(int addedPointsFor,
+														int addedPointsAgainst,
+														bool isWin, bool isLose) const
 	{
-		return std::make_shared<PlayerStatistics>(playerName,
-												  pointsFor + addedPointsFor,
-												  pointsAgainst + addedPointsAgainst,
-												  wins + (isWin ? 1 : 0),
-												  loses + (isLose ? 1 : 0));
+		return PlayerStatistics(playerName,
+								pointsFor + addedPointsFor,
+								pointsAgainst + addedPointsAgainst,
+								wins + (isWin ? 1 : 0),
+								loses + (isLose ? 1 : 0));
 	}
 
 	RoundResults::RoundResults(int aRoundNum) : roundNum(aRoundNum)
@@ -38,12 +45,22 @@ namespace battleship
 	}
 
 	Scoreboard::Scoreboard(vector<string> players) :
-		_playersPerRound(players.size())
+		_playersPerRound(static_cast<int>(players.size())) // Safe to assume that the number of players
+														   // does not overflow integer 
 	{
+		// Save max player name for score results table formatting
+		_maxPlayerNameLength = MIN_PLAYER_NAME_SIZE;
+
 		for (const string& player : players)
 		{
+			// Store initialized player score information
 			_score.emplace(std::make_pair(player, PlayerStatistics(player)));
 			_registeredMatches.emplace(player, 0);
+
+			// Query for the longest name
+			if (_maxPlayerNameLength < player.length())
+				_maxPlayerNameLength = static_cast<int>(player.length()); // Name is expected to be short enough
+																		  // to safely cast from size_t to int
 		}
 	}
 
@@ -64,7 +81,7 @@ namespace battleship
 
 		// Find RoundResults object for this round number
 		auto roundEntry = _trackedMatches.find(playerRound);
-		shared_ptr<RoundResults> roundResults = NULL;
+		shared_ptr<RoundResults> roundResults;
 
 		// If this is the first game in this round, create RoundResults
 		if (roundEntry == _trackedMatches.end())
@@ -83,7 +100,7 @@ namespace battleship
 		bool isWinner = (results->winner == player);
 		bool isLoser = (results->winner != player) && (results->winner != PlayerEnum::NONE);
 		auto newRoundStatistics = playerStatistics.updateStatistics(pointsTo, pointsAgainst, isWinner, isLoser);
-		roundResults->playerStatistics.emplace(std::make_pair(playerName, newRoundStatistics));
+		roundResults->playerStatistics.emplace(PlayerStatistics(newRoundStatistics)); // Save a copy in round results
 
 		// Update player score with the newest record
 		_score.emplace(std::make_pair(playerName, newRoundStatistics));
@@ -119,13 +136,46 @@ namespace battleship
 		return _roundsResults;
 	}
 
-	void Scoreboard::waitOnRoundResults(function<void()> callback)
+	void Scoreboard::printRoundResults(shared_ptr<RoundResults> roundResults) const
+	{
+		cout << setw(8) << "#"
+			 << setw(_maxPlayerNameLength) << "Team Name"
+			 << setw(8) << "Wins"
+			 << setw(8) << "Losses"
+			 << setw(8) << "%"
+			 << setw(8) << "Pts For"
+			 << setw(12) << "Pts Against" << endl;
+
+		int place = 1;
+
+		// RoundsResults are already sorted by player's rating
+		for (const auto& playerStats : roundResults->playerStatistics)
+		{
+			string placeStr = place + ".";
+			cout << setw(8) << placeStr
+				<< setw(_maxPlayerNameLength) << playerStats.playerName
+				<< setw(8) << playerStats.wins
+				<< setw(8) << playerStats.loses
+				<< setw(8) << setprecision(2) << playerStats.rating
+				<< setw(8) << playerStats.pointsFor
+				<< setw(12) << playerStats.pointsAgainst << endl;
+			place++;
+		}
+	}
+
+	void Scoreboard::waitOnRoundResults()
 	{
 		// Wait here until new data appears in round results queue
 		unique_lock<mutex> lock(_roundResultsLock);
 		_roundResultsCV.wait(lock, [this] { return !(_roundsResults.empty()); });
 
-		// Call callback in response to round results being ready
-		callback();
+		// Print all ready round results
+		// After they are printed, we pop this data from the queue
+		while (!_roundsResults.empty())
+		{
+			auto nextResults = _roundsResults.front();
+			_roundsResults.pop_back();
+			printRoundResults(nextResults);
+		}
 	}
 }

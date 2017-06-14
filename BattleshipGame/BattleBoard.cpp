@@ -18,8 +18,8 @@ namespace battleship
 						 PlayerEnum player, Orientation orientation) :
 		_firstPos(firstPos),
 		_shipType(type),
-		_player(player),
 		_orient(orientation),
+		_player(player),
 		_lifeLeft(type->_size)
 	{
 	}
@@ -43,12 +43,12 @@ namespace battleship
 
 	// Move Ctor
 	BattleBoard::BattleBoard(BattleBoard&& other) noexcept:
-		_gamePieces(std::move(other._gamePieces)),
-		_playerAShipCount(other._playerAShipCount),
-		_playerBShipCount(other._playerBShipCount),
 		_boardWidth(other._boardWidth),
 		_boardHeight(other._boardHeight),
-		_boardDepth(other._boardDepth)
+		_boardDepth(other._boardDepth),
+		_gamePieces(std::move(other._gamePieces)),
+		_playerAShipCount(other._playerAShipCount),
+		_playerBShipCount(other._playerBShipCount)
 	{
 	}
 
@@ -73,17 +73,17 @@ namespace battleship
 
 	// Copy ctor
 	BattleBoard::BattleBoard(BattleBoard const& other):
-		_playerAShipCount(other._playerAShipCount),
-		_playerBShipCount(other._playerBShipCount),
 		_boardWidth(other._boardWidth),
 		_boardHeight(other._boardHeight),
-		_boardDepth(other._boardDepth)
+		_boardDepth(other._boardDepth),
+		_playerAShipCount(other._playerAShipCount),
+		_playerBShipCount(other._playerBShipCount)
 	{
 		// Perform deep copy for game pieces as they contain data that may change along the game and shouldn't
 		// be shared among common boards
 		for (auto it = other._gamePieces.begin(); it != other._gamePieces.end(); ++it)
 		{
-			_gamePieces.emplace(it->first, std::make_shared<GamePiece>(it->second));
+			_gamePieces.emplace(it->first, std::make_shared<GamePiece>(*it->second));
 		}
 	}
 	
@@ -105,7 +105,7 @@ namespace battleship
 			// be shared among common boards
 			for (auto it = other._gamePieces.begin(); it != other._gamePieces.end(); ++it)
 			{
-				_gamePieces.emplace(it->first, std::make_shared<GamePiece>(it->second));
+				_gamePieces.emplace(it->first, std::make_shared<GamePiece>(*it->second));
 			}
 		}
 
@@ -185,7 +185,7 @@ namespace battleship
 	shared_ptr<const GamePiece> BattleBoard::executeAttack(const Coordinate& target)
 	{
 		auto dictIter = _gamePieces.find(target);
-		shared_ptr<GamePiece> gamePiece = NULL;
+		shared_ptr<GamePiece> gamePiece;
 
 		if (dictIter != _gamePieces.end())
 		{
@@ -210,17 +210,17 @@ namespace battleship
 
 	// Getters & Setters
 
-	const int BattleBoard::getPlayerAShipCount() const
+	int BattleBoard::getPlayerAShipCount() const
 	{
 		return _playerAShipCount;
 	}
 
-	const int BattleBoard::getPlayerBShipCount() const
+	int BattleBoard::getPlayerBShipCount() const
 	{
 		return _playerBShipCount;
 	}
 
-	const PlayerEnum BattleBoard::whichPlayerOwnsSquare(const Coordinate& pos) const
+	PlayerEnum BattleBoard::whichPlayerOwnsSquare(const Coordinate& pos) const
 	{
 		auto dictIter = _gamePieces.find(pos);
 
@@ -242,7 +242,7 @@ namespace battleship
 		// If not entry exists return EMPTY
 		if (gamePieceIt == _gamePieces.end())
 		{
-			return NULL;
+			return nullptr;
 		}
 		else
 		{ // If an entry exists return the game piece

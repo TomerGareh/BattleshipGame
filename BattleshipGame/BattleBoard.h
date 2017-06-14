@@ -1,7 +1,6 @@
 #pragma once
 
 #include <memory>
-#include <string>
 #include <set>
 #include <unordered_map>
 #include <utility>
@@ -115,16 +114,16 @@ namespace battleship
 		shared_ptr<const GamePiece> executeAttack(const Coordinate& target);
 
 		/** Returns the number of ships for player A */
-		const int getPlayerAShipCount() const;
+		int getPlayerAShipCount() const;
 
 		/** Returns the number of ships for player B */
-		const int getPlayerBShipCount() const;
+		int getPlayerBShipCount() const;
 
 		/** Returns the PlayerEnum of the player who owns the piece in square (row, col).
 		 *	If this is a blank spot, PlayerEnum::None is returned.
 		 *  Coordinates are defined in the range [0, BOARD_SIZE-1]
 		 */
-		const PlayerEnum whichPlayerOwnsSquare(const Coordinate& pos) const;
+		PlayerEnum whichPlayerOwnsSquare(const Coordinate& pos) const;
 
 		/** Returns game piece at given coordinate or NULL if this is an empty square.
 		 */

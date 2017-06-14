@@ -12,14 +12,14 @@ namespace battleship
 	{
 	}
 
-	bool GameManager::isPlayerShipsLeft(const BattleBoard *const board, PlayerEnum player) const
+	bool GameManager::isPlayerShipsLeft(const BattleBoard *const board, PlayerEnum player)
 	{
 		const int shipsCount = (player == PlayerEnum::A) ?
 								board->getPlayerAShipCount() : board->getPlayerBShipCount();
 		return (shipsCount > 0);
 	}
 
-	bool GameManager::isGameOver(const BattleBoard *const board, bool isPlayerAForfeit, bool isPlayerBForfeit) const
+	bool GameManager::isGameOver(const BattleBoard *const board, bool isPlayerAForfeit, bool isPlayerBForfeit)
 	{
 		if ((isPlayerAForfeit && isPlayerBForfeit) ||
 			(!isPlayerShipsLeft(board, PlayerEnum::A)) ||
@@ -37,13 +37,13 @@ namespace battleship
 														IBattleshipGameAlgo& playerB,
 														IBattleshipGameAlgo* currPlayer,
 														shared_ptr<const GamePiece> lastAttackedPiece,
-														bool isPlayerAForfeit, bool isPlayerBForfeit) const
+														bool isPlayerAForfeit, bool isPlayerBForfeit)
 	{
 		bool isCurrPlayerA = (currPlayer == &playerA);
 		bool isCurrPlayerB = !isCurrPlayerA;
 
 		// Switch turns only if the player misses or hits himself
-		if ((lastAttackedPiece == NULL) ||
+		if ((lastAttackedPiece == nullptr) ||
 			((lastAttackedPiece->_player == PlayerEnum::A) && (isCurrPlayerA)) ||
 			((lastAttackedPiece->_player == PlayerEnum::B) && (isCurrPlayerB)))
 		{
@@ -61,7 +61,7 @@ namespace battleship
 	}
 
 	void GameManager::updateCurrentGamePoints(const GamePiece *const sankPiece,
-											  int& playerAScore, int& playerBScore) const
+											  int& playerAScore, int& playerBScore)
 	{
 		if (sankPiece->_player == PlayerEnum::A)
 		{
@@ -73,7 +73,7 @@ namespace battleship
 		}
 	}
 
-	PlayerEnum GameManager::getWinner(const BattleBoard *const board) const
+	PlayerEnum GameManager::getWinner(const BattleBoard *const board)
 	{
 		if (board->getPlayerAShipCount() == 0)
 		{
@@ -121,7 +121,7 @@ namespace battleship
 				else
 					isPlayerBForfeit = true;
 
-				currentPlayer = switchPlayerTurns(*playerA, *playerB, currentPlayer, NULL,
+				currentPlayer = switchPlayerTurns(*playerA, *playerB, currentPlayer, nullptr,
 												  isPlayerAForfeit, isPlayerBForfeit);
 				continue;
 			}
@@ -132,7 +132,7 @@ namespace battleship
 				if (NO_MORE_MOVES == validator(target, board->height(), board->width(), board->depth()))
 				{
 					// Player performed an illegal move and will lose his turn
-					currentPlayer = switchPlayerTurns(*playerA, *playerB, currentPlayer, NULL,
+					currentPlayer = switchPlayerTurns(*playerA, *playerB, currentPlayer, nullptr,
 													  isPlayerAForfeit, isPlayerBForfeit);
 					continue;
 				}
@@ -149,7 +149,7 @@ namespace battleship
 			int attackingPlayerNumber = (currentPlayer == playerB.get()); // A - 0, B - 1
 			AttackResult attackResult;
 
-			if (attackedGamePiece == NULL)
+			if (attackedGamePiece == nullptr)
 			{	// Miss
 				attackResult = AttackResult::Miss;
 			}

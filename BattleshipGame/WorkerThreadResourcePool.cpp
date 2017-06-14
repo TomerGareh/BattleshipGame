@@ -28,7 +28,7 @@ namespace battleship
 		}
 	}
 
-	shared_ptr<BattleBoard> WorkerThreadResourcePool::requestBoard(const string& boardPath)
+	shared_ptr<BattleBoard> WorkerThreadResourcePool::requestBoard(const string& boardPath) const
 	{
 		// Always request from board factory to create a new instance out of board prototype
 		return _boardLoader->requestBattleboard(boardPath);

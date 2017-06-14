@@ -37,7 +37,8 @@ namespace battleship
 		}
 
 		// Get function pointer
-		GetAlgorithmFuncType getAlgorithmFunc = (GetAlgorithmFuncType)GetProcAddress(hDll, "GetAlgorithm");
+		GetAlgorithmFuncType getAlgorithmFunc =
+			reinterpret_cast<GetAlgorithmFuncType>(GetProcAddress(hDll, "GetAlgorithm"));
 		if (!getAlgorithmFunc)
 		{
 			Logger::getInstance().log(Severity::WARNING_LEVEL, "Cannot load dll: " + algoFullpath);
@@ -83,7 +84,7 @@ namespace battleship
 
 	shared_ptr<IBattleshipGameAlgo> AlgoLoader::requestAlgo(const string& algoPath) const
 	{
-		shared_ptr<AlgoDescriptor> algoDescriptor = NULL;
+		shared_ptr<AlgoDescriptor> algoDescriptor;
 
 		// Verify algo was already loaded before
 		auto it = std::find_if(_loadedGameAlgos.begin(), _loadedGameAlgos.end(),
@@ -95,7 +96,7 @@ namespace battleship
 			Logger::getInstance().log(Severity::ERROR_LEVEL,
 									  "Error: Trying to load algorithm from " + algoPath +
 									  " but this DLL isn't managed by the AlgoLoader");
-			return NULL;
+			return nullptr;
 		}
 		else
 		{	// Algo's DLL loaded before
@@ -108,11 +109,11 @@ namespace battleship
 		// Call GetAlgorithm for the specified algorithm,
 		// this should create a new instance for that algo type 
 		IBattleshipGameAlgo* algo = getAlgorithmFunc();
-		if (NULL == algo)
+		if (nullptr == algo)
 		{
 			Logger::getInstance().log(Severity::ERROR_LEVEL,
 									  "Error: Cannot create instance out of dll: " + algoDescriptor->path);
-			return NULL;
+			return nullptr;
 		}
 
 		Logger::getInstance().log(Severity::DEBUG_LEVEL, algoPath + " new instance created");

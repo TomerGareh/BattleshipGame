@@ -2,6 +2,7 @@
 #include "BattleshipGameBoardFactory.h"
 #include "IOUtil.h"
 #include "Logger.h"
+#include "BoardBuilder.h"
 
 using std::cout;
 using std::endl;
@@ -16,18 +17,17 @@ namespace battleship
 		_loadedBoards = loadAllBattleBoards(path);
 	}
 
-	bool BattleshipGameBoardFactory::parseHeader(string& nextLine, int& rows, int& cols, int& depth)
+	bool BattleshipGameBoardFactory::parseHeader(string& nextLine, int& rows, int& cols, int& depth) const
 	{
 		bool isValidFile = true;
 
 		string delimiter = "x"; // Separates dimensions
 
 		int dimensionIndex = 0;
-		size_t pos = 0;
-		string token;
+		size_t pos;
 		while ((pos = nextLine.find(delimiter)) != std::string::npos)
 		{
-			token = nextLine.substr(0, pos);
+			string token = nextLine.substr(0, pos);
 			nextLine.erase(0, pos + delimiter.length());
 
 			// Parse each dimension
@@ -75,17 +75,17 @@ namespace battleship
 
 		auto legalChars =
 		{
-			(char)toupper((char)BattleBoardSquare::Empty),
-			(char)toupper((char)BattleBoardSquare::RubberBoat),
-			(char)toupper((char)BattleBoardSquare::RocketShip),
-			(char)toupper((char)BattleBoardSquare::Submarine),
-			(char)toupper((char)BattleBoardSquare::Battleship),
-			(char)tolower((char)BattleBoardSquare::RubberBoat),
-			(char)tolower((char)BattleBoardSquare::RocketShip),
-			(char)tolower((char)BattleBoardSquare::Submarine),
-			(char)tolower((char)BattleBoardSquare::Battleship)
+			static_cast<char>(toupper(static_cast<char>(BattleBoardSquare::Empty))),
+			static_cast<char>(toupper(static_cast<char>(BattleBoardSquare::RubberBoat))),
+			static_cast<char>(toupper(static_cast<char>(BattleBoardSquare::RocketShip))),
+			static_cast<char>(toupper(static_cast<char>(BattleBoardSquare::Submarine))),
+			static_cast<char>(toupper(static_cast<char>(BattleBoardSquare::Battleship))),
+			static_cast<char>(tolower(static_cast<char>(BattleBoardSquare::RubberBoat))),
+			static_cast<char>(tolower(static_cast<char>(BattleBoardSquare::RocketShip))),
+			static_cast<char>(tolower(static_cast<char>(BattleBoardSquare::Submarine))),
+			static_cast<char>(tolower(static_cast<char>(BattleBoardSquare::Battleship)))
 		};
-		IOUtil::replaceIllegalCharacters(nextLine, (char)BattleBoardSquare::Empty, legalChars);
+		IOUtil::replaceIllegalCharacters(nextLine, static_cast<char>(BattleBoardSquare::Empty), legalChars);
 
 		// Traverse each character in the row and put into the board
 		for (char& nextChar : nextLine)
@@ -158,7 +158,7 @@ namespace battleship
 		bool isValidFile = IOUtil::parseFile(boardFile, lineParser, headerParser);
 
 		if (!isValidFile)
-			return NULL;
+			return nullptr;
 
 		// Finalize the board, perform validation here
 		auto board = builder->build();
@@ -175,12 +175,12 @@ namespace battleship
 		{
 			Logger::getInstance().log(Severity::INFO_LEVEL, "Loading battle board: " + boardFilename + "..");
 			string boardFile = path + "\\" + boardFilename;
-			shared_ptr<BattleBoard> nextBoard = buildBoardFromFile(boardFile);
+			unique_ptr<BattleBoard> nextBoard = buildBoardFromFile(boardFile);
 
 			// Accumulate only valid boards
-			if (NULL != nextBoard)
+			if (nullptr != nextBoard)
 			{
-				loadedBoards.emplace(boardFilename, nextBoard);
+				loadedBoards.emplace(make_pair(boardFilename, std::move(nextBoard)));
 				_loadedBoardNames.push_back(boardFilename);
 				Logger::getInstance().log(Severity::INFO_LEVEL,
 										  "Battle board " + boardFilename + " loaded successfully");
@@ -192,7 +192,7 @@ namespace battleship
 			}
 		}
 
-		// Compiler expected to perform return value optimization (vector is moved)
+		// Compiler expected to perform return value optimization (STL data struct is moved)
 		return loadedBoards;
 	}
 
@@ -202,7 +202,7 @@ namespace battleship
 
 		if (boardIt == _loadedBoards.end())
 		{
-			return NULL;
+			return nullptr;
 		}
 		else
 		{

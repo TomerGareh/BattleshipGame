@@ -1,7 +1,6 @@
 #pragma once
 
 #include <memory>
-#include <string>
 #include <tuple>
 #include <set>
 #include <map>
@@ -68,7 +67,7 @@ namespace battleship
 			const string& getMsg() const { return _msg; };
 			
 			/** Returns the priority enum of the current error */
-			const ErrorPriorityEnum getPriority() const { return _errorPriority; };
+			ErrorPriorityEnum getPriority() const { return _errorPriority; };
 		private:
 			string _msg;
 			ErrorPriorityEnum _errorPriority;
@@ -126,7 +125,7 @@ namespace battleship
 			 */
 			bool applyMask(const map<Coordinate, char>& boardMap, tuple<int, int, int> boardSize, Coordinate coord, PlayerEnum player);
 
-			void applyMaskEntry(char boardSquare, char shipChar, MaskEntry& maskEntry, bool axisException, int& matchSizeAxis,
+			static void applyMaskEntry(char boardSquare, char shipChar, MaskEntry& maskEntry, bool axisException, int& matchSizeAxis,
 								bool& wrongSizeAxis, bool& adjacentShipsAxis);
 
 			/** Clean state and prepare for next comparison */
@@ -149,9 +148,9 @@ namespace battleship
 		/** Returns true if the BattleBoard contains a legal formation, false if not.
 		 *  This function is used by BoardBuilder::validate()
 		 */
-		bool isValidBoard(const shared_ptr<BattleBoard> board, set<BoardInitializeError, ErrorPriorityFunction>& errorQueue);
+		bool isValidBoard(BattleBoard* board, set<BoardInitializeError, ErrorPriorityFunction>& errorQueue);
 
 		/** Prints the validation errors in the queue, in descending priority order */
-		void printErrors(const set<BoardInitializeError, ErrorPriorityFunction>& errorQueue);
+		static void printErrors(const set<BoardInitializeError, ErrorPriorityFunction>& errorQueue);
 	};
 }

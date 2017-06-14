@@ -1,6 +1,5 @@
 #include "SingleGameTask.h"
 #include "BattleBoard.h"
-#include "IBattleshipGameAlgo.h"
 #include "Logger.h"
 #include <algorithm>
 
@@ -29,14 +28,14 @@ namespace battleship
 		Logger::getInstance().log(Severity::DEBUG_LEVEL, msg);
 	}
 
-	void SingleGameTask::run(const GameManager& gameManager, WorkerThreadResourcePool& resourcePool)
+	void SingleGameTask::run(const GameManager& gameManager, WorkerThreadResourcePool& resourcePool) const
 	{
 		// Load resources
 		auto playerA = resourcePool.requestAlgo(_playerAName);
 		auto playerB = resourcePool.requestAlgo(_playerBName);
 		auto board = resourcePool.requestBoard(_boardName);
 
-		if ((playerA == NULL) || (playerA == NULL) || (playerA == NULL))
+		if ((playerA == nullptr) || (playerA == nullptr) || (playerA == nullptr))
 		{
 			string msg = "Error: Can't start a game between Player A: " + _playerAName +
 						 " and Player B: " + _playerBName +

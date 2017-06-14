@@ -1,20 +1,14 @@
 #include "MainGame.h"
-#include "IBattleshipGameAlgo.h"
 #include "BattleshipGameBoardFactory.h"
-#include "GameFromFileAlgo.h"
-#include "BattleBoard.h"
-#include "GameManager.h"
 #include "IOUtil.h"
 #include "AlgoLoader.h"
 #include "Logger.h"
 #include "Configuration.h"
 #include "CompetitionManager.h"
 
-#include <cstdlib>
 #include <memory>
 #include <iostream>
 #include <map>
-#include <string>
 
 using namespace battleship;
 using std::unique_ptr;
@@ -69,7 +63,7 @@ int main(int argc, char* argv[])
 		auto algoLoader = std::make_shared<AlgoLoader>(absolutePath);
 		auto availableAlgos = algoLoader->availableGameAlgos();
 
-		if (availableAlgos.size < 2)
+		if (availableAlgos.size() < 2)
 		{ // TODO: Is this absolutePath or config.path..???
 			Logger::getInstance().log(Severity::ERROR_LEVEL,
 									  "Missing an algorithm (dll) file looking in path: " + absolutePath,
@@ -77,7 +71,7 @@ int main(int argc, char* argv[])
 		}
 
 		// Validation #2: Missing board path, Invalid board setup, Missing dll files
-		if (validBoards.empty() || availableAlgos.size < 2)
+		if (validBoards.empty() || availableAlgos.size() < 2)
 			return ERROR_CODE;
 
 		Logger::getInstance().log(Severity::INFO_LEVEL,

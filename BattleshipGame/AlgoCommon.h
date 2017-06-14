@@ -1,7 +1,6 @@
 #pragma once
 
 #include <utility>
-#include <iostream>
 #include <string>
 #include "IBattleshipGameAlgo.h"
 
@@ -35,7 +34,7 @@ enum class PlayerEnum : int
 /** A functor for validating attack moves returned by home made algorithms are valid. */
 struct AttackValidator
 {
-	Coordinate operator() (const Coordinate& move, int rows, int cols, int depth)
+	Coordinate operator() (const Coordinate& move, int rows, int cols, int depth) const
 	{
 		if ((move.row < 1) || (move.col < 1) || (move.depth < 1) ||
 			(move.row > rows) || (move.col > cols) || (move.depth > depth))

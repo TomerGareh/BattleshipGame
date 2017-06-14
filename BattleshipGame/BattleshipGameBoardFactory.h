@@ -2,9 +2,7 @@
 
 #include <memory>
 #include <unordered_map>
-#include <string>
 #include <vector>
-#include "BoardBuilder.h"
 #include "BattleBoard.h"
 
 using std::shared_ptr;
@@ -52,7 +50,7 @@ namespace battleship
 		/** Parse header of battleboard file.
 		 *  nextLine contains the header line, rows, cols, depth will contain the resulting dimensions parsed.
 		 */
-		bool parseHeader(string& nextLine, int& rows, int& cols, int& depth);
+		bool parseHeader(string& nextLine, int& rows, int& cols, int& depth) const;
 
 		/** Parses a line of data from the board file.
 		 *	The line is expected to contain actual data with game pieces.
@@ -60,7 +58,7 @@ namespace battleship
 		 *  nextLine contains the line string, depthIndex and rowIndex are the current indices of row and depth
 		 *  within the board and "cols" is the total width of the board as parsed from the header.
 		 */
-		void parseBoardRow(BoardBuilder& builder, string& nextLine,
+		static void parseBoardRow(BoardBuilder& builder, string& nextLine,
 						   int depthIndex, int rowIndex, int cols);
 
 		/** Builds a BattleBoard by parsing the input board file path using a BoardBuilder helper object.

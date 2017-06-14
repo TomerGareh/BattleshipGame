@@ -4,9 +4,7 @@
 #include <vector>
 #include <map>
 #include <unordered_map>
-#include <string>
 #include <mutex>
-#include <condition_variable>
 #include <functional>
 #include "GameManager.h"
 
@@ -33,12 +31,12 @@ namespace battleship
 		PlayerStatistics(const string& aPlayerName);
 		PlayerStatistics(const string& aPlayerName, int aPointsFor, int aPointsAgainst, int aWins, int aLoses);
 
-		shared_ptr<PlayerStatistics> updateStatistics(int addedPointsFor, int addedPointsAgainst,
-													  bool isWin, bool isLose);
+		PlayerStatistics updateStatistics(int addedPointsFor, int addedPointsAgainst,
+										  bool isWin, bool isLose) const;
 	};
 
 	struct PlayerStatisticsRatingSort {
-		bool operator()(const PlayerStatistics& a, const PlayerStatistics& b)
+		bool operator()(const PlayerStatistics& a, const PlayerStatistics& b) const
 		{
 			return a.rating < b.rating;
 		}
@@ -86,11 +84,18 @@ namespace battleship
 		vector<shared_ptr<RoundResults>>& getRoundResults();
 
 		/** Waits on round results queue until new data is ready,
-		 *  when it arrives - trigger the callback
+		 *  when it arrives - trigger the print results table function (as a callback)
 		 */
-		void waitOnRoundResults(function<void()> callback);
+		void waitOnRoundResults();
+
+		/** Prints the round results in a formatted tableto the console
+		 */
+		void printRoundResults(shared_ptr<RoundResults> roundResults) const;
 
 	private:
+
+		/** Minimal space allocated for player name in the table (visual parameter) */
+		static constexpr int MIN_PLAYER_NAME_SIZE = 12;
 
 		// Number of player entries that must be present for a round to count as finished
 		int _playersPerRound;
@@ -122,6 +127,9 @@ namespace battleship
 		// Data is pushed to this vector only when the round is finished.
 		// _roundResults is volatile to make sure it's handled before condition_variables are notified
 		vector<shared_ptr<RoundResults>> _roundsResults;
+
+		/** Holds the longest player name encountered */
+		int _maxPlayerNameLength;
 
 		// Update the score table with the results for a single player from a single match
 		void updatePlayerGameResults(PlayerEnum player, const string& playerName, GameResults* results);

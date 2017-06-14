@@ -12,8 +12,8 @@ using std::lock_guard;
 namespace battleship
 {		
 	Logger::Logger():
-		_limit(Severity::DEBUG_LEVEL), // Default log level: show everything
-		_path(nullptr)
+		_path(nullptr), // Default log level: show everything
+		_limit(Severity::DEBUG_LEVEL)
 	{
 	} 
 
@@ -65,7 +65,7 @@ namespace battleship
 			lock_guard<mutex> lock(_outputLock);
 
 			// Get current date-time
-		time_t t = time(NULL);
+		time_t t = time(nullptr);
 		struct tm timeinfo;
 		int rc = localtime_s(&timeinfo, &t);
 

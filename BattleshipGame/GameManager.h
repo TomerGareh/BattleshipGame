@@ -3,7 +3,6 @@
 #include <memory>
 #include "BattleBoard.h"
 #include "IBattleshipGameAlgo.h"
-#include "AlgoLoader.h"
 
 using std::shared_ptr;
 using std::unique_ptr;
@@ -38,23 +37,23 @@ namespace battleship
 	private:
 
 		/** Helper methods: Are all game pieces of player X gone? */
-		bool isPlayerShipsLeft(const BattleBoard *const board, PlayerEnum player) const;
+		static bool isPlayerShipsLeft(const BattleBoard *const board, PlayerEnum player);
 
 		/** Returns if both player forfeit or anybody have won */
-		bool isGameOver(const BattleBoard* board, bool isPlayerAForfeit, bool isPlayerBForfeit) const;
+		static bool isGameOver(const BattleBoard* board, bool isPlayerAForfeit, bool isPlayerBForfeit);
 
 		/** Takes into consideration the current game state and points currPlayer to the next player who
 		 *  should be playing
 		 */
-		IBattleshipGameAlgo* switchPlayerTurns(IBattleshipGameAlgo& playerA, IBattleshipGameAlgo& playerB,
+		static IBattleshipGameAlgo* switchPlayerTurns(IBattleshipGameAlgo& playerA, IBattleshipGameAlgo& playerB,
 											   IBattleshipGameAlgo* currPlayer,
 											   shared_ptr<const GamePiece> lastAttackedPiece,
-											   bool isPlayerAForfeit, bool isPlayerBForfeit) const;
+											   bool isPlayerAForfeit, bool isPlayerBForfeit);
 
 		/** Updates the game points when a game piece have been sank */
-		void updateCurrentGamePoints(const GamePiece *const sankPiece, int& playerAScore, int& playerBScore) const;
+		static void updateCurrentGamePoints(const GamePiece *const sankPiece, int& playerAScore, int& playerBScore);
 
 		/** Fetch the winning player from the board according to the final game state */
-		PlayerEnum GameManager::getWinner(const BattleBoard *const board) const;
+		static PlayerEnum GameManager::getWinner(const BattleBoard *const board);
 	};
 }

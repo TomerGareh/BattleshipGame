@@ -1,6 +1,5 @@
 #pragma once
 
-#include <string>
 #include <functional>
 #include <initializer_list>
 #include <vector>

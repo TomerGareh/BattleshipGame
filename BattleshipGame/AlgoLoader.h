@@ -3,7 +3,6 @@
 #include <memory>
 #include <windows.h>
 #include <vector>
-#include <string>
 #include <unordered_map>
 #include "IBattleshipGameAlgo.h"
 
@@ -59,7 +58,7 @@ namespace battleship
 			HINSTANCE dll;
 			GetAlgorithmFuncType algoFunc;
 
-			AlgoDescriptor(string& aPath, HINSTANCE aDll, GetAlgorithmFuncType aAlgoFunc)
+			AlgoDescriptor(const string& aPath, HINSTANCE aDll, GetAlgorithmFuncType aAlgoFunc)
 			{
 				path = aPath;
 				dll = aDll;

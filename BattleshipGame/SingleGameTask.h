@@ -1,7 +1,6 @@
 #pragma once
 
 #include <memory>
-#include <string>
 #include "Scoreboard.h"
 #include "GameManager.h"
 #include "WorkerThreadResourcePool.h"
@@ -23,7 +22,7 @@ namespace battleship
 		 *  This method will allocate the resources needed to run the game if not already cached for
 		 *  this worker thread, and then run the game and update the scoreboard with the results
 		 */
-		void run(const GameManager& gameManager, WorkerThreadResourcePool& resourcePool);
+		void run(const GameManager& gameManager, WorkerThreadResourcePool& resourcePool) const;
 
 		const string& playerAName() const;
 		const string& playerBName() const;

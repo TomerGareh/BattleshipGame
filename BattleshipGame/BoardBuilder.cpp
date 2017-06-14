@@ -13,7 +13,7 @@ namespace battleship
 	}
 
 	BoardBuilder::BoardInitializeError::BoardInitializeError(ErrorPriorityEnum errorType) :
-		_errorPriority(errorType), _msg(getErrorMsg(errorType))
+		_msg(getErrorMsg(errorType)), _errorPriority(errorType)
 	{
 	}
 
@@ -199,16 +199,12 @@ namespace battleship
 			int i = maskEntry.first.row;
 			int j = maskEntry.first.col;
 			int k = maskEntry.first.depth;
-			char currMask = static_cast<char>(maskEntry.second);
 			bool XAxisException = ((coord.row + i < 0) || (coord.row + i >= boardHeight) || (coord.col + j < 0) ||
 								   (coord.col + j >= boardWidth) || (coord.depth + k < 0) || (coord.depth + k >= boardDepths));
 			bool YAxisException = ((coord.row + j < 0) || (coord.row + j >= boardHeight) || (coord.col + i < 0) ||
 								   (coord.col + i >= boardWidth) || (coord.depth + k < 0) || (coord.depth + k >= boardDepths));
 			bool ZAxisException = ((coord.row + i < 0) || (coord.row + i >= boardHeight) || (coord.col + k < 0) ||
 								   (coord.col + k >= boardWidth) || (coord.depth + j < 0) || (coord.depth + j >= boardDepths));
-
-			if (player == PlayerEnum::B)
-				currMask = tolower(currMask);
 			
 			// Check for X_AXIS orientation
 			Coordinate XOrientCoord(coord.row + i, coord.col + j, coord.depth + k);
@@ -233,7 +229,7 @@ namespace battleship
 		bool isYAxisMask = ((!wrongSizeYAxis) && (!adjacentShipsYAxis));
 		bool isZAxisMask = ((!wrongSizeZAxis) && (!adjacentShipsZAxis));
 
-		int maxMatchSize = 1;
+		int maxMatchSize;
 		if (matchSizeXAxis < matchSizeYAxis)
 		{
 			maxMatchSize = matchSizeYAxis;
@@ -246,7 +242,6 @@ namespace battleship
 		}
 		if (maxMatchSize < matchSizeZAxis)
 		{
-			maxMatchSize = matchSizeZAxis;
 			orient = Orientation::Z_AXIS;
 		}
 		
@@ -287,21 +282,17 @@ namespace battleship
 	void BoardBuilder::markVisitedCoords(unordered_set<Coordinate, CoordinateHash>& coordSet, Coordinate coord)
 	{
 		char ship = boardMap[coord];	// This coordinate has came from the boardMap, so it indeed exists
-		int i = coord.row;
 		int j = coord.col;
-		int k = coord.depth;
 		bool sameCharInRow = true;
-		bool sameCharInCol = true;
-		bool sameCharInDepth = true;
-		
+
 		while ((j < boardWidth) && sameCharInRow)
 		{
-			i = coord.row;
-			sameCharInCol = true;
+			int i = coord.row;
+			bool sameCharInCol = true;
 			while ((i < boardHeight) && sameCharInCol)
 			{
-				k = coord.depth;
-				sameCharInDepth = true;
+				int k = coord.depth;
+				bool sameCharInDepth = true;
 				while ((k < boardDepth) && sameCharInDepth)
 				{
 					Coordinate currCoord(i, j, k);
@@ -326,26 +317,25 @@ namespace battleship
 	}
 
 	// This function assumes that the board contains only ship characters or space, and not any other character
-	bool BoardBuilder::isValidBoard(const shared_ptr<BattleBoard> board, set<BoardInitializeError, ErrorPriorityFunction>& errorQueue)
+	bool BoardBuilder::isValidBoard(BattleBoard* board, set<BoardInitializeError, ErrorPriorityFunction>& errorQueue)
 	{
 		tuple<int, int, int> boardSize = std::make_tuple(boardWidth, boardHeight, boardDepth);
 		shared_ptr<ShipMask> rubberMask = std::make_shared<ShipMask>(BattleBoardSquare::RubberBoat);
 		shared_ptr<ShipMask> rocketMask = std::make_shared<ShipMask>(BattleBoardSquare::RocketShip);
 		shared_ptr<ShipMask> submarineMask = std::make_shared<ShipMask>(BattleBoardSquare::Submarine);
 		shared_ptr<ShipMask> battleshipMask = std::make_shared<ShipMask>(BattleBoardSquare::Battleship);
-		shared_ptr<ShipMask> currMask = NULL;
+		shared_ptr<ShipMask> currMask;
 
 		bool validBoard = true;
-		PlayerEnum player;
 		unordered_set<Coordinate, CoordinateHash> visitedCoords;
-		bool isMatch = false;
+		bool isMatch;
 		for (const auto& square : boardMap)
 		{
 			if (visitedCoords.find(square.first) == visitedCoords.end())
 				continue;
 
-			player = (isupper(square.second)) ? PlayerEnum::A : PlayerEnum::B;
-			const ShipType* shipType = NULL;
+			PlayerEnum player = (isupper(square.second)) ? PlayerEnum::A : PlayerEnum::B;
+			const ShipType* shipType;
 
 			switch (toupper(square.second))
 			{
@@ -441,10 +431,10 @@ namespace battleship
 		}
 	}
 
-	shared_ptr<BattleBoard> BoardBuilder::build()
+	unique_ptr<BattleBoard> BoardBuilder::build()
 	{
-		// Only BoardBuilder can instantiate this class
-		shared_ptr<BattleBoard> board(new BattleBoard(boardWidth, boardHeight, boardDepth));
+		// Only BoardBuilder can instantiate this class - so we must create without make_shared macro
+		unique_ptr<BattleBoard> board(new BattleBoard(boardWidth, boardHeight, boardDepth));
 		
 		ErrorPriorityFunction sortFunc = [](const BoardInitializeError& err1, const BoardInitializeError& err2)
 		{
@@ -456,16 +446,17 @@ namespace battleship
 		set<BoardInitializeError, ErrorPriorityFunction> errorQueue(sortFunc);
 		
 		// Call validation process here, add errors to errorQueue
-		bool validBoard = isValidBoard(board, errorQueue);
+		bool validBoard = isValidBoard(board.get(), errorQueue);
 
 		printErrors(errorQueue);
 
-	shared_ptr<BattleBoard> BoardBuilder::build()
-		return validBoard ? board : NULL;
+		return validBoard ? std::move(board) : NULL;
 	}
 
-	shared_ptr<BattleBoard> clone(const BattleBoard& prototype)
+	shared_ptr<BattleBoard> BoardBuilder::clone(const BattleBoard& prototype)
 	{
-		return std::make_shared<BattleBoard>(prototype); // Invoke copy constructor
+		// Only BoardBuilder can instantiate this class - so we must create without make_shared macro
+		shared_ptr<BattleBoard> board(new BattleBoard(prototype)); // Invoke copy constructor
+		return board;
 	}
 }

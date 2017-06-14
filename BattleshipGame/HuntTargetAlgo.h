@@ -1,6 +1,5 @@
 #pragma once
 
-#include <string>
 #include <tuple>
 #include <vector>
 #include <map>
@@ -8,7 +7,6 @@
 #include "IBattleshipGameAlgo.h"
 #include "AlgoCommon.h"
 
-using std::string;
 using std::tuple;
 using std::vector;
 using std::map;
@@ -76,9 +74,9 @@ private:
 
 	AttackDirection getTargetDirection(targetsMapEntry targetIt);
 
-	int getTargetSize(const map<AttackDirection, int>& targetSurround);
+	static int getTargetSize(const map<AttackDirection, int>& targetSurround);
 
-	void advanceInDirection(Coordinate& coord, AttackDirection direction, int size);
+	static void advanceInDirection(Coordinate& coord, AttackDirection direction, int size);
 
 	// Search for an unvisited coordinate in 'visitedCoords'. The returned coordiante is in the range 1 to board size.
 	// If no square was found, battleship::NO_MORE_MOVES is returned.

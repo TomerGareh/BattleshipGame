@@ -2,7 +2,6 @@
 #include "IBattleshipGameAlgo.h"
 #include "AlgoCommon.h"
 #include "BattleBoard.h"
-#include <tuple>
 #include <unordered_map>
 
 using std::unordered_map;

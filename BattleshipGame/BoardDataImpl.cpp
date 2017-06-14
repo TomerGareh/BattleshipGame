@@ -20,7 +20,7 @@ namespace battleship
 	{
 		auto gamePiece = _board->pieceAt(c);
 		
-		if (gamePiece == NULL)
+		if (gamePiece == nullptr)
 		{
 			return static_cast<char>(BoardSquare::Empty); // Empty square
 		}

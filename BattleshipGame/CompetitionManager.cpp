@@ -1,14 +1,6 @@
 #include "CompetitionManager.h"
-#include <iostream>
-#include <iomanip>
-#include <algorithm>
 
 using std::lock_guard;
-using std::setw;
-using std::setprecision;
-using std::cout;
-using std::endl;
-using std::min;
 
 namespace battleship
 {
@@ -50,14 +42,6 @@ namespace battleship
 		// Don't use more threads than needed, even if count says so
 		auto actualThreadCount = (threadCount < _gamesSet.size()) ? threadCount : _gamesSet.size();
 		_workerThreads.reserve(actualThreadCount);
-
-		// Save max player name for score results table formatting
-		_maxPlayerNameLength = MIN_PLAYER_NAME_SIZE;
-		for (const auto& algoName : algoLoader->loadedGameAlgos())
-		{
-			if (_maxPlayerNameLength < algoName.length())
-				_maxPlayerNameLength = algoName.length();
-		}
 	}
 
 	void CompetitionManager::runWorkerThread(shared_ptr<BattleshipGameBoardFactory> boardLoader,
@@ -84,50 +68,16 @@ namespace battleship
 			}
 
 			// Lock is released and the thread now runs the game the task represents
-			if (task != NULL)
+			if (task != nullptr)
 			{
 				task->run(_gameManager, resourcePool);
 			}
 		}
 	}
 
-	void CompetitionManager::printRoundResults(shared_ptr<RoundResults> roundResults)
+	void CompetitionManager::queryAndPrintScoreboard() const
 	{
-		cout << setw(8) << "#"
-			 << setw(_maxPlayerNameLength) << "Team Name"
-			 << setw(8) << "Wins"
-			 << setw(8) << "Losses"
-			 << setw(8) << "%"
-			 << setw(8) << "Pts For"
-			 << setw(12) << "Pts Against" << endl;
-
-		int place = 1;
-
-		// RoundsResults are already sorted by player's rating
-		for (const auto& playerStats : roundResults->playerStatistics)
-		{
-			string placeStr = place + ".";
-			cout << setw(8) << placeStr
-				 << setw(_maxPlayerNameLength) << playerStats.playerName
-				 << setw(8) << playerStats.wins
-				 << setw(8) << playerStats.loses
-				 << setw(8) << setprecision(2) << playerStats.rating
-				 << setw(8) << playerStats.pointsFor
-				 << setw(12) << playerStats.pointsAgainst << endl;
-			place++;
-		}
-	}
-
-	void CompetitionManager::queryAndPrintScoreboard()
-	{
-		// Print all ready round results
-		// After they are printed, we pop this data from the queue
-		while (!_scoreboard->getRoundResults().empty)
-		{
-			auto nextResults = _scoreboard->getRoundResults().front();
-			_scoreboard->getRoundResults().pop_back();
-			printRoundResults(nextResults);
-		}
+		
 	}
 
 	void CompetitionManager::run()
@@ -138,15 +88,12 @@ namespace battleship
 			worker = thread(&CompetitionManager::runWorkerThread, this, _boardLoader, _algoLoader);
 		}
 
-		// Print all ready round results from the scoreboard and drain the RoundResults queue
-		auto roundResultsReadyCallback = &queryAndPrintScoreboard;
-
 		// While competition is not over, wake up when round results are ready and print them
 		while (!_gamesSet.empty())
 		{
-			// Wait on conditional_variable predicate and wake up when round results are ready
-			// Then trigger callback which prints the results
-			_scoreboard->waitOnRoundResults(roundResultsReadyCallback);
+			// Wait on conditional_variable predicate and wake up when some round results are ready
+			// Then print all ready round results from the scoreboard and drain the RoundResults queue
+			_scoreboard->waitOnRoundResults();
 		}
 
 		// Wait for all worker threads to finish

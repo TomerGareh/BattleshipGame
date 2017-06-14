@@ -3,10 +3,8 @@
 #include <memory>
 #include <vector>
 #include <queue>
-#include <atomic>
 #include <thread>
 #include <mutex>
-#include "BattleBoard.h"
 #include "SingleGameTask.h"
 #include "Scoreboard.h"
 #include "AlgoLoader.h"
@@ -37,9 +35,11 @@ namespace battleship
 		/** Start digesting priority queue of games by worker threads and print round results when ready */
 		void run();
 
+		/** Logic for a single worker thread: constantly drain and process SingleGameTasks from gameSet until empty */
+		void runWorkerThread(shared_ptr<BattleshipGameBoardFactory> boardLoader,
+							 shared_ptr<AlgoLoader> algoLoader);
+
 	private:
-		/** Minimal space allocated for player name in the table (visual parameter) */
-		static constexpr int MIN_PLAYER_NAME_SIZE = 12;
 
 		/** Priority queue of games in the competition, sorted by "game number" for each player so
 		 *  matches are evenly distributed.
@@ -68,21 +68,11 @@ namespace battleship
 		/** Locks the gameSet when multiple threads aim to pull from it */
 		mutex _gameSetLock;
 
-		/** Holds the longest player name encountered */
-		int _maxPlayerNameLength;
-
 		/** Creates priority queue of games to run */
 		void prepareCompetition(shared_ptr<BattleshipGameBoardFactory> boardLoader,
 							    shared_ptr<AlgoLoader> algoLoader);
 
-		/** Logic for a single worker thread: constantly drain and process SingleGameTasks from gameSet until empty */
-		void runWorkerThread(shared_ptr<BattleshipGameBoardFactory> boardLoader,
-							 shared_ptr<AlgoLoader> algoLoader);
-
-		/** Prints a formatted table of the round results to the console */
-		void printRoundResults(shared_ptr<RoundResults> roundResults);
-
 		/** Queries the RoundResults queue in the scoreboard, drains it and prints the stats to the console */
-		void queryAndPrintScoreboard();
+		void queryAndPrintScoreboard() const;
 	};
 }

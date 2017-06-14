@@ -78,7 +78,7 @@ namespace battleship
 
 				if (IOUtil::isInteger(nextLine)) // Only use the value if this is a valid int
 				{
-					this->threads = atoi(nextLine.c_str);
+					this->threads = atoi(nextLine.c_str());
 
 					if (this->threads <= 0)	// Invalid thread count value
 						isValidFile = false;

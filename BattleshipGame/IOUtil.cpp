@@ -4,8 +4,6 @@
 #include <string>
 #include <algorithm>
 #include <locale>
-#include <cerrno>
-#include <sstream>
 #include <windows.h>
 #include "Logger.h"
 
@@ -74,7 +72,7 @@ namespace battleship
 			return false;
 		}
 
-		bool isHeader = (NULL != headerParser);
+		bool isHeader = (nullptr != headerParser);
 		int lineNum = 1;
 
 		// Read the next line from the file, in case of an error this is skipped
@@ -178,7 +176,7 @@ namespace battleship
 	{
 		const int BUFFER_SIZE = 1024;
 		char buffer[BUFFER_SIZE];
-		int pathSize = GetFullPathNameA(path.c_str(), BUFFER_SIZE, buffer, NULL);
+		int pathSize = GetFullPathNameA(path.c_str(), BUFFER_SIZE, buffer, nullptr);
 		string fullPath(buffer, pathSize);
 		return fullPath;
 	}
