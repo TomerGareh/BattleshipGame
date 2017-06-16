@@ -2,6 +2,7 @@
 #include "GameManager.h"
 #include "AlgoCommon.h"
 #include "BoardDataImpl.h"
+#include "Logger.h"
 
 using std::cout;
 using std::endl;
@@ -113,6 +114,8 @@ namespace battleship
 		{
 			// Attack
 			auto target = currentPlayer->attack();
+			string currPlayerStr = (currentPlayer == playerA.get()) ? "A" : "B";
+			Logger::getInstance().log(Severity::DEBUG_LEVEL, "Player " + currPlayerStr + " attacks at " + to_string(target));
 
 			if (target == NO_MORE_MOVES)
 			{	// Player chose not to attack - from now on this player forfeits the game
@@ -148,19 +151,23 @@ namespace battleship
 			// Notify on attack results
 			int attackingPlayerNumber = (currentPlayer == playerB.get()); // A - 0, B - 1
 			AttackResult attackResult;
+			string attackResultStr;
 
 			if (attackedGamePiece == nullptr)
 			{	// Miss
 				attackResult = AttackResult::Miss;
+				attackResultStr = "Miss";
 			}
 			else if (attackedGamePiece->_lifeLeft == 0)
 			{	// Sink
 				attackResult = AttackResult::Sink;
+				attackResultStr = "Sink";
 				updateCurrentGamePoints(attackedGamePiece.get(), playerAPoints, playerBPoints);
 			}
 			else
 			{	// Hit
 				attackResult = AttackResult::Hit;
+				attackResultStr = "Hit";
 			}
 
 			currentPlayer = switchPlayerTurns(*playerA, *playerB, currentPlayer, attackedGamePiece,
@@ -168,6 +175,7 @@ namespace battleship
 
 			playerA->notifyOnAttackResult(attackingPlayerNumber, target, attackResult);
 			playerB->notifyOnAttackResult(attackingPlayerNumber, target, attackResult);
+			Logger::getInstance().log(Severity::DEBUG_LEVEL, "Attack result: " + attackResultStr);
 		}
 
 		auto winner = getWinner(board.get());

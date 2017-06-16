@@ -469,7 +469,7 @@ void HuntTargetAlgo::notifyOnAttackResult(int player, Coordinate move, AttackRes
 																   {AttackDirection::RowPlus, 0}, {AttackDirection::RowMinus, 0}, 
 																   {AttackDirection::ColPlus, 0}, {AttackDirection::ColMinus, 0},
 																   {AttackDirection::DepthPlus, 0}, {AttackDirection::DepthMinus, 0}};
-					targetsMap.emplace(move, newTargetSurround);
+					targetsMap.emplace(moveZeroBased, newTargetSurround);
 				}
 				else if (result == AttackResult::Sink)	// In case of rubber boat
 				{
@@ -499,7 +499,7 @@ void HuntTargetAlgo::notifyOnAttackResult(int player, Coordinate move, AttackRes
 																		   {AttackDirection::RowPlus, 0}, {AttackDirection::RowMinus, 0},
 																		   {AttackDirection::ColPlus, 0}, {AttackDirection::ColMinus, 0},
 																		   {AttackDirection::DepthPlus, 0}, {AttackDirection::DepthMinus, 0}};
-							targetsMap.emplace(move, newTargetSurround);
+							targetsMap.emplace(moveZeroBased, newTargetSurround);
 						}
 						return;
 					}

@@ -52,8 +52,8 @@ struct AttackValidator
 #pragma region Coordinate extensions
 
 inline string to_string(Coordinate c) {
-	return "(" + std::to_string(c.col) + ", " +
-		std::to_string(c.row) + ", " +
+	return "(" + std::to_string(c.row) + ", " +
+		std::to_string(c.col) + ", " +
 		std::to_string(c.depth) + ")";
 }
 
