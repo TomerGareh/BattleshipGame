@@ -1,5 +1,8 @@
 #include <iostream>
 #include "BoardBuilder.h"
+#include "Logger.h"
+
+using std::to_string;
 
 namespace battleship
 {
@@ -61,9 +64,13 @@ namespace battleship
 			{
 				return "Adjacent Ships on Board";
 			}
+			case ErrorPriorityEnum::WRONG_SHIP_TYPES_FOR_BOTH_PLAYERS:
+			{
+				return "Wrong ship types / amount of types for both players";
+			}
 			case ErrorPriorityEnum::NO_SHIPS_AT_ALL:
 			{
-				return "There are no ships at all on the board";
+				return "No ships at all on board";
 			}
 			default:
 			{
@@ -144,10 +151,12 @@ namespace battleship
 	{
 	}
 
-	void BoardBuilder::ShipMask::applyMaskEntry(char boardSquare, char shipChar, MaskEntry& maskEntry, bool axisException,
+	void BoardBuilder::ShipMask::applyMaskEntry(char boardSquare, char shipChar, const MaskEntry& maskEntry, bool axisException,
 												int& matchSizeAxis, bool& wrongSizeAxis, bool& adjacentShipsAxis)
 	{
 		char maskChar = static_cast<char>(maskEntry.second);
+		if (islower(shipChar))
+			maskChar = tolower(maskChar);
 
 		if (!axisException)
 		{
@@ -242,10 +251,11 @@ namespace battleship
 		}
 		if (maxMatchSize < matchSizeZAxis)
 		{
+			maxMatchSize = matchSizeZAxis;
 			orient = Orientation::Z_AXIS;
 		}
 		
-		wrongSize = (wrongSizeXAxis && wrongSizeYAxis && wrongSizeXAxis);
+		wrongSize = (wrongSizeXAxis && wrongSizeYAxis && wrongSizeZAxis);
 		
 		if ((!wrongSizeXAxis) && wrongSizeYAxis && wrongSizeZAxis)
 		{
@@ -304,9 +314,11 @@ namespace battleship
 					{
 						sameCharInDepth = false;
 						if (k == coord.depth)
+						{
 							sameCharInCol = false;
-						if (i == coord.row)
-							sameCharInRow = false;
+							if (i == coord.row)
+								sameCharInRow = false;
+						}
 					}
 					k++;
 				}
@@ -331,7 +343,7 @@ namespace battleship
 		bool isMatch;
 		for (const auto& square : boardMap)
 		{
-			if (visitedCoords.find(square.first) == visitedCoords.end())
+			if (visitedCoords.find(square.first) != visitedCoords.end())
 				continue;
 
 			PlayerEnum player = (isupper(square.second)) ? PlayerEnum::A : PlayerEnum::B;
@@ -401,11 +413,18 @@ namespace battleship
 
 			markVisitedCoords(visitedCoords, square.first);
 
-			if (!currMask->wrongSize)
-				board->addGamePiece(square.first, *shipType, player, currMask->orient);
+			string logMsg = "Ship type " + string(1, static_cast<char>(shipType->_representation)) + " of player " +
+							to_string(static_cast<int>(player));
 
+			if (!currMask->wrongSize)
+			{
+				Logger::getInstance().log(Severity::DEBUG_LEVEL, logMsg + " is valid.");
+				board->addGamePiece(square.first, *shipType, player, currMask->orient);
+			}
+			
 			if (!isMatch)
 			{
+				Logger::getInstance().log(Severity::DEBUG_LEVEL, logMsg + " is invalid.");
 				validBoard = false;
 				if (currMask->adjacentShips)
 					errorQueue.insert(BoardInitializeError(ErrorPriorityEnum::ADJACENT_SHIPS_ON_BOARD));
@@ -427,7 +446,7 @@ namespace battleship
 	{
 		for (const auto& err : errorQueue)
 		{
-			std::cout << err.getMsg() << std::endl;
+			Logger::getInstance().log(Severity::WARNING_LEVEL, err.getMsg());
 		}
 	}
 

@@ -2,17 +2,20 @@
 
 #include <memory>
 #include <tuple>
+#include <vector>
 #include <set>
 #include <map>
 #include <unordered_set>
 #include <functional>
 #include "IBattleshipGameAlgo.h"
 #include "BattleBoard.h"
+#include "AlgoCommon.h"
 
 using std::shared_ptr;
 using std::string;
 using std::pair;
 using std::tuple;
+using std::vector;
 using std::set;
 using std::map;
 using std::unordered_set;
@@ -34,6 +37,7 @@ namespace battleship
 		WRONG_SIZE_SHAPE_FOR_SHIP_M_PLAYER_B,
 		WRONG_SIZE_SHAPE_FOR_SHIP_D_PLAYER_B,
 		ADJACENT_SHIPS_ON_BOARD,
+		WRONG_SHIP_TYPES_FOR_BOTH_PLAYERS,
 		NO_SHIPS_AT_ALL
 	};
 
@@ -108,8 +112,9 @@ namespace battleship
 			BattleBoardSquare maskType;
 
 			/** A map of squares that compose the mask. The coordinate is a relative coordinate. */
-			map<Coordinate, BattleBoardSquare> mask;
-			using MaskEntry = const pair<Coordinate, BattleBoardSquare>;
+			
+			vector<pair<Coordinate, BattleBoardSquare>> mask;
+			using MaskEntry = pair<Coordinate, BattleBoardSquare>;
 			
 			Orientation orient;
 			bool wrongSize;
@@ -125,8 +130,8 @@ namespace battleship
 			 */
 			bool applyMask(const map<Coordinate, char>& boardMap, tuple<int, int, int> boardSize, Coordinate coord, PlayerEnum player);
 
-			static void applyMaskEntry(char boardSquare, char shipChar, MaskEntry& maskEntry, bool axisException, int& matchSizeAxis,
-								bool& wrongSizeAxis, bool& adjacentShipsAxis);
+			static void applyMaskEntry(char boardSquare, char shipChar, const MaskEntry& maskEntry, bool axisException,
+									   int& matchSizeAxis, bool& wrongSizeAxis, bool& adjacentShipsAxis);
 
 			/** Clean state and prepare for next comparison */
 			void resetMaskFlags();
