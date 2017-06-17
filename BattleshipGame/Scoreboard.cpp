@@ -1,10 +1,12 @@
 #include "Scoreboard.h"
 #include "Logger.h"
+#include "IOUtil.h"
 #include <iostream>
 #include <iomanip>
 #include <algorithm>
 #include <string>
 #include <sstream>
+#include <windows.h>
 
 using std::lock_guard;
 using std::unique_lock;
@@ -25,8 +27,9 @@ namespace battleship
 
 	Scoreboard::Scoreboard(vector<string> players, int totalRounds) :
 		_totalRounds(totalRounds),
-		_playersPerRound(static_cast<int>(players.size())) // Safe to assume that the number of players
-														   // does not overflow integer 
+		_playersPerRound(static_cast<int>(players.size())), // Safe to assume that the number of players
+														    // does not overflow integer 
+		_resultsCursorPosition(std::make_pair(0, 0))
 	{
 		// Save max player name for score results table formatting
 		_maxPlayerNameLength = MIN_PLAYER_NAME_SIZE;
@@ -159,6 +162,13 @@ namespace battleship
 			place++;
 		}
 
+		if (roundResults->roundNum == 1)
+		{
+			COORD currPosition(IOUtil::getConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE)));
+			_resultsCursorPosition.first = currPosition.Y;
+			_resultsCursorPosition.second = currPosition.X;
+		}
+		IOUtil::gotoxy(_resultsCursorPosition.first, _resultsCursorPosition.second);
 		Logger::getInstance().log(Severity::INFO_LEVEL, ss.str(), true); // true = Print to log & console
 	}
 
