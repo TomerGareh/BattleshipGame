@@ -23,7 +23,8 @@ namespace battleship
 	{
 	}
 
-	Scoreboard::Scoreboard(vector<string> players) :
+	Scoreboard::Scoreboard(vector<string> players, int totalRounds) :
+		_totalRounds(totalRounds),
 		_playersPerRound(static_cast<int>(players.size())) // Safe to assume that the number of players
 														   // does not overflow integer 
 	{
@@ -128,11 +129,11 @@ namespace battleship
 
 	void Scoreboard::printRoundResults(shared_ptr<RoundResults> roundResults) const
 	{
-		Logger::getInstance().log(Severity::INFO_LEVEL,
-								  "Results for round " +
-								  to_string(roundResults->roundNum) + ":");
-
+		// Use string stream so log "block" will be printed in an atomic manner
 		stringstream ss;
+
+		ss << "Results for round " << to_string(roundResults->roundNum) << 
+			  "/" << to_string(_totalRounds) << endl;
 
 		ss << setw(8) << "#"
 		   << setw(_maxPlayerNameLength) << "Team Name"
@@ -140,16 +141,13 @@ namespace battleship
 		   << setw(8) << "Losses"
 		   << setw(8) << "%"
 		   << setw(8) << "Pts For"
-		   << setw(12) << "Pts Against";
+		   << setw(12) << "Pts Against" << endl;
 
-		cout << ss.str() << endl;
-		Logger::getInstance().log(Severity::INFO_LEVEL, ss.str());
 		int place = 1;
 
 		// RoundsResults are already sorted by player's rating
 		for (const auto& playerStats : roundResults->playerStatistics)
 		{
-			ss.str("");
 			string placeStr = to_string(place) + ".";
 			ss << setw(8) << placeStr
 			   << setw(_maxPlayerNameLength) << playerStats.playerName
@@ -157,11 +155,11 @@ namespace battleship
 			   << setw(8) << playerStats.loses
 			   << setw(8) << setprecision(2) << fixed << playerStats.rating
 			   << setw(8) << playerStats.pointsFor
-			   << setw(12) << playerStats.pointsAgainst;
-			cout << ss.str() << endl;
-			Logger::getInstance().log(Severity::INFO_LEVEL, ss.str());
+			   << setw(12) << playerStats.pointsAgainst << endl;
 			place++;
 		}
+
+		Logger::getInstance().log(Severity::INFO_LEVEL, ss.str(), true); // true = Print to log & console
 	}
 
 	void Scoreboard::processRoundResultsQueue()

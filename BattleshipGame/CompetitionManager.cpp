@@ -12,7 +12,12 @@ namespace battleship
 	{
 		auto availableBoards = boardLoader->boardsList(); // Valid boards
 		auto availableAlgos = algoLoader->loadedGameAlgos(); // Valid loaded algorithms
-		_scoreboard = std::make_shared<Scoreboard>(availableAlgos); // Reset scoreboard
+
+		// Total games for each player: play twice against each player other player on each board
+		auto totalRounds = (availableAlgos.size() - 1) * 2 * availableBoards.size();
+
+		// Reset scoreboard (casting totalRounds to int is safe since we don't expect that many games)
+		_scoreboard = std::make_shared<Scoreboard>(availableAlgos, static_cast<int>(totalRounds));
 
 		// Iterate all boards and players and create SingleGameTask for each valid combination
 		for (const auto& board : availableBoards)
@@ -125,5 +130,8 @@ namespace battleship
 				worker.join();
 			}
 		}
+
+		// Drain any remaining round results in queue and report to screen / log
+		_scoreboard->processRoundResultsQueue();
 	}
 }

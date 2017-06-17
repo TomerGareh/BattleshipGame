@@ -51,7 +51,7 @@ namespace battleship
 	class Scoreboard
 	{
 	public:
-		Scoreboard(vector<string> players);
+		Scoreboard(vector<string> players, int totalRounds);
 		virtual ~Scoreboard() = default;
 
 		/** Registers the two players for a future match.
@@ -81,10 +81,17 @@ namespace battleship
 		 */
 		void waitOnRoundResults();
 
+		/** Pop and print all round results ready in the _roundResults queue
+		 */
+		void processRoundResultsQueue();
+
 	private:
 
 		/** Minimal space allocated for player name in the table (visual parameter) */
 		static constexpr int MIN_PLAYER_NAME_SIZE = 12;
+
+		// Total rounds the competition should contain
+		int _totalRounds;
 
 		// Number of player entries that must be present for a round to count as finished
 		int _playersPerRound;
@@ -123,10 +130,6 @@ namespace battleship
 		/** Update the score table with the results for a single player from a single match
 		 */
 		void updatePlayerGameResults(PlayerEnum player, const string& playerName, GameResults* results);
-
-		/** Pop and print all round results ready in the _roundResults queue
-		 */
-		void processRoundResultsQueue();
 
 		/** Prints the round results in a formatted table to the console
 		 */
