@@ -72,12 +72,14 @@ namespace battleship
 			if (!rc)
 				_fs << "[" << std::put_time(&timeinfo, "%d-%m-%Y %H-%M-%S") << "][" << severityStr << "] " << msg << endl;
 
-			if (isPrintToConsole)
+			// Errors are force printed to console as well
+			if (severity == Severity::ERROR_LEVEL)
 			{
-				if (severity == Severity::ERROR_LEVEL)
-					cerr << msg << endl;
-				else
-					cout << msg << endl;
+				cerr << msg << endl;
+			}
+			else if (isPrintToConsole)
+			{
+				cout << msg << endl;
 			}
 		}
 	}
