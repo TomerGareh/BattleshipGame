@@ -54,22 +54,12 @@ namespace battleship
 		Scoreboard(vector<string> players, int totalRounds);
 		virtual ~Scoreboard() = default;
 
-		/** Registers the two players for a future match.
-		 *  -- This method is not thread safe.
-		 */
-		void registerMatch(const string& playerA, const string& playerB);
-
 		/** Update the score table with the game results.
 		 *  This method is thread safe.
 		 */
 		void updateWithGameResults(shared_ptr<GameResults> results,
-								   const string& playerAName, const string& playerBName);
-
-		/**
-		 *  Returns total matches the player currently participates in
-		 *  --This method is thread safe.
-		 */
-		int getPlayerEnlistedMatches(const string& player) const;
+								   const string& playerAName, const string& playerBName,
+								   const string& boardName);
 
 		/** A "queue" of round results for rounds that are finished being played.
 		 *  Outside consumers are expected to pop entries from this data structure after processing them.
@@ -108,11 +98,6 @@ namespace battleship
 		// Current points & statistics for each player, contains the most up to date info about each player
 		map<string, PlayerStatistics> _score;
 
-		// Number of registered matches for each player, so far.
-		// This data structure is populated when the tournament is constructed, to make sure
-		// player's games are evenly spread.
-		unordered_map<string, int> _registeredMatches;
-
 		// Tracked matches data - 
 		// key is round number
 		// value is RoundResults (that accumulates data from finished games for each player for that round)
@@ -134,5 +119,8 @@ namespace battleship
 		/** Prints the round results in a formatted table to the console
 		 */
 		void printRoundResults(shared_ptr<RoundResults> roundResults) const;
+
+		/** Get the next round for the player (to submit score to) */
+		int getPlayerCurrentRound(const string& player) const;
 	};
 }

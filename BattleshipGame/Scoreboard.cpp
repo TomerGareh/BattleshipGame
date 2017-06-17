@@ -16,6 +16,7 @@ using std::cout;
 using std::endl;
 using std::to_string;
 using std::stringstream;
+using std::left;
 
 namespace battleship
 {
@@ -35,7 +36,6 @@ namespace battleship
 		{
 			// Store initialized player score information
 			_score.emplace(std::make_pair(player, PlayerStatistics(player)));
-			_registeredMatches.emplace(player, 0);
 
 			// Query for the longest name
 			if (_maxPlayerNameLength < player.length())
@@ -46,19 +46,21 @@ namespace battleship
 		_maxPlayerNameLength += 2; // Apply some spacing between tabs in printed scoreboard
 	}
 
-	void Scoreboard::registerMatch(const string& playerA, const string& playerB)
+	int Scoreboard::getPlayerCurrentRound(const string& player) const
 	{
-		_registeredMatches[playerA]++;
-		_registeredMatches[playerB]++;
+		// Fetch current score for player
+		const PlayerStatistics& playerStatistics = _score.at(player);
+
+		// Calculate round number for this player, start from round #1
+		int playerRound = playerStatistics.getRoundsPlayed() + 1;
+
+		return playerRound;
 	}
 
 	void Scoreboard::updatePlayerGameResults(PlayerEnum player, const string& playerName, GameResults* results)
 	{
-		// Fetch current score for player
-		PlayerStatistics& playerStatistics = _score.at(playerName);
-
 		// Calculate round number for this player, start from round #1
-		int playerRound = playerStatistics.getRoundsPlayed() + 1;
+		int playerRound = getPlayerCurrentRound(playerName);
 
 		// Find RoundResults object for this round number
 		auto roundEntry = _trackedMatches.find(playerRound);
@@ -75,6 +77,9 @@ namespace battleship
 		{
 			roundResults = roundEntry->second;
 		}
+
+		// Fetch current score for player
+		PlayerStatistics& playerStatistics = _score.at(playerName);
 
 		// Update RoundResults with the new player's statistics
 		int pointsTo = (player == PlayerEnum::A) ? results->playerAPoints : results->playerBPoints;
@@ -108,18 +113,29 @@ namespace battleship
 
 	void Scoreboard::updateWithGameResults(shared_ptr<GameResults> results,
 										   const string& playerAName,
-										   const string& playerBName)
+										   const string& playerBName,
+										   const string& boardName)
 	{
 		// Update the score table here.
 		// Game result updates should be atomic so we lock here to protect the score table's integrity
 		lock_guard<mutex> lock(_scoreLock);
+
+		string gameResultStr = (results->winner == PlayerEnum::A) ?  "Player A wins" :
+							   ((results->winner == PlayerEnum::B) ? "Player B wins" :
+																	 "Tie");
+
+		int playerARound = getPlayerCurrentRound(playerAName);
+		int playerBRound = getPlayerCurrentRound(playerBName);
+		string msg = "Game finished between Player A: " + playerAName +
+					 " (Round #" + std::to_string(playerARound) + ", " + std::to_string(results->playerAPoints) +
+					 " pts) and Player B: " + playerBName +
+					 " (Round #" + std::to_string(playerBRound) + ", " + std::to_string(results->playerBPoints) +
+					 " pts) on board: " + boardName + ". Game result: " + gameResultStr;
+
+		Logger::getInstance().log(Severity::INFO_LEVEL, msg);
+
 		updatePlayerGameResults(PlayerEnum::A, playerAName, results.get());
 		updatePlayerGameResults(PlayerEnum::B, playerBName, results.get());
-	}
-
-	int Scoreboard::getPlayerEnlistedMatches(const string& player) const
-	{
-		return _registeredMatches.at(player);
 	}
 
 	vector<shared_ptr<RoundResults>>& Scoreboard::getRoundResults()
@@ -135,7 +151,7 @@ namespace battleship
 		ss << "Results for round " << to_string(roundResults->roundNum) << 
 			  "/" << to_string(_totalRounds) << endl;
 
-		ss << setw(8) << "#"
+		ss << left << setw(8) << "#"
 		   << setw(_maxPlayerNameLength) << "Team Name"
 		   << setw(8) << "Wins"
 		   << setw(8) << "Losses"

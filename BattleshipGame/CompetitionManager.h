@@ -11,7 +11,7 @@
 #include "BattleshipGameBoardFactory.h"
 
 using std::vector;
-using std::priority_queue;
+using std::queue;
 using std::shared_ptr;
 using std::unique_ptr;
 using std::thread;
@@ -44,9 +44,7 @@ namespace battleship
 		/** Priority queue of games in the competition, sorted by "game number" for each player so
 		 *  matches are evenly distributed.
 		 */
-		priority_queue<shared_ptr<SingleGameTask>,
-					   vector<shared_ptr<SingleGameTask>>,
-					   SingleGameTaskLessSort> _gamesSet;
+		queue<shared_ptr<SingleGameTask>> _gamesSet;
 
 		/** Scoreboard of in game results for each round.
 		 *  Functions relevant for competition time are protected by locks to enable concurrency.

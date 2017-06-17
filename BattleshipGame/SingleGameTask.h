@@ -17,8 +17,6 @@ namespace battleship
 		SingleGameTask(const string& playerAName, const string& playerBName,
 					   const string& boardName, Scoreboard* scoreBoard);
 		virtual ~SingleGameTask() = default;
-		
-		bool operator<(const SingleGameTask& other) const;
 
 		/** Run single game betwen playerA and playerB on stored board.
 		 *  This method will allocate the resources needed to run the game if not already cached for
@@ -29,8 +27,6 @@ namespace battleship
 		const string& playerAName() const;
 		const string& playerBName() const;
 		const string& boardName() const;
-		int playerAGameNum() const;
-		int playerBGameNum() const;
 
 	private:
 
@@ -41,19 +37,7 @@ namespace battleship
 		// Board path identifier
 		string _boardName;
 
-		// Return the number of game this is of each player (first, second, etc)
-		int _playerAGameNum;
-		int _playerBGameNum;
-
 		// Scoreboard that keeps track of the game results
 		Scoreboard* _scoreBoard;
-	};
-
-	/** Functor to invoke comparator on operator< on actual SingleGameTasks inside shared_ptr */
-	struct SingleGameTaskLessSort : public std::binary_function<shared_ptr<SingleGameTask>, shared_ptr<SingleGameTask>, bool> {
-		bool operator()(const shared_ptr<SingleGameTask> lhs, const shared_ptr<SingleGameTask> rhs) const
-		{
-			return *lhs < *rhs;
-		}
 	};
 }

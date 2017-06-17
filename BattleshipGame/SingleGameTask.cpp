@@ -15,13 +15,6 @@ namespace battleship
 		_boardName(boardName),
 		_scoreBoard(scoreBoard)
 	{
-		// Register match so the scoreboard remembers how many matches each player have signed up for
-		_scoreBoard->registerMatch(playerAName, playerBName);
-
-		// Keep game number for each player, this helps sorting the games order to make it fair among players
-		_playerAGameNum = _scoreBoard->getPlayerEnlistedMatches(playerAName);
-		_playerBGameNum = _scoreBoard->getPlayerEnlistedMatches(playerBName);
-
 		string msg = "Created game between Player A: " + _playerAName +
 					 " and Player B: " + _playerBName +
 					 " on board: " + _boardName + ".";
@@ -50,19 +43,8 @@ namespace battleship
 
 		// Run a single game and update scoreboard with results
 		auto gameResults = gameManager.runGame(board, playerA, playerB);
-		
-		string gameResultStr = (gameResults->winner == PlayerEnum::A) ?  "Player A wins" :
-							   ((gameResults->winner == PlayerEnum::B) ? "Player B wins" :
-																		 "Tie");
-		string msg = "Game finished between Player A: " + _playerAName +
-					 " (Round #" + std::to_string(_playerAGameNum) + ", " + std::to_string(gameResults->playerAPoints) +
-					 " pts) and Player B: " + _playerBName +
-					 " (Round #" + std::to_string(_playerBGameNum) + ", " + std::to_string(gameResults->playerBPoints) +
-					 " pts) on board: " + _boardName + ". Game result: " + gameResultStr;
-					 ;
-		Logger::getInstance().log(Severity::INFO_LEVEL, msg);
 
-		_scoreBoard->updateWithGameResults(gameResults, _playerAName, _playerBName);
+		_scoreBoard->updateWithGameResults(gameResults, _playerAName, _playerBName, _boardName);
 	}
 
 	const string& SingleGameTask::playerAName() const
@@ -78,39 +60,5 @@ namespace battleship
 	const string& SingleGameTask::boardName() const
 	{
 		return _boardName;
-	}
-
-	int SingleGameTask::playerAGameNum() const
-	{
-		return _playerAGameNum;
-	}
-
-	int SingleGameTask::playerBGameNum() const
-	{
-		return _playerBGameNum;
-	}
-
-	/** For reordering SingleGameTask by player's game time.
-	 *	Helps sorting SingleGameTasks in the priority queue to keep the competition fair for all player's
-	 *  chance of playing.
-	 */
-	bool SingleGameTask::operator<(const SingleGameTask& other) const
-	{
-		// Game with the player that played the LEAST amount of games wins HIGHER priority
-		// (Note: Intuitively, this is in inverse order to played amound of games!)
-		int lowestLhsPlayer = min(this->playerAGameNum(), this->playerBGameNum());
-		int lowestRhsPlayer = min(other.playerAGameNum(), other.playerBGameNum());
-
-		if (lowestLhsPlayer != lowestRhsPlayer)
-		{
-			return lowestLhsPlayer > lowestRhsPlayer;
-		}
-		else
-		{
-			int highestLhsPlayer = max(this->playerAGameNum(), this->playerBGameNum());
-			int highestRhsPlayer = max(other.playerAGameNum(), other.playerBGameNum());
-
-			return highestLhsPlayer > highestRhsPlayer;
-		}
 	}
 }

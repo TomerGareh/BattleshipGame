@@ -1,9 +1,13 @@
 #include "CompetitionManager.h"
 #include "Logger.h"
 #include <string>
+#include <algorithm>
 
+using std::priority_queue;
 using std::lock_guard;
 using std::to_string;
+using std::min;
+using std::max;
 
 namespace battleship
 {
@@ -19,6 +23,56 @@ namespace battleship
 		// Reset scoreboard (casting totalRounds to int is safe since we don't expect that many games)
 		_scoreboard = std::make_shared<Scoreboard>(availableAlgos, static_cast<int>(totalRounds));
 
+		unordered_map<string, int> registeredGames;
+		for (const auto& algo : availableAlgos)
+		{
+			registeredGames.emplace(algo, 0);
+		}
+
+		// For reordering SingleGameTask by player's game time.
+		// Helps sorting SingleGameTasks in the priority queue to keep the competition fair for all player's
+		// chance of playing.
+		auto PrioritySort = [this, &registeredGames](const shared_ptr<SingleGameTask> lhs,
+													 const shared_ptr<SingleGameTask> rhs) -> bool
+		{
+			auto lhsPlayerAGamesCount = registeredGames.find(lhs->playerAName())->second;
+			auto lhsPlayerBGamesCount = registeredGames.find(lhs->playerBName())->second;
+			auto rhsPlayerAGamesCount = registeredGames.find(rhs->playerAName())->second;
+			auto rhsPlayerBGamesCount = registeredGames.find(rhs->playerBName())->second;
+
+			// Game with the player that played the LEAST amount of games wins HIGHER priority
+			// (Note: Intuitively, this is in inverse order to played amound of games!)
+			int lowestLhsPlayer = min(lhsPlayerAGamesCount, lhsPlayerBGamesCount);
+			int lowestRhsPlayer = min(rhsPlayerAGamesCount, rhsPlayerBGamesCount);
+			if (lowestLhsPlayer != lowestRhsPlayer)
+			{
+				return lowestLhsPlayer > lowestRhsPlayer;
+			}
+			
+			int highestLhsPlayer = max(lhsPlayerAGamesCount, lhsPlayerBGamesCount);
+			int highestRhsPlayer = max(rhsPlayerAGamesCount, rhsPlayerBGamesCount);
+			if (highestLhsPlayer < highestRhsPlayer)
+			{
+				return highestLhsPlayer > highestRhsPlayer;
+			}
+
+			// Else sort lexicographically so set won't dump "equal" items for the set
+			if (lhs->playerAName() != rhs->playerAName())
+			{
+				return lhs->playerAName() > rhs->playerAName();
+			}
+			else if (lhs->playerBName() != rhs->playerBName())
+			{
+				return lhs->playerBName() > rhs->playerBName();
+			}
+			else
+			{
+				return lhs->boardName() > rhs->boardName();
+			}
+		};
+
+		set<shared_ptr<SingleGameTask>, decltype(PrioritySort)> gamesToSortQueue(PrioritySort);
+
 		// Iterate all boards and players and create SingleGameTask for each valid combination
 		for (const auto& board : availableBoards)
 		{
@@ -30,11 +84,24 @@ namespace battleship
 					{
 						// _gameSet keeps all SingleGameTasks sorted in a fair order for the players
 						// so everyone gets their chance to play equally
-						_gamesSet.emplace(std::make_shared<SingleGameTask>(algo1, algo2,
-																		   board, _scoreboard.get()));
+						gamesToSortQueue.emplace(std::make_shared<SingleGameTask>(algo1, algo2,
+																				  board, _scoreboard.get()));
 					}
 				}
 			}
+		}
+
+		while (!gamesToSortQueue.empty())
+		{
+			// Get next game in fair order
+			auto task = *gamesToSortQueue.begin();
+
+			gamesToSortQueue.erase(gamesToSortQueue.begin());
+			_gamesSet.push(task);
+
+			// Re-prioritize queue - no need to check for end here since we've just created all keys
+			registeredGames.find(task->playerAName())->second++;
+			registeredGames.find(task->playerBName())->second++;
 		}
 	}
 
@@ -75,7 +142,7 @@ namespace battleship
 
 				// Pop next game task from game-queue.
 				// Games are expected to be pre-sorted in a fair manner for all players.
-				task = _gamesSet.top();
+				task = _gamesSet.front();
 				_gamesSet.pop();
 			}
 
