@@ -68,7 +68,7 @@ namespace battleship
 		{
 			roundResults = std::make_shared<RoundResults>(playerRound);
 			_trackedMatches.emplace(std::make_pair(playerRound, roundResults));
-			Logger::getInstance().log(Severity::INFO_LEVEL, "Round " + to_string(playerRound) + " started (1 game done).");
+			Logger::getInstance().log(Severity::DEBUG_LEVEL, "Round " + to_string(playerRound) + " started (1 game done).");
 		}
 		else
 		{

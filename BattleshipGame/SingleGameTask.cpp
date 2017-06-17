@@ -50,19 +50,19 @@ namespace battleship
 
 		// Run a single game and update scoreboard with results
 		auto gameResults = gameManager.runGame(board, playerA, playerB);
-		_scoreBoard->updateWithGameResults(gameResults, _playerAName, _playerBName);
-
+		
 		string gameResultStr = (gameResults->winner == PlayerEnum::A) ?  "Player A wins" :
 							   ((gameResults->winner == PlayerEnum::B) ? "Player B wins" :
 																		 "Tie");
-							    
 		string msg = "Game finished between Player A: " + _playerAName +
-					 " (" + std::to_string(gameResults->playerAPoints) +
+					 " (Round #" + std::to_string(_playerAGameNum) + ", " + std::to_string(gameResults->playerAPoints) +
 					 " pts) and Player B: " + _playerBName +
-					 " (" + std::to_string(gameResults->playerBPoints) +
+					 " (Round #" + std::to_string(_playerBGameNum) + ", " + std::to_string(gameResults->playerBPoints) +
 					 " pts) on board: " + _boardName + ". Game result: " + gameResultStr;
 					 ;
 		Logger::getInstance().log(Severity::INFO_LEVEL, msg);
+
+		_scoreBoard->updateWithGameResults(gameResults, _playerAName, _playerBName);
 	}
 
 	const string& SingleGameTask::playerAName() const

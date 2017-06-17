@@ -43,7 +43,8 @@ namespace battleship
 		prepareCompetition(boardLoader, algoLoader);
 
 		// Don't use more threads than needed, even if count says so
-		_workerThreadsCount = threadCount < static_cast<int>(_gamesSet.size()) ? threadCount : _gamesSet.size();
+		_workerThreadsCount = threadCount < static_cast<int>(_gamesSet.size()) ? 
+							  threadCount : static_cast<int>(_gamesSet.size());
 		_workerThreads.reserve(_workerThreadsCount);
 	}
 
