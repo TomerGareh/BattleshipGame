@@ -120,6 +120,7 @@
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="Logger.h" />
     <ClInclude Include="MainGame.h" />
+    <ClInclude Include="PlayerStatistics.h" />
     <ClInclude Include="Scoreboard.h" />
     <ClInclude Include="SingleGameTask.h" />
     <ClInclude Include="WorkerThreadResourcePool.h" />
@@ -135,6 +136,7 @@
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="MainGame.cpp" />
+    <ClCompile Include="PlayerStatistics.cpp" />
     <ClCompile Include="Scoreboard.cpp" />
     <ClCompile Include="SingleGameTask.cpp" />
     <ClCompile Include="WorkerThreadResourcePool.cpp" />

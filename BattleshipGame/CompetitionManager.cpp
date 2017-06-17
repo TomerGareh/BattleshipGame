@@ -43,8 +43,8 @@ namespace battleship
 		prepareCompetition(boardLoader, algoLoader);
 
 		// Don't use more threads than needed, even if count says so
-		auto actualThreadCount = (threadCount < _gamesSet.size()) ? threadCount : _gamesSet.size();
-		_workerThreads.reserve(actualThreadCount);
+		_workerThreadsCount = (threadCount < _gamesSet.size()) ? threadCount : _gamesSet.size();
+		_workerThreads.reserve(_workerThreadsCount);
 	}
 
 	void CompetitionManager::runWorkerThread(shared_ptr<BattleshipGameBoardFactory> boardLoader,
@@ -85,19 +85,26 @@ namespace battleship
 
 	void CompetitionManager::run()
 	{
+		if (_workerThreadsCount < 1)
+		{
+			Logger::getInstance().log(Severity::ERROR_LEVEL,
+								 	  "Attempted to start competition with illegal number of worker threads: " +
+									  to_string(static_cast<unsigned int>(_workerThreadsCount)));
+			return;
+		}
+
 		Logger::getInstance().log(Severity::INFO_LEVEL,
 								  "Competition started with " + 
 								  to_string(static_cast<unsigned int>(_gamesSet.size())) +
-			                      " games ran by " +
-								  to_string(static_cast<unsigned int>(_workerThreads.size())) +
+			                      " games run by " +
+								  to_string(static_cast<unsigned int>(_workerThreadsCount)) +
 								  " threads.");
 
-		int threadId = 1;
-
 		// Start all worker threads
-		for (auto& worker: _workerThreads)
+		for (int threadId = 1; threadId <= _workerThreadsCount; threadId++)
 		{
-			worker = thread(&CompetitionManager::runWorkerThread, this, _boardLoader, _algoLoader, threadId);
+			_workerThreads.push_back(std::move(thread(&CompetitionManager::runWorkerThread, 
+									 this, _boardLoader, _algoLoader, threadId)));
 			threadId++;
 		}
 

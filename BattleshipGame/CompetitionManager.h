@@ -68,6 +68,9 @@ namespace battleship
 		/** Locks the gameSet when multiple threads aim to pull from it */
 		mutex _gameSetLock;
 
+		/** Number of actual worker threads the competition manager employs */
+		int _workerThreadsCount;
+
 		/** Creates priority queue of games to run */
 		void prepareCompetition(shared_ptr<BattleshipGameBoardFactory> boardLoader,
 							    shared_ptr<AlgoLoader> algoLoader);

@@ -11,6 +11,7 @@ using std::unique_lock;
 using std::min;
 using std::setw;
 using std::setprecision;
+using std::fixed;
 using std::cout;
 using std::endl;
 using std::to_string;
@@ -18,33 +19,6 @@ using std::stringstream;
 
 namespace battleship
 {
-	PlayerStatistics::PlayerStatistics(const string& aPlayerName) :
-									   playerName(aPlayerName), pointsFor(0),
-									   pointsAgainst(0), wins(0), loses(0), rating(0)
-	{
-	}
-
-	PlayerStatistics::PlayerStatistics(const string& aPlayerName, int aPointsFor,
-									   int aPointsAgainst, int aWins, int aLoses):
-									   playerName(aPlayerName),
-									   pointsFor(aPointsFor),
-									   pointsAgainst(aPointsAgainst),
-									   wins(aWins), loses(aLoses),
-									   rating(static_cast<float>(aWins) / static_cast<float>(aWins + aLoses))
-	{
-	}
-
-	PlayerStatistics PlayerStatistics::updateStatistics(int addedPointsFor,
-														int addedPointsAgainst,
-														bool isWin, bool isLose) const
-	{
-		return PlayerStatistics(playerName,
-								pointsFor + addedPointsFor,
-								pointsAgainst + addedPointsAgainst,
-								wins + (isWin ? 1 : 0),
-								loses + (isLose ? 1 : 0));
-	}
-
 	RoundResults::RoundResults(int aRoundNum) : roundNum(aRoundNum)
 	{
 	}
@@ -67,6 +41,8 @@ namespace battleship
 				_maxPlayerNameLength = static_cast<int>(player.length()); // Name is expected to be short enough
 																		  // to safely cast from size_t to int
 		}
+
+		_maxPlayerNameLength += 2; // Apply some spacing between tabs in printed scoreboard
 	}
 
 	void Scoreboard::registerMatch(const string& playerA, const string& playerB)
@@ -75,14 +51,13 @@ namespace battleship
 		_registeredMatches[playerB]++;
 	}
 
-	void Scoreboard::updatePlayerGameResults(PlayerEnum player, const string& playerName,
-										     GameResults* results)
+	void Scoreboard::updatePlayerGameResults(PlayerEnum player, const string& playerName, GameResults* results)
 	{
 		// Fetch current score for player
 		PlayerStatistics& playerStatistics = _score.at(playerName);
 
-		// Calculate round number for this player
-		int playerRound = playerStatistics.wins + playerStatistics.loses;
+		// Calculate round number for this player, start from round #1
+		int playerRound = playerStatistics.getRoundsPlayed() + 1;
 
 		// Find RoundResults object for this round number
 		auto roundEntry = _trackedMatches.find(playerRound);
@@ -93,6 +68,7 @@ namespace battleship
 		{
 			roundResults = std::make_shared<RoundResults>(playerRound);
 			_trackedMatches.emplace(std::make_pair(playerRound, roundResults));
+			Logger::getInstance().log(Severity::INFO_LEVEL, "Round " + to_string(playerRound) + " started (1 game done).");
 		}
 		else
 		{
@@ -108,13 +84,22 @@ namespace battleship
 		roundResults->playerStatistics.emplace(PlayerStatistics(newRoundStatistics)); // Save a copy in round results
 
 		// Update player score with the newest record
-		_score.emplace(std::make_pair(playerName, newRoundStatistics));
+		auto scoreIt = _score.find(playerName);
+		if (scoreIt != _score.end())
+		{
+			scoreIt->second = std::move(newRoundStatistics);
+		}
+		else
+		{
+			Logger::getInstance().log(Severity::ERROR_LEVEL, "Illegal state in scoretable - player data is missing.");
+		}
 
 		// If this is the last update for this round, push the RoundResults to the approporiate
 		// list so the reporter thread can wake up and print it
 		if (roundResults->playerStatistics.size() == _playersPerRound)
 		{
 			unique_lock<mutex> lock(_roundResultsLock);
+			Logger::getInstance().log(Severity::INFO_LEVEL, "Round " + to_string(playerRound) + " finished.");
 			_roundsResults.push_back(roundResults); // Guaranteed to happen before lock is released
 			_roundResultsCV.notify_one();
 		}
@@ -165,12 +150,12 @@ namespace battleship
 		for (const auto& playerStats : roundResults->playerStatistics)
 		{
 			ss.str("");
-			string placeStr = place + ".";
+			string placeStr = to_string(place) + ".";
 			ss << setw(8) << placeStr
 			   << setw(_maxPlayerNameLength) << playerStats.playerName
 			   << setw(8) << playerStats.wins
 			   << setw(8) << playerStats.loses
-			   << setw(8) << setprecision(2) << playerStats.rating
+			   << setw(8) << setprecision(2) << fixed << playerStats.rating
 			   << setw(8) << playerStats.pointsFor
 			   << setw(12) << playerStats.pointsAgainst;
 			cout << ss.str() << endl;

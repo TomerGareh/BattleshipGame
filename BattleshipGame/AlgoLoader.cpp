@@ -16,17 +16,18 @@ namespace battleship
 		_availableGameAlgos.clear();
 		vector<string> foundDlls = IOUtil::listFilesInPath(path, "dll");
 
-		// Scan for dlls in the path, and append the path to their filenames
+		// Scan for dlls in the path
 		for (auto& nextDllFilename : foundDlls)
 		{
-			string fullFileName = path + "\\" + nextDllFilename;
-			_availableGameAlgos.push_back(fullFileName);
-			Logger::getInstance().log(Severity::DEBUG_LEVEL, fullFileName + " found");
+			_availableGameAlgos.push_back(nextDllFilename);
+			Logger::getInstance().log(Severity::DEBUG_LEVEL, nextDllFilename + " found");
 		}
 	}
 
-	void AlgoLoader::loadAlgorithm(const string& algoFullpath)
+	void AlgoLoader::loadAlgorithm(const string& algoName)
 	{
+		string algoFullpath = _algosPath + "\\" + algoName;
+
 		// Load dynamic library
 		// Again using Unicode compatible version of LoadLibrary
 		HINSTANCE hDll = LoadLibraryA(algoFullpath.c_str());
@@ -47,24 +48,24 @@ namespace battleship
 		}
 
 		// Keep algorithm in list of loaded algos
-		auto algoDescriptor = std::make_shared<AlgoDescriptor>(algoFullpath, hDll, getAlgorithmFunc);
+		auto algoDescriptor = std::make_shared<AlgoDescriptor>(algoName, hDll, getAlgorithmFunc);
 		_loadedGameAlgos.push_back(algoDescriptor);
-		_loadedGameAlgoNames.push_back(algoFullpath);
+		_loadedGameAlgoNames.push_back(algoName);
 
-		Logger::getInstance().log(Severity::INFO_LEVEL, algoFullpath + " loaded successfully");
+		Logger::getInstance().log(Severity::INFO_LEVEL, algoName + " loaded successfully");
 	}
 
-	AlgoLoader::AlgoLoader(const string& path)
+	AlgoLoader::AlgoLoader(const string& path): _algosPath(path)
 	{	
-		Logger::getInstance().log(Severity::INFO_LEVEL, "AlgoLoader started..");
+		Logger::getInstance().log(Severity::INFO_LEVEL, "AlgoLoader started.. Loading from path: " + _algosPath);
 
 		// Fetch DLL list
 		fetchDLLs(path);
 
 		// Try to load all algorithms available
-		for (const string& algoPath : _availableGameAlgos)
+		for (const string& algoName : _availableGameAlgos)
 		{
-			loadAlgorithm(algoPath);
+			loadAlgorithm(algoName);
 		}
 	}
 
@@ -78,23 +79,21 @@ namespace battleship
 			Logger::getInstance().log(Severity::DEBUG_LEVEL, "Freeing algorithm: " + descriptor->path);
 			FreeLibrary(descriptor->dll);
 		}
-
-		Logger::getInstance().log(Severity::INFO_LEVEL, "AlgoLoader destroyed..");
 	}
 
-	shared_ptr<IBattleshipGameAlgo> AlgoLoader::requestAlgo(const string& algoPath) const
+	shared_ptr<IBattleshipGameAlgo> AlgoLoader::requestAlgo(const string& algoName) const
 	{
 		shared_ptr<AlgoDescriptor> algoDescriptor;
 
 		// Verify algo was already loaded before
 		auto it = std::find_if(_loadedGameAlgos.begin(), _loadedGameAlgos.end(),
-			[&algoPath](shared_ptr<AlgoDescriptor> const& ad) { return ad->path == algoPath; });
+			[&algoName](shared_ptr<AlgoDescriptor> const& ad) { return ad->path == algoName; });
 
 		if (it == _loadedGameAlgos.end())
 		{
 			// Not loaded before, meaning a wrong algoPath given
 			Logger::getInstance().log(Severity::ERROR_LEVEL,
-									  "Error: Trying to load algorithm from " + algoPath +
+									  "Error: Trying to load algorithm from " + algoName +
 									  " but this DLL isn't managed by the AlgoLoader");
 			return nullptr;
 		}
@@ -116,7 +115,7 @@ namespace battleship
 			return nullptr;
 		}
 
-		Logger::getInstance().log(Severity::DEBUG_LEVEL, algoPath + " new instance created");
+		Logger::getInstance().log(Severity::DEBUG_LEVEL, algoName + " new instance created");
 
 		// Wrap in a smart pointer, so consumers don't have to deal with memory deallocation manually
 		return shared_ptr<IBattleshipGameAlgo>(algo);

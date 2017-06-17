@@ -7,6 +7,7 @@
 #include <mutex>
 #include <functional>
 #include "GameManager.h"
+#include "PlayerStatistics.h"
 
 using std::shared_ptr;
 using std::vector;
@@ -19,26 +20,18 @@ using std::function;
 
 namespace battleship
 {
-	struct PlayerStatistics
-	{
-		const string playerName;
-		const int pointsFor;
-		const int pointsAgainst;
-		const int wins;
-		const int loses;
-		const float rating;
-
-		PlayerStatistics(const string& aPlayerName);
-		PlayerStatistics(const string& aPlayerName, int aPointsFor, int aPointsAgainst, int aWins, int aLoses);
-
-		PlayerStatistics updateStatistics(int addedPointsFor, int addedPointsAgainst,
-										  bool isWin, bool isLose) const;
-	};
-
 	struct PlayerStatisticsRatingSort {
 		bool operator()(const PlayerStatistics& a, const PlayerStatistics& b) const
 		{
-			return a.rating < b.rating;
+			if (a.rating == b.rating)
+			{
+				return a.playerName > b.playerName; // Don't consider equal unless this is the same player
+													// (for equal rating we choose some inner order between the players)
+			}
+			else
+			{
+				return a.rating > b.rating;
+			}
 		}
 	};
 

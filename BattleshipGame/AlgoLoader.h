@@ -42,7 +42,7 @@ namespace battleship
 		 *  (algoPath should appear in "loadedAlgos()")
 		 *  This method is thread safe.
 		 */
-		shared_ptr<IBattleshipGameAlgo> requestAlgo(const string& algoPath) const;
+		shared_ptr<IBattleshipGameAlgo> requestAlgo(const string& algoName) const;
 
 	private:
 
@@ -66,6 +66,9 @@ namespace battleship
 			}
 		};
 
+		/** Path to load dlls of algorithms from */
+		string _algosPath;
+
 		/** Vector of available algorithms for loading: <Algorithm name> */
 		vector<string> _availableGameAlgos;
 
@@ -76,7 +79,7 @@ namespace battleship
 		vector<shared_ptr<AlgoDescriptor>> _loadedGameAlgos;
 
 		/** Loads the algorithm's DLL in the given path */
-		void loadAlgorithm(const string& algoFullpath);
+		void loadAlgorithm(const string& algoName);
 
 		/** Fetches names for all algorithms available in the given path.
 	 	 *	(populates the AlgoLoad with available dlls for loading)

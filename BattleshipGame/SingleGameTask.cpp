@@ -24,7 +24,7 @@ namespace battleship
 
 		string msg = "Created game between Player A: " + _playerAName +
 					 " and Player B: " + _playerBName +
-					 " on board:" + _boardName + ".";
+					 " on board: " + _boardName + ".";
 		Logger::getInstance().log(Severity::DEBUG_LEVEL, msg);
 	}
 
@@ -39,14 +39,14 @@ namespace battleship
 		{
 			string msg = "Error: Can't start a game between Player A: " + _playerAName +
 						 " and Player B: " + _playerBName +
-					     " on board:" + _boardName + " due to invalid resources";
+					     " on board: " + _boardName + " due to invalid resources";
 			Logger::getInstance().log(Severity::ERROR_LEVEL, msg);
 			return;
 		}
 
-		Logger::getInstance().log(Severity::INFO_LEVEL,
+		Logger::getInstance().log(Severity::DEBUG_LEVEL,
 								  "Game started between Player A: " + _playerAName +
-								  " and Player B: " + _playerBName + " on board:" + _boardName + ".");
+								  " and Player B: " + _playerBName + " on board: " + _boardName + ".");
 
 		// Run a single game and update scoreboard with results
 		auto gameResults = gameManager.runGame(board, playerA, playerB);
@@ -60,7 +60,7 @@ namespace battleship
 					 " (" + std::to_string(gameResults->playerAPoints) +
 					 " pts) and Player B: " + _playerBName +
 					 " (" + std::to_string(gameResults->playerBPoints) +
-					 " pts) on board:" + _boardName + ". Game result: " + gameResultStr;
+					 " pts) on board: " + _boardName + ". Game result: " + gameResultStr;
 					 ;
 		Logger::getInstance().log(Severity::INFO_LEVEL, msg);
 	}
@@ -94,11 +94,11 @@ namespace battleship
 	 *	Helps sorting SingleGameTasks in the priority queue to keep the competition fair for all player's
 	 *  chance of playing.
 	 */
-	bool operator<(const SingleGameTask& lhs, const SingleGameTask& rhs)
+	bool operator<(const shared_ptr<SingleGameTask> lhs, const shared_ptr<SingleGameTask> rhs)
 	{
-		// Game with the player that played the least amount of games wins
-		int lowestLhsPlayer = min(lhs.playerAGameNum(), lhs.playerBGameNum());
-		int lowestRhsPlayer = min(rhs.playerAGameNum(), rhs.playerBGameNum());
+		// Game with the player that played the least amount of games wins higher priority
+		int lowestLhsPlayer = min(lhs->playerAGameNum(), lhs->playerBGameNum());
+		int lowestRhsPlayer = min(rhs->playerAGameNum(), rhs->playerBGameNum());
 
 		if (lowestLhsPlayer != lowestRhsPlayer)
 		{
@@ -106,8 +106,8 @@ namespace battleship
 		}
 		else
 		{
-			int highestLhsPlayer = max(lhs.playerAGameNum(), lhs.playerBGameNum());
-			int highestRhsPlayer = max(rhs.playerAGameNum(), rhs.playerBGameNum());
+			int highestLhsPlayer = max(lhs->playerAGameNum(), lhs->playerBGameNum());
+			int highestRhsPlayer = max(rhs->playerAGameNum(), rhs->playerBGameNum());
 
 			return highestLhsPlayer < highestRhsPlayer;
 		}
