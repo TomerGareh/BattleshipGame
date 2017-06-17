@@ -1,7 +1,10 @@
 #include "Scoreboard.h"
+#include "Logger.h"
 #include <iostream>
 #include <iomanip>
 #include <algorithm>
+#include <string>
+#include <sstream>
 
 using std::lock_guard;
 using std::unique_lock;
@@ -10,6 +13,8 @@ using std::setw;
 using std::setprecision;
 using std::cout;
 using std::endl;
+using std::to_string;
+using std::stringstream;
 
 namespace battleship
 {
@@ -138,37 +143,44 @@ namespace battleship
 
 	void Scoreboard::printRoundResults(shared_ptr<RoundResults> roundResults) const
 	{
-		cout << setw(8) << "#"
-			 << setw(_maxPlayerNameLength) << "Team Name"
-			 << setw(8) << "Wins"
-			 << setw(8) << "Losses"
-			 << setw(8) << "%"
-			 << setw(8) << "Pts For"
-			 << setw(12) << "Pts Against" << endl;
+		Logger::getInstance().log(Severity::INFO_LEVEL,
+								  "Results for round " +
+								  to_string(roundResults->roundNum) + ":");
 
+		stringstream ss;
+
+		ss << setw(8) << "#"
+		   << setw(_maxPlayerNameLength) << "Team Name"
+		   << setw(8) << "Wins"
+		   << setw(8) << "Losses"
+		   << setw(8) << "%"
+		   << setw(8) << "Pts For"
+		   << setw(12) << "Pts Against";
+
+		cout << ss.str() << endl;
+		Logger::getInstance().log(Severity::INFO_LEVEL, ss.str());
 		int place = 1;
 
 		// RoundsResults are already sorted by player's rating
 		for (const auto& playerStats : roundResults->playerStatistics)
 		{
+			ss.str("");
 			string placeStr = place + ".";
-			cout << setw(8) << placeStr
-				<< setw(_maxPlayerNameLength) << playerStats.playerName
-				<< setw(8) << playerStats.wins
-				<< setw(8) << playerStats.loses
-				<< setw(8) << setprecision(2) << playerStats.rating
-				<< setw(8) << playerStats.pointsFor
-				<< setw(12) << playerStats.pointsAgainst << endl;
+			ss << setw(8) << placeStr
+			   << setw(_maxPlayerNameLength) << playerStats.playerName
+			   << setw(8) << playerStats.wins
+			   << setw(8) << playerStats.loses
+			   << setw(8) << setprecision(2) << playerStats.rating
+			   << setw(8) << playerStats.pointsFor
+			   << setw(12) << playerStats.pointsAgainst;
+			cout << ss.str() << endl;
+			Logger::getInstance().log(Severity::INFO_LEVEL, ss.str());
 			place++;
 		}
 	}
 
-	void Scoreboard::waitOnRoundResults()
+	void Scoreboard::processRoundResultsQueue()
 	{
-		// Wait here until new data appears in round results queue
-		unique_lock<mutex> lock(_roundResultsLock);
-		_roundResultsCV.wait(lock, [this] { return !(_roundsResults.empty()); });
-
 		// Print all ready round results
 		// After they are printed, we pop this data from the queue
 		while (!_roundsResults.empty())
@@ -177,5 +189,17 @@ namespace battleship
 			_roundsResults.pop_back();
 			printRoundResults(nextResults);
 		}
+	}
+
+	void Scoreboard::waitOnRoundResults()
+	{
+		// Wait here until new data appears in round results queue
+		unique_lock<mutex> lock(_roundResultsLock);
+		Logger::getInstance().log(Severity::INFO_LEVEL, "Main thread going to sleep until new results arrive.");
+		_roundResultsCV.wait(lock, [this] { return !(_roundsResults.empty()); });
+
+		Logger::getInstance().log(Severity::INFO_LEVEL, "Main thread woke up to handle new round results.");
+
+		processRoundResultsQueue();
 	}
 }

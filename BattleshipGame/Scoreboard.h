@@ -88,10 +88,6 @@ namespace battleship
 		 */
 		void waitOnRoundResults();
 
-		/** Prints the round results in a formatted tableto the console
-		 */
-		void printRoundResults(shared_ptr<RoundResults> roundResults) const;
-
 	private:
 
 		/** Minimal space allocated for player name in the table (visual parameter) */
@@ -128,10 +124,19 @@ namespace battleship
 		// _roundResults is volatile to make sure it's handled before condition_variables are notified
 		vector<shared_ptr<RoundResults>> _roundsResults;
 
-		/** Holds the longest player name encountered */
+		// Holds the longest player name encountered
 		int _maxPlayerNameLength;
 
-		// Update the score table with the results for a single player from a single match
+		/** Update the score table with the results for a single player from a single match
+		 */
 		void updatePlayerGameResults(PlayerEnum player, const string& playerName, GameResults* results);
+
+		/** Pop and print all round results ready in the _roundResults queue
+		 */
+		void processRoundResultsQueue();
+
+		/** Prints the round results in a formatted table to the console
+		 */
+		void printRoundResults(shared_ptr<RoundResults> roundResults) const;
 	};
 }

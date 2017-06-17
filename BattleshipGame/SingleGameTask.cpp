@@ -24,7 +24,7 @@ namespace battleship
 
 		string msg = "Created game between Player A: " + _playerAName +
 					 " and Player B: " + _playerBName +
-					 " on board:" + _boardName + " due to invalid resources";
+					 " on board:" + _boardName + ".";
 		Logger::getInstance().log(Severity::DEBUG_LEVEL, msg);
 	}
 
@@ -43,6 +43,10 @@ namespace battleship
 			Logger::getInstance().log(Severity::ERROR_LEVEL, msg);
 			return;
 		}
+
+		Logger::getInstance().log(Severity::INFO_LEVEL,
+								  "Game started between Player A: " + _playerAName +
+								  " and Player B: " + _playerBName + " on board:" + _boardName + ".");
 
 		// Run a single game and update scoreboard with results
 		auto gameResults = gameManager.runGame(board, playerA, playerB);

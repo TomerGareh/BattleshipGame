@@ -82,12 +82,10 @@ int main(int argc, char* argv[])
 		}
 
 		Logger::getInstance().log(Severity::INFO_LEVEL,
-								  "Number of legal players: " +
-								  to_string(static_cast<unsigned int>(algoLoader->loadedGameAlgos().size())),
+								  "Number of legal players: " + algoLoader->loadedGameAlgos().size(),
 								  isPrintToConsole);
 		Logger::getInstance().log(Severity::INFO_LEVEL,
-								  "Number of legal boards: " +
-								  to_string(static_cast<unsigned int>(validBoards.size())),
+								  "Number of legal boards: " + validBoards.size(),
 								  isPrintToConsole);
 
 		Logger::getInstance().log(Severity::DEBUG_LEVEL, "All resources validated, proceeding to competition");
