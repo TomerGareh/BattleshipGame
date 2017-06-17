@@ -64,6 +64,9 @@ void HuntTargetAlgo::setBoard(const BoardData& board)
 	std::get<1>(boardSize) = board.cols();
 	std::get<2>(boardSize) = board.depth();
 
+	visitedCoords = {};
+	targetsMap = {};
+
 	// Mark our ships and their surrounding as visited
 	for (int i = 0; i < std::get<0>(boardSize); ++i)
 	{

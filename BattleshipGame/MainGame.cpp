@@ -70,7 +70,7 @@ int main(int argc, char* argv[])
 		if (availableAlgos.size() < 2)
 		{ // TODO: Is this absolutePath or config.path..???
 			Logger::getInstance().log(Severity::ERROR_LEVEL,
-									  "Missing an algorithm (dll) file looking in path: " + absolutePath,
+									  "Missing an algorithm (dll) file looking in path: " + absolutePath + " (need at least two)",
 									  isPrintToConsole);
 		}
 
