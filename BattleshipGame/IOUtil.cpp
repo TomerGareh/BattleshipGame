@@ -188,27 +188,4 @@ namespace battleship
 		string fullPath(buffer, pathSize);
 		return fullPath;
 	}
-
-	COORD IOUtil::getConsoleCursorPosition(HANDLE hConsoleOutput)
-	{
-		CONSOLE_SCREEN_BUFFER_INFO cbsi;
-		if (GetConsoleScreenBufferInfo(hConsoleOutput, &cbsi))
-		{
-			return cbsi.dwCursorPosition;
-		}
-		else
-		{
-			// The function failed. Call GetLastError() for details.
-			COORD invalid = {0, 0};
-			return invalid;
-		}
-	}
-
-	void IOUtil::gotoxy(int row, int col)
-	{
-		COORD coord;
-		coord.X = col;
-		coord.Y = row;
-		SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
-	}
 }

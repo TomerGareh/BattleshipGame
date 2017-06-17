@@ -1,12 +1,11 @@
 #include "Scoreboard.h"
 #include "Logger.h"
-#include "IOUtil.h"
+#include "ConsoleUtils.h"
 #include <iostream>
 #include <iomanip>
 #include <algorithm>
 #include <string>
 #include <sstream>
-#include <windows.h>
 
 using std::lock_guard;
 using std::unique_lock;
@@ -146,7 +145,7 @@ namespace battleship
 		return _roundsResults;
 	}
 
-	void Scoreboard::printRoundResults(shared_ptr<RoundResults> roundResults) const
+	void Scoreboard::printRoundResults(shared_ptr<RoundResults> roundResults)
 	{
 		// Use string stream so log "block" will be printed in an atomic manner
 		stringstream ss;
@@ -178,13 +177,18 @@ namespace battleship
 			place++;
 		}
 
+		// For the first round - we save the position of the scoreboard in the console, so we keep repainting
+		// over the same coordinate again and again
 		if (roundResults->roundNum == 1)
 		{
-			COORD currPosition(IOUtil::getConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE)));
+			ConsoleUtils::registerCloseupHandler(); // Make sure if the program crashes, we show the cursor again
+			ConsoleUtils::setConsoleCursor(false);  // Hide console's cursor
+			COORD currPosition(ConsoleUtils::getConsoleCursorPosition());
 			_resultsCursorPosition.first = currPosition.Y;
 			_resultsCursorPosition.second = currPosition.X;
 		}
-		IOUtil::gotoxy(_resultsCursorPosition.first, _resultsCursorPosition.second);
+		ConsoleUtils::gotoxy(_resultsCursorPosition.first, _resultsCursorPosition.second);
+
 		Logger::getInstance().log(Severity::INFO_LEVEL, ss.str(), true); // true = Print to log & console
 	}
 

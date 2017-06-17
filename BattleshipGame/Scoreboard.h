@@ -122,7 +122,7 @@ namespace battleship
 
 		/** Prints the round results in a formatted table to the console
 		 */
-		void printRoundResults(shared_ptr<RoundResults> roundResults) const;
+		void printRoundResults(shared_ptr<RoundResults> roundResults);
 
 		/** Get the next round for the player (to submit score to) */
 		int getPlayerCurrentRound(const string& player) const;
