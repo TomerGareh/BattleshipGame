@@ -94,22 +94,23 @@ namespace battleship
 	 *	Helps sorting SingleGameTasks in the priority queue to keep the competition fair for all player's
 	 *  chance of playing.
 	 */
-	bool operator<(const shared_ptr<SingleGameTask> lhs, const shared_ptr<SingleGameTask> rhs)
+	bool SingleGameTask::operator<(const SingleGameTask& other) const
 	{
-		// Game with the player that played the least amount of games wins higher priority
-		int lowestLhsPlayer = min(lhs->playerAGameNum(), lhs->playerBGameNum());
-		int lowestRhsPlayer = min(rhs->playerAGameNum(), rhs->playerBGameNum());
+		// Game with the player that played the LEAST amount of games wins HIGHER priority
+		// (Note: Intuitively, this is in inverse order to played amound of games!)
+		int lowestLhsPlayer = min(this->playerAGameNum(), this->playerBGameNum());
+		int lowestRhsPlayer = min(other.playerAGameNum(), other.playerBGameNum());
 
 		if (lowestLhsPlayer != lowestRhsPlayer)
 		{
-			return lowestLhsPlayer < lowestRhsPlayer;
+			return lowestLhsPlayer > lowestRhsPlayer;
 		}
 		else
 		{
-			int highestLhsPlayer = max(lhs->playerAGameNum(), lhs->playerBGameNum());
-			int highestRhsPlayer = max(rhs->playerAGameNum(), rhs->playerBGameNum());
+			int highestLhsPlayer = max(this->playerAGameNum(), this->playerBGameNum());
+			int highestRhsPlayer = max(other.playerAGameNum(), other.playerBGameNum());
 
-			return highestLhsPlayer < highestRhsPlayer;
+			return highestLhsPlayer > highestRhsPlayer;
 		}
 	}
 }

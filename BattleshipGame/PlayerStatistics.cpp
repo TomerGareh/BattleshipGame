@@ -14,7 +14,7 @@ namespace battleship
 		pointsFor(aPointsFor),
 		pointsAgainst(aPointsAgainst),
 		wins(aWins), loses(aLoses), ties(aTies),
-		rating(getPlayerRating(aWins, aLoses, aTies))
+		rating(getPlayerRating(aWins, aLoses))
 	{
 	}
 
@@ -79,12 +79,12 @@ namespace battleship
 			ties + ((!isWin && !isLose) ? 1 : 0));
 	}
 
-	float PlayerStatistics::getPlayerRating(int wins, int loses, int ties)
+	float PlayerStatistics::getPlayerRating(int wins, int loses)
 	{
 		return 100 * static_cast<float>(wins) / static_cast<float>(wins + loses);
 	}
 
-	int PlayerStatistics::getRoundsPlayed()
+	int PlayerStatistics::getRoundsPlayed() const
 	{
 		return wins + loses + ties;
 	}

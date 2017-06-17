@@ -18,6 +18,8 @@ namespace battleship
 					   const string& boardName, Scoreboard* scoreBoard);
 		virtual ~SingleGameTask() = default;
 		
+		bool operator<(const SingleGameTask& other) const;
+
 		/** Run single game betwen playerA and playerB on stored board.
 		 *  This method will allocate the resources needed to run the game if not already cached for
 		 *  this worker thread, and then run the game and update the scoreboard with the results
@@ -45,5 +47,13 @@ namespace battleship
 
 		// Scoreboard that keeps track of the game results
 		Scoreboard* _scoreBoard;
+	};
+
+	/** Functor to invoke comparator on operator< on actual SingleGameTasks inside shared_ptr */
+	struct SingleGameTaskLessSort : public std::binary_function<shared_ptr<SingleGameTask>, shared_ptr<SingleGameTask>, bool> {
+		bool operator()(const shared_ptr<SingleGameTask> lhs, const shared_ptr<SingleGameTask> rhs) const
+		{
+			return *lhs < *rhs;
+		}
 	};
 }

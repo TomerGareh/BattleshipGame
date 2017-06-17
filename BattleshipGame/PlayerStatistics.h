@@ -24,7 +24,7 @@ namespace battleship
 			bool isWin, bool isLose) const;
 
 		/** Number of rounds the player have played so far */
-		int getRoundsPlayed();
+		int getRoundsPlayed() const;
 
 		// Components of player's statistics
 		string playerName;
@@ -36,6 +36,6 @@ namespace battleship
 		float rating;
 
 	private:
-		static float getPlayerRating(int wins, int loses, int ties);
+		static float getPlayerRating(int wins, int loses);
 	};
 }

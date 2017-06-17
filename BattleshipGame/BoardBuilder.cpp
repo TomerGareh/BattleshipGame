@@ -251,7 +251,6 @@ namespace battleship
 		}
 		if (maxMatchSize < matchSizeZAxis)
 		{
-			maxMatchSize = matchSizeZAxis;
 			orient = Orientation::Z_AXIS;
 		}
 		
