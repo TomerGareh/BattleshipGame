@@ -1,5 +1,6 @@
 #pragma once
 
+#include <windows.h>
 #include <functional>
 #include <initializer_list>
 #include <vector>
@@ -71,6 +72,12 @@ namespace battleship
 		 *  This function does not verify that the resulting path is valid.
 		 */
 		static string convertPathToAbsolute(const string& path);
+		
+		/** Get the cursor position of the console output */
+		static COORD getConsoleCursorPosition(HANDLE hConsoleOutput);
+
+		/** Points the cursor at (row,col) in the console output */
+		static void gotoxy(int row, int col);
 
 	private:
 		IOUtil() = default;	// This helper class shouldn't be instantiated

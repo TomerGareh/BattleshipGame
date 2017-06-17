@@ -10,6 +10,7 @@
 #include "PlayerStatistics.h"
 
 using std::shared_ptr;
+using std::pair;
 using std::vector;
 using std::unordered_map;
 using std::map;
@@ -111,6 +112,9 @@ namespace battleship
 
 		// Holds the longest player name encountered
 		int _maxPlayerNameLength;
+
+		// Holds the cursor position for the printing of the results
+		pair<int, int> _resultsCursorPosition;
 
 		/** Update the score table with the results for a single player from a single match
 		 */
