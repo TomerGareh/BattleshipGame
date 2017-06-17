@@ -1,4 +1,7 @@
+#include <map>
 #include "BattleBoard.h"
+
+using std::map;
 
 namespace battleship
 {
@@ -81,9 +84,13 @@ namespace battleship
 	{
 		// Perform deep copy for game pieces as they contain data that may change along the game and shouldn't
 		// be shared among common boards
+		map<Coordinate, shared_ptr<GamePiece>> copiedGamePieces;	// We should copy only once for each ship
 		for (auto it = other._gamePieces.begin(); it != other._gamePieces.end(); ++it)
 		{
-			_gamePieces.emplace(it->first, std::make_shared<GamePiece>(*it->second));
+			if (copiedGamePieces.find(it->second->_firstPos) == copiedGamePieces.end())
+				copiedGamePieces.emplace(it->second->_firstPos, std::make_shared<GamePiece>(*it->second));
+
+			_gamePieces.emplace(it->first, copiedGamePieces[it->second->_firstPos]);
 		}
 	}
 	

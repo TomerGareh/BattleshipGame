@@ -60,7 +60,7 @@ int main(int argc, char* argv[])
 		if (validBoards.empty())
 		{
 			Logger::getInstance().log(Severity::ERROR_LEVEL,
-									  "No board files(*.sboard) looking in path: " + config.path,
+									  "No board files (*.sboard) looking in path: " + config.path,
 								      isPrintToConsole);
 		}
 
