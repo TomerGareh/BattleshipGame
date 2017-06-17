@@ -1,6 +1,9 @@
 #include "CompetitionManager.h"
+#include "Logger.h"
+#include <string>
 
 using std::lock_guard;
+using std::to_string;
 
 namespace battleship
 {
@@ -45,11 +48,14 @@ namespace battleship
 	}
 
 	void CompetitionManager::runWorkerThread(shared_ptr<BattleshipGameBoardFactory> boardLoader,
-											 shared_ptr<AlgoLoader> algoLoader)
+											 shared_ptr<AlgoLoader> algoLoader,
+											 int threadId)
 	{
 		// Each thread keeps it's own pool of resources that are created on demand,
 		// to avoid wasting time on locking shared resources between multiple threads
 		WorkerThreadResourcePool resourcePool(boardLoader, algoLoader);
+
+		Logger::getInstance().log(Severity::INFO_LEVEL, "Worker thread #" + to_string(threadId) + " started..");
 
 		while (!_gamesSet.empty()) // While there are still games to be played
 		{
@@ -73,19 +79,26 @@ namespace battleship
 				task->run(_gameManager, resourcePool);
 			}
 		}
-	}
 
-	void CompetitionManager::queryAndPrintScoreboard() const
-	{
-		
+		Logger::getInstance().log(Severity::INFO_LEVEL, "Worker thread #" + to_string(threadId) + " finished..");
 	}
 
 	void CompetitionManager::run()
 	{
+		Logger::getInstance().log(Severity::INFO_LEVEL,
+								  "Competition started with " + 
+								  to_string(static_cast<unsigned int>(_gamesSet.size())) +
+			                      " games ran by " +
+								  to_string(static_cast<unsigned int>(_workerThreads.size())) +
+								  " threads.");
+
+		int threadId = 1;
+
 		// Start all worker threads
 		for (auto& worker: _workerThreads)
 		{
-			worker = thread(&CompetitionManager::runWorkerThread, this, _boardLoader, _algoLoader);
+			worker = thread(&CompetitionManager::runWorkerThread, this, _boardLoader, _algoLoader, threadId);
+			threadId++;
 		}
 
 		// While competition is not over, wake up when round results are ready and print them
@@ -104,8 +117,5 @@ namespace battleship
 				worker.join();
 			}
 		}
-
-		// Print the last results that may have arrived after all worker threads have finished
-		queryAndPrintScoreboard();
 	}
 }

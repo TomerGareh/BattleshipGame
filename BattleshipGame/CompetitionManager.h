@@ -37,7 +37,7 @@ namespace battleship
 
 		/** Logic for a single worker thread: constantly drain and process SingleGameTasks from gameSet until empty */
 		void runWorkerThread(shared_ptr<BattleshipGameBoardFactory> boardLoader,
-							 shared_ptr<AlgoLoader> algoLoader);
+							 shared_ptr<AlgoLoader> algoLoader, int threadId);
 
 	private:
 
@@ -71,8 +71,5 @@ namespace battleship
 		/** Creates priority queue of games to run */
 		void prepareCompetition(shared_ptr<BattleshipGameBoardFactory> boardLoader,
 							    shared_ptr<AlgoLoader> algoLoader);
-
-		/** Queries the RoundResults queue in the scoreboard, drains it and prints the stats to the console */
-		void queryAndPrintScoreboard() const;
 	};
 }

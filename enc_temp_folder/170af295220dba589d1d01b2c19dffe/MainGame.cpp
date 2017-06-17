@@ -60,7 +60,7 @@ int main(int argc, char* argv[])
 		if (validBoards.empty())
 		{
 			Logger::getInstance().log(Severity::ERROR_LEVEL,
-									  "No board files (*.sboard) looking in path: " + config.path,
+									  "No board files(*.sboard) looking in path: " + config.path,
 								      isPrintToConsole);
 		}
 
@@ -82,12 +82,10 @@ int main(int argc, char* argv[])
 		}
 
 		Logger::getInstance().log(Severity::INFO_LEVEL,
-								  "Number of legal players: " +
-								  to_string(static_cast<unsigned int>(algoLoader->loadedGameAlgos().size())),
+								  "Number of legal players: " + algoLoader->loadedGameAlgos().size(),
 								  isPrintToConsole);
 		Logger::getInstance().log(Severity::INFO_LEVEL,
-								  "Number of legal boards: " +
-								  to_string(static_cast<unsigned int>(validBoards.size())),
+								  "Number of legal boards: " + validBoards.size(),
 								  isPrintToConsole);
 
 		Logger::getInstance().log(Severity::DEBUG_LEVEL, "All resources validated, proceeding to competition");
