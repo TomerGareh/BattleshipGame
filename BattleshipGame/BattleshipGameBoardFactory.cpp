@@ -11,10 +11,10 @@ namespace battleship
 {
 	const string BattleshipGameBoardFactory::BOARD_SUFFIX = "sboard";
 
-	BattleshipGameBoardFactory::BattleshipGameBoardFactory(const string& path)
+	BattleshipGameBoardFactory::BattleshipGameBoardFactory(const string& path): _path(path)
 	{
 		Logger::getInstance().log(Severity::DEBUG_LEVEL, "BattleshipGameBoardFactory started..");
-		_loadedBoards = loadAllBattleBoards(path);
+		_availableBoards = IOUtil::listFilesInPath(path, BOARD_SUFFIX);
 	}
 
 	bool BattleshipGameBoardFactory::parseHeader(string& nextLine, int& rows, int& cols, int& depth) const
@@ -165,22 +165,19 @@ namespace battleship
 		return board;
 	}
 
-	BattleshipGameBoardFactory::LoadedBoardsIndex BattleshipGameBoardFactory::loadAllBattleBoards(const string& path)
+	const vector<string>& BattleshipGameBoardFactory::loadAllBattleBoards()
 	{
-		LoadedBoardsIndex loadedBoards;
-		auto boardFiles = IOUtil::listFilesInPath(path, BOARD_SUFFIX);
-
 		// Load each of the battle boards
-		for (const auto& boardFilename : boardFiles)
+		for (const auto& boardFilename : _availableBoards)
 		{
 			Logger::getInstance().log(Severity::INFO_LEVEL, "Loading battle board: " + boardFilename + "..");
-			string boardFile = path + "\\" + boardFilename;
+			string boardFile = _path + "\\" + boardFilename;
 			unique_ptr<BattleBoard> nextBoard = buildBoardFromFile(boardFile);
 
 			// Accumulate only valid boards
 			if (nullptr != nextBoard)
 			{
-				loadedBoards.emplace(make_pair(boardFilename, std::move(nextBoard)));
+				_loadedBoards.emplace(make_pair(boardFilename, std::move(nextBoard)));
 				_loadedBoardNames.push_back(boardFilename);
 				Logger::getInstance().log(Severity::INFO_LEVEL,
 										  "Battle board " + boardFilename + " loaded successfully");
@@ -192,8 +189,7 @@ namespace battleship
 			}
 		}
 
-		// Compiler expected to perform return value optimization (STL data struct is moved)
-		return loadedBoards;
+		return _loadedBoardNames;
 	}
 
 	shared_ptr<BattleBoard> BattleshipGameBoardFactory::requestBattleboard(const string& path)
@@ -211,7 +207,12 @@ namespace battleship
 		}
 	}
 
-	const vector<string>& BattleshipGameBoardFactory::boardsList() const
+	const vector<string>& BattleshipGameBoardFactory::availableBoardsList() const
+	{
+		return _availableBoards;
+	}
+
+	const vector<string>& BattleshipGameBoardFactory::loadedBoardsList() const
 	{
 		return _loadedBoardNames;
 	}

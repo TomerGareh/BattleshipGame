@@ -14,17 +14,17 @@ namespace battleship
 	void CompetitionManager::prepareCompetition(shared_ptr<BattleshipGameBoardFactory> boardLoader,
 												shared_ptr<AlgoLoader> algoLoader)
 	{
-		auto availableBoards = boardLoader->boardsList(); // Valid boards
-		auto availableAlgos = algoLoader->loadedGameAlgos(); // Valid loaded algorithms
+		auto boards = boardLoader->loadedBoardsList(); // Valid boards
+		auto algos = algoLoader->loadedGameAlgos(); // Valid loaded algorithms
 
 		// Total games for each player: play twice against each player other player on each board
-		auto totalRounds = (availableAlgos.size() - 1) * 2 * availableBoards.size();
+		auto totalRounds = (boards.size() - 1) * 2 * boards.size();
 
 		// Reset scoreboard (casting totalRounds to int is safe since we don't expect that many games)
-		_scoreboard = std::make_shared<Scoreboard>(availableAlgos, static_cast<int>(totalRounds));
+		_scoreboard = std::make_shared<Scoreboard>(algos, static_cast<int>(totalRounds));
 
 		unordered_map<string, int> registeredGames;
-		for (const auto& algo : availableAlgos)
+		for (const auto& algo : algos)
 		{
 			registeredGames.emplace(algo, 0);
 		}
@@ -74,11 +74,11 @@ namespace battleship
 		set<shared_ptr<SingleGameTask>, decltype(PrioritySort)> gamesToSortQueue(PrioritySort);
 
 		// Iterate all boards and players and create SingleGameTask for each valid combination
-		for (const auto& board : availableBoards)
+		for (const auto& board : boards)
 		{
-			for (const auto& algo1 : availableAlgos)
+			for (const auto& algo1 : algos)
 			{
-				for (const auto& algo2 : availableAlgos)
+				for (const auto& algo2 : algos)
 				{
 					if (algo1 != algo2) // Avoid games with the same player against himself
 					{

@@ -120,6 +120,7 @@
     <ClInclude Include="ConsoleUtils.h" />
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="Logger.h" />
+    <ClInclude Include="MainBattleshipGame.h" />
     <ClInclude Include="MainGame.h" />
     <ClInclude Include="PlayerStatistics.h" />
     <ClInclude Include="Scoreboard.h" />
@@ -137,6 +138,7 @@
     <ClCompile Include="ConsoleUtils.cpp" />
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="Logger.cpp" />
+    <ClCompile Include="MainBattleshipGame.cpp" />
     <ClCompile Include="MainGame.cpp" />
     <ClCompile Include="PlayerStatistics.cpp" />
     <ClCompile Include="Scoreboard.cpp" />

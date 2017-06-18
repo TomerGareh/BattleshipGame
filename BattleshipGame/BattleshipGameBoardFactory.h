@@ -25,6 +25,9 @@ namespace battleship
 		BattleshipGameBoardFactory(const string& path);
 		~BattleshipGameBoardFactory() = default;
 
+		/** Loads and validates all available battleboard files */
+		const vector<string>& loadAllBattleBoards();
+
 		/** Creates a BattleBoard instance using prototype pattern.
 		 *  This method assumes "path" refers a valid battleboard that was loaded before,
 		 *	as this function simply returns a new instance clone out of the template object.
@@ -32,8 +35,11 @@ namespace battleship
 		 */
 		shared_ptr<BattleBoard> requestBattleboard(const string& path);
 
+		/** Returns list of boards available for loading (not necessarily valid) */
+		const vector<string>& availableBoardsList() const;
+
 		/** Returns list of boards available for creation */
-		const vector<string>& boardsList() const;
+		const vector<string>& loadedBoardsList() const;
 
 	private:
 		/** Suffix for game board files **/
@@ -44,8 +50,14 @@ namespace battleship
 		/** Index of loaded board templates, for creating additional instances from prototypes */
 		LoadedBoardsIndex _loadedBoards;
 
+		/** List of available board files for loading (not necessarily valid) */
+		vector<string> _availableBoards;
+
 		/** Lists of boards available for creation */
 		vector<string> _loadedBoardNames;
+
+		/** Path to load board files from */
+		string _path;
 
 		/** Parse header of battleboard file.
 		 *  nextLine contains the header line, rows, cols, depth will contain the resulting dimensions parsed.
@@ -66,8 +78,5 @@ namespace battleship
 		 *	If the path is invalid or no board files are found, errors are printed and NULL is returned.
 		 */
 		unique_ptr<BattleBoard> buildBoardFromFile(const string& path);
-
-		/** Creates a BattleBoard using the loadMethod. This overload takes no parameters. */
-		LoadedBoardsIndex loadAllBattleBoards(const string& path);
 	};
 }

@@ -81,7 +81,11 @@ namespace battleship
 
 	float PlayerStatistics::getPlayerRating(int wins, int loses)
 	{
-		return 100 * static_cast<float>(wins) / static_cast<float>(wins + loses);
+		// Avoid edge case of initialization
+		if (wins + loses == 0)
+			return 0;
+		else
+			return 100 * static_cast<float>(wins) / static_cast<float>(wins + loses);
 	}
 
 	int PlayerStatistics::getRoundsPlayed() const

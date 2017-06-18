@@ -13,13 +13,11 @@ namespace battleship
 	{
 		Logger::getInstance().log(Severity::DEBUG_LEVEL, "AlgoLoader Fetching list of available DLLs..");
 
-		_availableGameAlgos.clear();
-		vector<string> foundDlls = IOUtil::listFilesInPath(path, "dll");
+		_availableGameAlgos = IOUtil::listFilesInPath(path, "dll");
 
 		// Scan for dlls in the path
-		for (auto& nextDllFilename : foundDlls)
+		for (auto& nextDllFilename : _availableGameAlgos)
 		{
-			_availableGameAlgos.push_back(nextDllFilename);
 			Logger::getInstance().log(Severity::DEBUG_LEVEL, nextDllFilename + " found");
 		}
 	}
@@ -61,12 +59,6 @@ namespace battleship
 
 		// Fetch DLL list
 		fetchDLLs(path);
-
-		// Try to load all algorithms available
-		for (const string& algoName : _availableGameAlgos)
-		{
-			loadAlgorithm(algoName);
-		}
 	}
 
 	AlgoLoader::~AlgoLoader()
@@ -79,6 +71,17 @@ namespace battleship
 			Logger::getInstance().log(Severity::DEBUG_LEVEL, "Freeing algorithm: " + descriptor->path);
 			FreeLibrary(descriptor->dll);
 		}
+	}
+
+	const vector<string>& AlgoLoader::loadAllAvailableAlgorithms()
+	{
+		// Try to load all algorithms available
+		for (const string& algoName : _availableGameAlgos)
+		{
+			loadAlgorithm(algoName);
+		}
+
+		return _loadedGameAlgoNames;
 	}
 
 	shared_ptr<IBattleshipGameAlgo> AlgoLoader::requestAlgo(const string& algoName) const

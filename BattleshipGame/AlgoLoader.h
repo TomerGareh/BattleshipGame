@@ -44,6 +44,11 @@ namespace battleship
 		 */
 		shared_ptr<IBattleshipGameAlgo> requestAlgo(const string& algoName) const;
 
+		/** Loads & validates all available game algorithms. 
+		 *	Returns a list of available algorithm names.
+		 */
+		const vector<string>& loadAllAvailableAlgorithms();
+
 	private:
 
 		/** Typedef for object creating new IBattleshipGameAlgo objects from Dlls */
