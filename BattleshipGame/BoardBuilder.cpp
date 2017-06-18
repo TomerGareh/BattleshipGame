@@ -1,4 +1,5 @@
 #include <iostream>
+#include <algorithm>
 #include "BoardBuilder.h"
 #include "Logger.h"
 
@@ -79,59 +80,59 @@ namespace battleship
 		}
 	}
 
-	BoardBuilder::ShipMask::ShipMask(BattleBoardSquare ship) : maskType(ship)
+	BoardBuilder::ShipMask::ShipMask(BoardSquare ship) : maskType(ship)
 	{
 		switch (ship)
 		{
-			case BattleBoardSquare::RubberBoat:
+			case BoardSquare::RubberBoat:
 			{
 				mask = {
-					{Coordinate(1, 0, 0), BattleBoardSquare::Empty}, {Coordinate(-1, 0, 0), BattleBoardSquare::Empty},
-					{Coordinate(0, 1, 0), BattleBoardSquare::Empty}, {Coordinate(0, -1, 0), BattleBoardSquare::Empty},
-					{Coordinate(0, 0, 1), BattleBoardSquare::Empty}, {Coordinate(0, 0, -1), BattleBoardSquare::Empty}
+					{Coordinate(1, 0, 0), BoardSquare::Empty}, {Coordinate(-1, 0, 0), BoardSquare::Empty},
+					{Coordinate(0, 1, 0), BoardSquare::Empty}, {Coordinate(0, -1, 0), BoardSquare::Empty},
+					{Coordinate(0, 0, 1), BoardSquare::Empty}, {Coordinate(0, 0, -1), BoardSquare::Empty}
 				};
 				break;
 			}
-			case BattleBoardSquare::RocketShip:
+			case BoardSquare::RocketShip:
 			{
 				mask = {
-					{Coordinate(0, 1, 0), BattleBoardSquare::RocketShip},
-					{Coordinate(1, 0, 0), BattleBoardSquare::Empty}, {Coordinate(-1, 0, 0), BattleBoardSquare::Empty},
-					{Coordinate(1, 1, 0), BattleBoardSquare::Empty}, {Coordinate(-1, 1, 0), BattleBoardSquare::Empty},
-					{Coordinate(0, 2, 0), BattleBoardSquare::Empty}, {Coordinate(0, -1, 0), BattleBoardSquare::Empty},
-					{Coordinate(0, 0, 1), BattleBoardSquare::Empty}, {Coordinate(0, 0, -1), BattleBoardSquare::Empty},
-					{Coordinate(0, 1, 1), BattleBoardSquare::Empty}, {Coordinate(0, 1, -1), BattleBoardSquare::Empty}
+					{Coordinate(0, 1, 0), BoardSquare::RocketShip},
+					{Coordinate(1, 0, 0), BoardSquare::Empty}, {Coordinate(-1, 0, 0), BoardSquare::Empty},
+					{Coordinate(1, 1, 0), BoardSquare::Empty}, {Coordinate(-1, 1, 0), BoardSquare::Empty},
+					{Coordinate(0, 2, 0), BoardSquare::Empty}, {Coordinate(0, -1, 0), BoardSquare::Empty},
+					{Coordinate(0, 0, 1), BoardSquare::Empty}, {Coordinate(0, 0, -1), BoardSquare::Empty},
+					{Coordinate(0, 1, 1), BoardSquare::Empty}, {Coordinate(0, 1, -1), BoardSquare::Empty}
 				};
 				break;
 			}
-			case BattleBoardSquare::Submarine:
+			case BoardSquare::Submarine:
 			{
 				mask = {
-					{Coordinate(0, 1, 0), BattleBoardSquare::Submarine}, {Coordinate(0, 2, 0), BattleBoardSquare::Submarine},
-					{Coordinate(1, 0, 0), BattleBoardSquare::Empty}, {Coordinate(-1, 0, 0), BattleBoardSquare::Empty},
-					{Coordinate(1, 1, 0), BattleBoardSquare::Empty}, {Coordinate(-1, 1, 0), BattleBoardSquare::Empty},
-					{Coordinate(1, 2, 0), BattleBoardSquare::Empty}, {Coordinate(-1, 2, 0), BattleBoardSquare::Empty},
-					{Coordinate(0, 3, 0), BattleBoardSquare::Empty}, {Coordinate(0, -1, 0), BattleBoardSquare::Empty},
-					{Coordinate(0, 0, 1), BattleBoardSquare::Empty}, {Coordinate(0, 0, -1), BattleBoardSquare::Empty},
-					{Coordinate(0, 1, 1), BattleBoardSquare::Empty}, {Coordinate(0, 1, -1), BattleBoardSquare::Empty},
-					{Coordinate(0, 2, 1), BattleBoardSquare::Empty}, {Coordinate(0, 2, -1), BattleBoardSquare::Empty}
+					{Coordinate(0, 1, 0), BoardSquare::Submarine}, {Coordinate(0, 2, 0), BoardSquare::Submarine},
+					{Coordinate(1, 0, 0), BoardSquare::Empty}, {Coordinate(-1, 0, 0), BoardSquare::Empty},
+					{Coordinate(1, 1, 0), BoardSquare::Empty}, {Coordinate(-1, 1, 0), BoardSquare::Empty},
+					{Coordinate(1, 2, 0), BoardSquare::Empty}, {Coordinate(-1, 2, 0), BoardSquare::Empty},
+					{Coordinate(0, 3, 0), BoardSquare::Empty}, {Coordinate(0, -1, 0), BoardSquare::Empty},
+					{Coordinate(0, 0, 1), BoardSquare::Empty}, {Coordinate(0, 0, -1), BoardSquare::Empty},
+					{Coordinate(0, 1, 1), BoardSquare::Empty}, {Coordinate(0, 1, -1), BoardSquare::Empty},
+					{Coordinate(0, 2, 1), BoardSquare::Empty}, {Coordinate(0, 2, -1), BoardSquare::Empty}
 				};
 				break;
 			}
-			case BattleBoardSquare::Battleship:
+			case BoardSquare::Battleship:
 			{
 				mask = {
-					{Coordinate(0, 1, 0), BattleBoardSquare::Battleship}, {Coordinate(0, 2, 0), BattleBoardSquare::Battleship},
-					{Coordinate(0, 3, 0), BattleBoardSquare::Battleship},
-					{Coordinate(1, 0, 0), BattleBoardSquare::Empty}, {Coordinate(-1, 0, 0), BattleBoardSquare::Empty},
-					{Coordinate(1, 1, 0), BattleBoardSquare::Empty}, {Coordinate(-1, 1, 0), BattleBoardSquare::Empty},
-					{Coordinate(1, 2, 0), BattleBoardSquare::Empty}, {Coordinate(-1, 2, 0), BattleBoardSquare::Empty},
-					{Coordinate(1, 3, 0), BattleBoardSquare::Empty}, {Coordinate(-1, 3, 0), BattleBoardSquare::Empty},
-					{Coordinate(0, 4, 0), BattleBoardSquare::Empty}, {Coordinate(0, -1, 0), BattleBoardSquare::Empty},
-					{Coordinate(0, 0, 1), BattleBoardSquare::Empty}, {Coordinate(0, 0, -1), BattleBoardSquare::Empty},
-					{Coordinate(0, 1, 1), BattleBoardSquare::Empty}, {Coordinate(0, 1, -1), BattleBoardSquare::Empty},
-					{Coordinate(0, 2, 1), BattleBoardSquare::Empty}, {Coordinate(0, 2, -1), BattleBoardSquare::Empty},
-					{Coordinate(0, 3, 1), BattleBoardSquare::Empty}, {Coordinate(0, 3, -1), BattleBoardSquare::Empty}
+					{Coordinate(0, 1, 0), BoardSquare::Battleship}, {Coordinate(0, 2, 0), BoardSquare::Battleship},
+					{Coordinate(0, 3, 0), BoardSquare::Battleship},
+					{Coordinate(1, 0, 0), BoardSquare::Empty}, {Coordinate(-1, 0, 0), BoardSquare::Empty},
+					{Coordinate(1, 1, 0), BoardSquare::Empty}, {Coordinate(-1, 1, 0), BoardSquare::Empty},
+					{Coordinate(1, 2, 0), BoardSquare::Empty}, {Coordinate(-1, 2, 0), BoardSquare::Empty},
+					{Coordinate(1, 3, 0), BoardSquare::Empty}, {Coordinate(-1, 3, 0), BoardSquare::Empty},
+					{Coordinate(0, 4, 0), BoardSquare::Empty}, {Coordinate(0, -1, 0), BoardSquare::Empty},
+					{Coordinate(0, 0, 1), BoardSquare::Empty}, {Coordinate(0, 0, -1), BoardSquare::Empty},
+					{Coordinate(0, 1, 1), BoardSquare::Empty}, {Coordinate(0, 1, -1), BoardSquare::Empty},
+					{Coordinate(0, 2, 1), BoardSquare::Empty}, {Coordinate(0, 2, -1), BoardSquare::Empty},
+					{Coordinate(0, 3, 1), BoardSquare::Empty}, {Coordinate(0, 3, -1), BoardSquare::Empty}
 				};
 				break;
 			}
@@ -162,12 +163,12 @@ namespace battleship
 		{
 			if (boardSquare == maskChar)
 			{
-				if (maskChar != static_cast<char>(BattleBoardSquare::Empty))
+				if (maskChar != static_cast<char>(BoardSquare::Empty))
 					matchSizeAxis++;
 			}
 			else
 			{
-				if ((boardSquare != static_cast<char>(BattleBoardSquare::Empty)) &&	(boardSquare != shipChar))
+				if ((boardSquare != static_cast<char>(BoardSquare::Empty)) &&	(boardSquare != shipChar))
 				{
 					if (matchSizeAxis >= (maskEntry.first.col + 1))
 						adjacentShipsAxis = true;
@@ -180,7 +181,7 @@ namespace battleship
 		}
 		else
 		{
-			if (maskChar != static_cast<char>(BattleBoardSquare::Empty))
+			if (maskChar != static_cast<char>(BoardSquare::Empty))
 				wrongSizeAxis = true;
 		}
 	}
@@ -218,19 +219,19 @@ namespace battleship
 			// Check for X_AXIS orientation
 			Coordinate XOrientCoord(coord.row + i, coord.col + j, coord.depth + k);
 			char currBoardSquare = (boardMap.find(XOrientCoord) != boardMap.end()) ?
-									boardMap.at(XOrientCoord) : static_cast<char>(BattleBoardSquare::Empty);
+									boardMap.at(XOrientCoord) : static_cast<char>(BoardSquare::Empty);
 			applyMaskEntry(currBoardSquare, shipChar, maskEntry, XAxisException, matchSizeXAxis, wrongSizeXAxis, adjacentShipsXAxis);
 
 			// Check for Y_AXIS orientation
 			Coordinate YOrientCoord(coord.row + j, coord.col + i, coord.depth + k);
 			currBoardSquare = (boardMap.find(YOrientCoord) != boardMap.end()) ?
-							   boardMap.at(YOrientCoord) : static_cast<char>(BattleBoardSquare::Empty);
+							   boardMap.at(YOrientCoord) : static_cast<char>(BoardSquare::Empty);
 			applyMaskEntry(currBoardSquare, shipChar, maskEntry, YAxisException, matchSizeYAxis, wrongSizeYAxis, adjacentShipsYAxis);
 
 			// Check for Z_AXIS orientation
 			Coordinate ZOrientCoord(coord.row + i, coord.col + k, coord.depth + j);
 			currBoardSquare = (boardMap.find(ZOrientCoord) != boardMap.end()) ?
-							   boardMap.at(ZOrientCoord) : static_cast<char>(BattleBoardSquare::Empty);
+							   boardMap.at(ZOrientCoord) : static_cast<char>(BoardSquare::Empty);
 			applyMaskEntry(currBoardSquare, shipChar, maskEntry, ZAxisException, matchSizeZAxis, wrongSizeZAxis, adjacentShipsZAxis);
 		}
 
@@ -327,19 +328,50 @@ namespace battleship
 		}
 	}
 
+	bool BoardBuilder::isBalancedBoard(vector<BoardSquare>& playerAShips, vector<BoardSquare>& playerBShips)
+	{
+		if (playerAShips.empty() || playerBShips.empty())
+			return false;
+
+		bool balancedBoard = true;
+		for (const auto& AShip : playerAShips)
+		{
+			bool foundMatch = false;
+			for (vector<BoardSquare>::iterator BShipIt = playerBShips.begin(); BShipIt != playerBShips.end(); ++BShipIt)
+			{
+				if (*BShipIt == AShip)
+				{
+					foundMatch = true;
+					playerBShips.erase(BShipIt);
+					break;
+				}
+			}
+
+			if (!foundMatch)
+			{
+				balancedBoard = false;
+				break;
+			}
+		}
+		
+		return (balancedBoard && playerBShips.empty());
+	}
+
 	// This function assumes that the board contains only ship characters or space, and not any other character
 	bool BoardBuilder::isValidBoard(BattleBoard* board, set<BoardInitializeError, ErrorPriorityFunction>& errorQueue)
 	{
 		tuple<int, int, int> boardSize = std::make_tuple(boardWidth, boardHeight, boardDepth);
-		shared_ptr<ShipMask> rubberMask = std::make_shared<ShipMask>(BattleBoardSquare::RubberBoat);
-		shared_ptr<ShipMask> rocketMask = std::make_shared<ShipMask>(BattleBoardSquare::RocketShip);
-		shared_ptr<ShipMask> submarineMask = std::make_shared<ShipMask>(BattleBoardSquare::Submarine);
-		shared_ptr<ShipMask> battleshipMask = std::make_shared<ShipMask>(BattleBoardSquare::Battleship);
-		shared_ptr<ShipMask> currMask;
+		ShipMask rubberMask(BoardSquare::RubberBoat);
+		ShipMask rocketMask(BoardSquare::RocketShip);
+		ShipMask submarineMask(BoardSquare::Submarine);
+		ShipMask battleshipMask(BoardSquare::Battleship);
+		ShipMask* currMask;
 
 		bool validBoard = true;
-		unordered_set<Coordinate, CoordinateHash> visitedCoords;
 		bool isMatch;
+		unordered_set<Coordinate, CoordinateHash> visitedCoords;
+		vector<BoardSquare> playerAShips;
+		vector<BoardSquare> playerBShips;
 		for (const auto& square : boardMap)
 		{
 			if (visitedCoords.find(square.first) != visitedCoords.end())
@@ -350,60 +382,60 @@ namespace battleship
 
 			switch (toupper(square.second))
 			{
-			case static_cast<char>(BattleBoardSquare::RubberBoat) :
+			case static_cast<char>(BoardSquare::RubberBoat) :
 			{
 				shipType = &BattleBoard::RUBBER_BOAT;
-				isMatch = rubberMask->applyMask(boardMap, boardSize, square.first, player);
-				if (rubberMask->wrongSize)
+				isMatch = rubberMask.applyMask(boardMap, boardSize, square.first, player);
+				if (rubberMask.wrongSize)
 				{
 					if (player == PlayerEnum::A)
 						errorQueue.insert(BoardInitializeError(ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_B_PLAYER_A));
 					else
 						errorQueue.insert(BoardInitializeError(ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_B_PLAYER_B));
 				}
-				currMask = rubberMask;
+				currMask = &rubberMask;
 				break;
 			}
-			case static_cast<char>(BattleBoardSquare::RocketShip) :
+			case static_cast<char>(BoardSquare::RocketShip) :
 			{
 				shipType = &BattleBoard::ROCKET_SHIP;
-				isMatch = rocketMask->applyMask(boardMap, boardSize, square.first, player);
-				if (rocketMask->wrongSize)
+				isMatch = rocketMask.applyMask(boardMap, boardSize, square.first, player);
+				if (rocketMask.wrongSize)
 				{
 					if (player == PlayerEnum::A)
 						errorQueue.insert(BoardInitializeError(ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_P_PLAYER_A));
 					else
 						errorQueue.insert(BoardInitializeError(ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_P_PLAYER_B));
 				}
-				currMask = rocketMask;
+				currMask = &rocketMask;
 				break;
 			}
-			case static_cast<char>(BattleBoardSquare::Submarine) :
+			case static_cast<char>(BoardSquare::Submarine) :
 			{
 				shipType = &BattleBoard::SUBMARINE;
-				isMatch = submarineMask->applyMask(boardMap, boardSize, square.first, player);
-				if (submarineMask->wrongSize)
+				isMatch = submarineMask.applyMask(boardMap, boardSize, square.first, player);
+				if (submarineMask.wrongSize)
 				{
 					if (player == PlayerEnum::A)
 						errorQueue.insert(BoardInitializeError(ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_M_PLAYER_A));
 					else
 						errorQueue.insert(BoardInitializeError(ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_M_PLAYER_B));
 				}
-				currMask = submarineMask;
+				currMask = &submarineMask;
 				break;
 			}
-			case static_cast<char>(BattleBoardSquare::Battleship) :
+			case static_cast<char>(BoardSquare::Battleship) :
 			{
 				shipType = &BattleBoard::BATTLESHIP;
-				isMatch = battleshipMask->applyMask(boardMap, boardSize, square.first, player);
-				if (battleshipMask->wrongSize)
+				isMatch = battleshipMask.applyMask(boardMap, boardSize, square.first, player);
+				if (battleshipMask.wrongSize)
 				{
 					if (player == PlayerEnum::A)
 						errorQueue.insert(BoardInitializeError(ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_D_PLAYER_A));
 					else
 						errorQueue.insert(BoardInitializeError(ErrorPriorityEnum::WRONG_SIZE_SHAPE_FOR_SHIP_D_PLAYER_B));
 				}
-				currMask = battleshipMask;
+				currMask = &battleshipMask;
 				break;
 			}
 			default:
@@ -419,6 +451,10 @@ namespace battleship
 			{
 				Logger::getInstance().log(Severity::DEBUG_LEVEL, logMsg + " is valid.");
 				board->addGamePiece(square.first, *shipType, player, currMask->orient);
+				if (player == PlayerEnum::A)
+					playerAShips.push_back(shipType->_representation);
+				else
+					playerBShips.push_back(shipType->_representation);
 			}
 			
 			if (!isMatch)
@@ -436,6 +472,10 @@ namespace battleship
 		{
 			validBoard = false;
 			errorQueue.insert(BoardInitializeError(ErrorPriorityEnum::NO_SHIPS_AT_ALL));
+		}
+		else if (!isBalancedBoard(playerAShips, playerBShips))
+		{	// Board is still valid
+			errorQueue.insert(BoardInitializeError(ErrorPriorityEnum::WRONG_SHIP_TYPES_FOR_BOTH_PLAYERS));
 		}
 
 		return validBoard;

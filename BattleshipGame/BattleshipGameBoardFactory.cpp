@@ -78,23 +78,23 @@ namespace battleship
 
 		auto legalChars =
 		{
-			static_cast<char>(toupper(static_cast<char>(BattleBoardSquare::Empty))),
-			static_cast<char>(toupper(static_cast<char>(BattleBoardSquare::RubberBoat))),
-			static_cast<char>(toupper(static_cast<char>(BattleBoardSquare::RocketShip))),
-			static_cast<char>(toupper(static_cast<char>(BattleBoardSquare::Submarine))),
-			static_cast<char>(toupper(static_cast<char>(BattleBoardSquare::Battleship))),
-			static_cast<char>(tolower(static_cast<char>(BattleBoardSquare::RubberBoat))),
-			static_cast<char>(tolower(static_cast<char>(BattleBoardSquare::RocketShip))),
-			static_cast<char>(tolower(static_cast<char>(BattleBoardSquare::Submarine))),
-			static_cast<char>(tolower(static_cast<char>(BattleBoardSquare::Battleship)))
+			static_cast<char>(toupper(static_cast<char>(BoardSquare::Empty))),
+			static_cast<char>(toupper(static_cast<char>(BoardSquare::RubberBoat))),
+			static_cast<char>(toupper(static_cast<char>(BoardSquare::RocketShip))),
+			static_cast<char>(toupper(static_cast<char>(BoardSquare::Submarine))),
+			static_cast<char>(toupper(static_cast<char>(BoardSquare::Battleship))),
+			static_cast<char>(tolower(static_cast<char>(BoardSquare::RubberBoat))),
+			static_cast<char>(tolower(static_cast<char>(BoardSquare::RocketShip))),
+			static_cast<char>(tolower(static_cast<char>(BoardSquare::Submarine))),
+			static_cast<char>(tolower(static_cast<char>(BoardSquare::Battleship)))
 		};
-		IOUtil::replaceIllegalCharacters(nextLine, static_cast<char>(BattleBoardSquare::Empty), legalChars);
+		IOUtil::replaceIllegalCharacters(nextLine, static_cast<char>(BoardSquare::Empty), legalChars);
 
 		// Traverse each character in the row and put into the board
 		for (char& nextChar : nextLine)
 		{
 			// Add to board only squares with real game pieces
-			if (!(nextChar == static_cast<char>(BattleBoardSquare::Empty)))
+			if (!(nextChar == static_cast<char>(BoardSquare::Empty)))
 				builder.addPiece(Coordinate(rowIndex, colCounter, depthIndex), nextChar);
 
 			colCounter++;

@@ -29,23 +29,10 @@ namespace battleship
 
 	/* -- Enums & consts -- */
 
-	/** Represents legal values for squares on the game board (including legaly visual values) */
-	enum class BattleBoardSquare : char
-	{
-		Empty = static_cast<char>(BoardSquare::Empty),
-		Hit = '*',
-		Bombared = '@',
-		Sinking = 'X',
-		RubberBoat = static_cast<char>(BoardSquare::RubberBoat),
-		RocketShip = static_cast<char>(BoardSquare::RocketShip),
-		Submarine = static_cast<char>(BoardSquare::Submarine),
-		Battleship = static_cast<char>(BoardSquare::Battleship)
-	};
-
 	/** Contains data of a ship type, such as size, points, according to game rules */
 	struct ShipType
 	{
-		BattleBoardSquare _representation; // Visual representation of this ship type (case-insensitive)
+		BoardSquare _representation; // Visual representation of this ship type (case-insensitive)
 		int _size;	// Number of squares this ship type occupies
 		int _points;	// Number of points a player gets for sinking this ship type
 
@@ -54,7 +41,7 @@ namespace battleship
 		friend class BattleBoard;	// The only class who is allowed to instantiate ShipTypes
 
 	private:
-		ShipType(BattleBoardSquare representation, int size, int points);
+		ShipType(BoardSquare representation, int size, int points);
 		ShipType(ShipType const&) = delete;	// Disable copying
 		ShipType& operator=(ShipType const&) = delete;	// Disable copying (assignment)
 		ShipType(ShipType&& other) noexcept = delete; // Disable moving

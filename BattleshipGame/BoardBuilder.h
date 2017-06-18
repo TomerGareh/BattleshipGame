@@ -109,19 +109,19 @@ namespace battleship
 		class ShipMask
 		{
 		public:
-			BattleBoardSquare maskType;
+			BoardSquare maskType;
 
 			/** A map of squares that compose the mask. The coordinate is a relative coordinate. */
 			
-			vector<pair<Coordinate, BattleBoardSquare>> mask;
-			using MaskEntry = pair<Coordinate, BattleBoardSquare>;
+			vector<pair<Coordinate, BoardSquare>> mask;
+			using MaskEntry = pair<Coordinate, BoardSquare>;
 			
 			Orientation orient;
 			bool wrongSize;
 			bool adjacentShips;
 
-			/** Constructs a new mask according to ship type (which is represented by the BattleBoardSquare in this case) */
-			ShipMask(BattleBoardSquare ship);
+			/** Constructs a new mask according to ship type (which is represented by the BoardSquare in this case) */
+			ShipMask(BoardSquare ship);
 
 			virtual ~ShipMask();
 
@@ -149,6 +149,9 @@ namespace battleship
 
 		/** Mark given squares as already validated */
 		void markVisitedCoords(unordered_set<Coordinate, CoordinateHash>& coordSet, Coordinate coord);
+
+		/** Check that players have the same amount and types of ships */
+		static bool isBalancedBoard(vector<BoardSquare>& playerAShips, vector<BoardSquare>& playerBShips);
 
 		/** Returns true if the BattleBoard contains a legal formation, false if not.
 		 *  This function is used by BoardBuilder::validate()

@@ -7,7 +7,7 @@ namespace battleship
 {
 	#pragma region GamePiece
 
-	ShipType::ShipType(BattleBoardSquare representation, int size, int points):
+	ShipType::ShipType(BoardSquare representation, int size, int points):
 		_representation(representation),
 		_size(size),
 		_points(points)
@@ -31,10 +31,10 @@ namespace battleship
 	#pragma region BattleBoard
 
 	// Static members initialization
-	const ShipType BattleBoard::RUBBER_BOAT(BattleBoardSquare::RubberBoat, 1, 2);
-	const ShipType BattleBoard::ROCKET_SHIP(BattleBoardSquare::RocketShip, 2, 3);
-	const ShipType BattleBoard::SUBMARINE(BattleBoardSquare::Submarine, 3, 7 );
-	const ShipType BattleBoard::BATTLESHIP(BattleBoardSquare::Battleship, 4, 8 );
+	const ShipType BattleBoard::RUBBER_BOAT(BoardSquare::RubberBoat, 1, 2);
+	const ShipType BattleBoard::ROCKET_SHIP(BoardSquare::RocketShip, 2, 3);
+	const ShipType BattleBoard::SUBMARINE(BoardSquare::Submarine, 3, 7 );
+	const ShipType BattleBoard::BATTLESHIP(BoardSquare::Battleship, 4, 8 );
 
 	// Ctor
 	BattleBoard::BattleBoard(int width, int height, int depth):
