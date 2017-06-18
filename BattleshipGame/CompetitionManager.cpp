@@ -3,7 +3,6 @@
 #include <string>
 #include <algorithm>
 
-using std::priority_queue;
 using std::lock_guard;
 using std::to_string;
 using std::min;
@@ -18,90 +17,41 @@ namespace battleship
 		auto algos = algoLoader->loadedGameAlgos(); // Valid loaded algorithms
 
 		// Total games for each player: play twice against each player other player on each board
-		auto totalRounds = (boards.size() - 1) * 2 * boards.size();
+		auto totalRounds = (algos.size() - 1) * 2 * boards.size();
 
 		// Reset scoreboard (casting totalRounds to int is safe since we don't expect that many games)
 		_scoreboard = std::make_shared<Scoreboard>(algos, static_cast<int>(totalRounds));
-
-		unordered_map<string, int> registeredGames;
-		for (const auto& algo : algos)
-		{
-			registeredGames.emplace(algo, 0);
-		}
-
-		// For reordering SingleGameTask by player's game time.
-		// Helps sorting SingleGameTasks in the priority queue to keep the competition fair for all player's
-		// chance of playing.
-		auto PrioritySort = [this, &registeredGames](const shared_ptr<SingleGameTask> lhs,
-													 const shared_ptr<SingleGameTask> rhs) -> bool
-		{
-			auto lhsPlayerAGamesCount = registeredGames.find(lhs->playerAName())->second;
-			auto lhsPlayerBGamesCount = registeredGames.find(lhs->playerBName())->second;
-			auto rhsPlayerAGamesCount = registeredGames.find(rhs->playerAName())->second;
-			auto rhsPlayerBGamesCount = registeredGames.find(rhs->playerBName())->second;
-
-			// Game with the player that played the LEAST amount of games wins HIGHER priority
-			// (Note: Intuitively, this is in inverse order to played amound of games!)
-			int lowestLhsPlayer = min(lhsPlayerAGamesCount, lhsPlayerBGamesCount);
-			int lowestRhsPlayer = min(rhsPlayerAGamesCount, rhsPlayerBGamesCount);
-			if (lowestLhsPlayer != lowestRhsPlayer)
-			{
-				return lowestLhsPlayer > lowestRhsPlayer;
-			}
-			
-			int highestLhsPlayer = max(lhsPlayerAGamesCount, lhsPlayerBGamesCount);
-			int highestRhsPlayer = max(rhsPlayerAGamesCount, rhsPlayerBGamesCount);
-			if (highestLhsPlayer < highestRhsPlayer)
-			{
-				return highestLhsPlayer > highestRhsPlayer;
-			}
-
-			// Else sort lexicographically so set won't dump "equal" items for the set
-			if (lhs->playerAName() != rhs->playerAName())
-			{
-				return lhs->playerAName() > rhs->playerAName();
-			}
-			else if (lhs->playerBName() != rhs->playerBName())
-			{
-				return lhs->playerBName() > rhs->playerBName();
-			}
-			else
-			{
-				return lhs->boardName() > rhs->boardName();
-			}
-		};
-
-		set<shared_ptr<SingleGameTask>, decltype(PrioritySort)> gamesToSortQueue(PrioritySort);
-
+		
 		// Iterate all boards and players and create SingleGameTask for each valid combination
+		queue<shared_ptr<SingleGameTask>> inversedGamesSet;
+		size_t numOfAlgos = algos.size() - 1;
 		for (const auto& board : boards)
 		{
-			for (const auto& algo1 : algos)
+			// Each round is a diagonal in the game matrix (without the main diagonal),
+			// and we run over it from both sides in order to get a balanced tournament 
+			for (size_t round = 1; round <= numOfAlgos; ++round)
 			{
-				for (const auto& algo2 : algos)
+				for (size_t algo1 = 0, algo2 = round; ((algo1 <= (numOfAlgos - algo2)) && (algo2 <= numOfAlgos)); ++algo1, ++algo2)
 				{
-					if (algo1 != algo2) // Avoid games with the same player against himself
+					_gamesSet.push(std::make_shared<SingleGameTask>(algos[algo1], algos[algo2], board, _scoreboard.get()));
+					inversedGamesSet.push(std::make_shared<SingleGameTask>(algos[algo2], algos[algo1], board, _scoreboard.get()));
+					if (algo1 != (numOfAlgos - algo2))	// On the secondary diagonal 'algo1' and 'numOfAlgos-algo2' indices meet
+														// and we don't want to add them twice
 					{
-						// _gameSet keeps all SingleGameTasks sorted in a fair order for the players
-						// so everyone gets their chance to play equally
-						gamesToSortQueue.emplace(std::make_shared<SingleGameTask>(algo1, algo2,
-																				  board, _scoreboard.get()));
+						_gamesSet.push(std::make_shared<SingleGameTask>(algos[numOfAlgos-algo2], algos[numOfAlgos-algo1], board,
+									   _scoreboard.get()));
+						inversedGamesSet.push(std::make_shared<SingleGameTask>(algos[numOfAlgos-algo1], algos[numOfAlgos-algo2], board,
+											  _scoreboard.get()));
 					}
 				}
 			}
 		}
 
-		while (!gamesToSortQueue.empty())
+		// Move inversed games to the main queue
+		while (!inversedGamesSet.empty())
 		{
-			// Get next game in fair order
-			auto task = *gamesToSortQueue.begin();
-
-			gamesToSortQueue.erase(gamesToSortQueue.begin());
-			_gamesSet.push(task);
-
-			// Re-prioritize queue - no need to check for end here since we've just created all keys
-			registeredGames.find(task->playerAName())->second++;
-			registeredGames.find(task->playerBName())->second++;
+			_gamesSet.push(inversedGamesSet.front());
+			inversedGamesSet.pop();
 		}
 	}
 

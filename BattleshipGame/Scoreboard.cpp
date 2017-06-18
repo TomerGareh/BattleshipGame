@@ -159,7 +159,7 @@ namespace battleship
 		   << setw(8) << "Losses"
 		   << setw(8) << "%"
 		   << setw(8) << "Pts For"
-		   << setw(12) << "Pts Against" << endl;
+		   << setw(12) << "Pts Against" << endl << endl;
 
 		int place = 1;
 
