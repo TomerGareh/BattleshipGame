@@ -42,14 +42,14 @@ namespace battleship
 		if (loadedBoards.empty())
 		{
 			Logger::getInstance().log(Severity::ERROR_LEVEL,
-				"Error: No valid board files (*.sboard) looking in path: " + config.path,
+				"No valid board files (*.sboard) looking in path: " + config.path,
 				PRINT_TO_CONSOLE);
 		}
 
 		if (loadedAlgos.size() < 2)
-		{ // TODO: Is this absolutePath or config.path..???
+		{
 			Logger::getInstance().log(Severity::ERROR_LEVEL,
-				"Error: Missing valid algorithms looking in path: " + config.path + " (need at least two)",
+				"Missing valid algorithm (dll) files looking in path: " + config.path + " (need at least two)",
 				PRINT_TO_CONSOLE);
 		}
 
@@ -78,10 +78,9 @@ namespace battleship
 		auto availableAlgos = algoLoader->availableGameAlgos();
 
 		if (availableAlgos.size() < 2)
-		{ // TODO: Is this absolutePath or config.path..???
-			auto absolutePath = IOUtil::convertPathToAbsolute(config.path);
+		{
 			Logger::getInstance().log(Severity::ERROR_LEVEL,
-				"Missing an algorithm (dll) file looking in path: " + absolutePath + " (need at least two)",
+				"Missing algorithm (dll) files looking in path: " + config.path + " (need at least two)",
 				PRINT_TO_CONSOLE);
 		}
 
