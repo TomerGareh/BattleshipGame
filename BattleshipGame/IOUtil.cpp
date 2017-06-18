@@ -1,10 +1,11 @@
 #include "IOUtil.h"
+#include "Logger.h"
+#include <windows.h>
 #include <stdio.h>
 #include <fstream>
 #include <string>
 #include <algorithm>
 #include <locale>
-#include "Logger.h"
 
 namespace battleship
 {

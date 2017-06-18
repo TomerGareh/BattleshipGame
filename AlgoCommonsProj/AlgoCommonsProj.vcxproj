@@ -112,11 +112,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\BattleshipGame\AlgoCommon.h" />
-    <ClCompile Include="..\BattleshipGame\IOUtil.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\BattleshipGame\IBattleshipGameAlgo.h" />
-    <ClInclude Include="..\BattleshipGame\IOUtil.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

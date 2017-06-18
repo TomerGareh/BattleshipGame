@@ -1,4 +1,5 @@
 #include <iostream>
+#include <algorithm>
 #include "BattleshipGameBoardFactory.h"
 #include "IOUtil.h"
 #include "Logger.h"
@@ -6,6 +7,7 @@
 
 using std::cout;
 using std::endl;
+using std::transform;
 
 namespace battleship
 {
@@ -21,6 +23,7 @@ namespace battleship
 	{
 		bool isValidFile = true;
 
+		transform(nextLine.begin(), nextLine.end(), nextLine.begin(), ::tolower);
 		string delimiter = "x"; // Separates dimensions
 
 		int dimensionIndex = 0;

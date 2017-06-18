@@ -42,14 +42,14 @@ namespace battleship
 		if (loadedBoards.empty())
 		{
 			Logger::getInstance().log(Severity::ERROR_LEVEL,
-				"No valid board files (*.sboard) looking in path: " + config.path,
+				"Error: No valid board files (*.sboard) looking in path: " + config.path,
 				PRINT_TO_CONSOLE);
 		}
 
 		if (loadedAlgos.size() < 2)
 		{ // TODO: Is this absolutePath or config.path..???
 			Logger::getInstance().log(Severity::ERROR_LEVEL,
-				"Missing valid algorithms looking in path: " + config.path + " (need at least two)",
+				"Error: Missing valid algorithms looking in path: " + config.path + " (need at least two)",
 				PRINT_TO_CONSOLE);
 		}
 
