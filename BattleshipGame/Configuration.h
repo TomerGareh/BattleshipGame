@@ -1,8 +1,13 @@
 #pragma once
 
 #include <string>
+#include <vector>
+#include <utility>
+#include "Logger.h"
 
 using std::string;
+using std::pair;
+using std::vector;
 
 namespace battleship
 {
@@ -22,6 +27,11 @@ namespace battleship
 
 		// Number of worker threads to run games in competition
 		int threads;
+
+		// List of textual warnings (if any) for incorrect configuration setup.
+		// The configuration object accumulates these since nothing is loaded in the app yet,
+		// including the logger.
+		vector<pair<Severity, string>> configurationIssues;
 
 		/** Parses the arguements in the command line and overrides the configuration accordingly.
 	 	 *  Returns true if successful or false if the command line was illegal.

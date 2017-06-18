@@ -105,12 +105,30 @@ namespace battleship
 		return true;
 	}
 
-	void MainBattleshipGame::startLogger(const Configuration& config)
+	void MainBattleshipGame::startLogger(const Configuration& config, bool isLegalConfiguration)
 	{
 		Logger::getInstance().setPath(config.path)->setLevel(Severity::INFO_LEVEL);
 		Logger::getInstance().log(Severity::INFO_LEVEL, "Battleship game started.");
-		Logger::getInstance().log(Severity::INFO_LEVEL, "Path = " + config.path);
-		Logger::getInstance().log(Severity::INFO_LEVEL, "Worker threads count = " + to_string(config.threads));
+
+		// Report all accumulated configuration issues now that the logger is loaded
+		// Note: If there are configuration issues with the path given, we expect to use the default one
+		// for the logger purposes
+		for (const auto& issues : config.configurationIssues)
+		{
+			auto severity = issues.first;
+			auto msg = issues.second;
+			Logger::getInstance().log(severity, msg, PRINT_TO_CONSOLE);
+		}
+
+		if (isLegalConfiguration)
+		{
+			Logger::getInstance().log(Severity::INFO_LEVEL, "Path = " + config.path);
+			Logger::getInstance().log(Severity::INFO_LEVEL, "Worker threads count = " + to_string(config.threads));
+		}
+		else
+		{
+			Logger::getInstance().log(Severity::INFO_LEVEL, "Battleship game ended.");
+		}
 	}
 
 	int MainBattleshipGame::run(int argc, char* argv[])
@@ -121,11 +139,11 @@ namespace battleship
 			Configuration config;
 			bool isLegalArgs = config.parseArgs(argc, argv);
 
-			if (!isLegalArgs) // Error already printed by configuration parser
-				return ERROR_CODE;
-
 			// #2 - Start logger
-			startLogger(config);
+			startLogger(config, isLegalArgs);
+
+			if (!isLegalArgs) // Error already printed by logger
+				return ERROR_CODE;
 
 			// #3 - Load and build game resources: board & algorithms
 

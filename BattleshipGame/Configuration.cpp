@@ -14,7 +14,8 @@ namespace battleship
 	{
 		if (argc > MAX_ARG_COUNT)
 		{
-			cerr << "Error: Too many arguments given. Try: BattleShipGame [path] [-threads <#count>]" << endl;
+			string error = "Error: Too many arguments given. Try: BattleShipGame [path] [-threads <#count>]";
+			configurationIssues.push_back(std::make_pair(Severity::ERROR_LEVEL, error));
 			return false;
 		}
 
@@ -38,19 +39,22 @@ namespace battleship
 
 						if (this->threads <= 0)	// Invalid thread count value
 						{
-							cerr << "Error: Invalid thread count value. Thread count must be > 0 " << endl;
+							string error = "Error: Invalid thread count value. Thread count must be > 0 ";
+							configurationIssues.push_back(std::make_pair(Severity::ERROR_LEVEL, error));
 							return false;
 						}
 					}
 					else
 					{
-						cerr << "Error: Illegal threads field value. Try: -threads <#count>" << endl;
+						string error = "Error: Illegal threads field value. Try: -threads <#count>";
+						configurationIssues.push_back(std::make_pair(Severity::ERROR_LEVEL, error));
 						return false;
 					}
 				}
 				else
 				{
-					cerr << "Error: Threads argument missing value field. Try: -threads <#count>" << endl;
+					string error = "Error: Threads argument missing value field. Try: -threads <#count>";
+					configurationIssues.push_back(std::make_pair(Severity::ERROR_LEVEL, error));
 					return false;
 				}
 			}
@@ -97,11 +101,17 @@ namespace battleship
 					this->threads = std::stoi(nextLine.c_str());
 
 					if (this->threads <= 0)	// Invalid thread count value
+					{
 						isValidFile = false;
+						string warning = "Configuration file traced invalid worker threads count value";
+						configurationIssues.push_back(std::make_pair(Severity::WARNING_LEVEL, warning));
+					}
 				}
 				else
 				{
 					isValidFile = false;
+					string warning = "Configuration file traced invalid worker threads count value";
+					configurationIssues.push_back(std::make_pair(Severity::WARNING_LEVEL, warning));
 				}
 			}
 			else if ((IOUtil::startsWith(nextLine, CONFIG_HEADER_COMMENT)) ||  // Comment %%
@@ -112,6 +122,8 @@ namespace battleship
 			else // Unknown parameter
 			{
 				isValidFile = false;
+				string warning = "Configuration file traced an invalid configuration attribute";
+				configurationIssues.push_back(std::make_pair(Severity::WARNING_LEVEL, warning));
 			}
 
 			isHeader = true; // The entire configuration file is treated as a header to ensure validity
@@ -136,6 +148,9 @@ namespace battleship
 		// First try to load configuration from command line args
 		if (!loadConfigFile())
 		{
+			string warning = "Warning: Configuration file is missing or invalid. Loading default values..";
+			configurationIssues.push_back(std::make_pair(Severity::WARNING_LEVEL, warning));
+
 			// If it fails, load defaults
 			loadDefaults();
 		}

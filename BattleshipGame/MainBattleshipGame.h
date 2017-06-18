@@ -54,7 +54,7 @@ namespace battleship
 		static bool validatePath(const Configuration& config);
 
 		/** Initialize the game logger */
-		static void startLogger(const Configuration& config);
+		static void startLogger(const Configuration& config, bool isLegalConfiguration);
 	};
 }
 
