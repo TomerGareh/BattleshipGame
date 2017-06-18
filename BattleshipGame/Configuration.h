@@ -28,6 +28,9 @@ namespace battleship
 		// Number of worker threads to run games in competition
 		int threads;
 
+		// Severity filter for logger messages
+		Severity logSeverity;
+
 		// List of textual warnings (if any) for incorrect configuration setup.
 		// The configuration object accumulates these since nothing is loaded in the app yet,
 		// including the logger.
@@ -48,6 +51,9 @@ namespace battleship
 		// Default amount of worker threads
 		static constexpr int DEFAULT_THREAD_COUNT = 4;
 
+		// Default logger severity
+		static constexpr Severity DEFAULT_SEVERITY = Severity::INFO_LEVEL;
+
 		// Maximum number of arguments in a legal command line
 		static constexpr int MAX_ARG_COUNT = 4;
 
@@ -59,6 +65,9 @@ namespace battleship
 
 		// Header of threads arg in configuration file
 		static constexpr auto CONFIG_HEADER_THREADS = "THREADS=";
+
+		// Header of log level arg in configuration file
+		static constexpr auto CONFIG_HEADER_LOGLEVEL = "LOG_LEVEL=";
 
 		// Beginning of comments in config file - to be ignored by the parser
 		static constexpr auto CONFIG_HEADER_COMMENT = "%%";

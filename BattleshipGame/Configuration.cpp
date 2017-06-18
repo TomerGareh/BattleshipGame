@@ -1,6 +1,7 @@
 #include "Configuration.h"
 #include "IOUtil.h"
 #include <iostream>
+#include <climits>
 
 using std::cout;
 using std::cerr;
@@ -69,13 +70,32 @@ namespace battleship
 		if (value.empty())
 			return;
 
-		// IF starts and ends with value marker ("quotation marks") - remove them
+		// If starts and ends with value marker ("quotation marks") - remove them
 		if (IOUtil::startsWith(value, CONFIG_VALUE_MARKER) &&
 			IOUtil::endsWith(value, CONFIG_VALUE_MARKER))
 		{
 			value.erase(0, 1);
 			value.erase(value.length() - 1, 1);
 		}
+	}
+
+	bool validateInt(const string& parsedArg, int min, int max)
+	{
+		if (!IOUtil::isInteger(parsedArg)) // Only use the value if this is a valid int
+		{
+			return false;
+		}
+		else
+		{
+			int val = std::stoi(parsedArg.c_str());
+
+			if ((val < min) || (val > max))	// Invalid value
+			{
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	bool Configuration::loadConfigFile()
@@ -96,21 +116,33 @@ namespace battleship
 				IOUtil::removePrefix(nextLine, CONFIG_HEADER_THREADS);
 				normalizeValue(nextLine);
 
-				if (IOUtil::isInteger(nextLine)) // Only use the value if this is a valid int
+				if (validateInt(nextLine, 1, INT_MAX)) // Only use the value if this is a valid int
 				{
 					this->threads = std::stoi(nextLine.c_str());
-
-					if (this->threads <= 0)	// Invalid thread count value
-					{
-						isValidFile = false;
-						string warning = "Configuration file traced invalid worker threads count value";
-						configurationIssues.push_back(std::make_pair(Severity::WARNING_LEVEL, warning));
-					}
 				}
 				else
 				{
 					isValidFile = false;
 					string warning = "Configuration file traced invalid worker threads count value";
+					configurationIssues.push_back(std::make_pair(Severity::WARNING_LEVEL, warning));
+				}
+			}
+			else if (IOUtil::startsWith(nextLine, CONFIG_HEADER_LOGLEVEL)) // Log level parameter (int)
+			{
+				IOUtil::removePrefix(nextLine, CONFIG_HEADER_LOGLEVEL);
+				normalizeValue(nextLine);
+
+				int minVal = static_cast<int>(Severity::DEBUG_LEVEL);
+				int maxVal = static_cast<int>(Severity::ERROR_LEVEL);
+
+				if (validateInt(nextLine, minVal, maxVal)) // Only use the value if this is a valid int
+				{
+					this->logSeverity = static_cast<Severity>(std::stoi(nextLine.c_str()));
+				}
+				else
+				{
+					isValidFile = false;
+					string warning = "Configuration file traced invalid log level value";
 					configurationIssues.push_back(std::make_pair(Severity::WARNING_LEVEL, warning));
 				}
 			}
@@ -133,7 +165,6 @@ namespace battleship
 		auto emptyBodyParser = [this](string& nextLine) {};
 
 		bool isValidConfigFile = IOUtil::parseFile(CONFIG_FILE, emptyBodyParser, config);
-
 		return isValidConfigFile;
 	}
 
@@ -141,18 +172,24 @@ namespace battleship
 	{
 		this->path = DEFAULT_PATH;			   // Nameless param, default is working directory
 		this->threads = DEFAULT_THREAD_COUNT;  // Optional param: worker threads count
+		this->logSeverity = DEFAULT_SEVERITY;  // Default is info level
 	}
 
 	Configuration::Configuration()
 	{
-		// First try to load configuration from command line args
+		// First load defaults in case configuration file is missing anything
+		loadDefaults();
+
+		// Next try to load configuration from file
 		if (!loadConfigFile())
 		{
 			string warning = "Warning: Configuration file is missing or invalid. Loading default values..";
 			configurationIssues.push_back(std::make_pair(Severity::WARNING_LEVEL, warning));
 
-			// If it fails, load defaults
+			// If it fails, load defaults again
 			loadDefaults();
 		}
+
+		// Later on we may override with arguments from command line
 	}
 }

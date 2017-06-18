@@ -107,7 +107,7 @@ namespace battleship
 
 	void MainBattleshipGame::startLogger(const Configuration& config, bool isLegalConfiguration)
 	{
-		Logger::getInstance().setPath(config.path)->setLevel(Severity::INFO_LEVEL);
+		Logger::getInstance().setPath(config.path)->setLevel(config.logSeverity);
 		Logger::getInstance().log(Severity::INFO_LEVEL, "Battleship game started.");
 
 		// Report all accumulated configuration issues now that the logger is loaded
@@ -124,6 +124,8 @@ namespace battleship
 		{
 			Logger::getInstance().log(Severity::INFO_LEVEL, "Path = " + config.path);
 			Logger::getInstance().log(Severity::INFO_LEVEL, "Worker threads count = " + to_string(config.threads));
+			string severityStr = Logger::severityToString(config.logSeverity);
+			Logger::getInstance().log(Severity::INFO_LEVEL, "Logger level = " + severityStr);
 		}
 		else
 		{

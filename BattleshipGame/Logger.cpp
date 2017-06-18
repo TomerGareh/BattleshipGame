@@ -40,6 +40,18 @@ namespace battleship
 		return instance;
 	}
 
+	string Logger::severityToString(Severity severity) {
+
+		if (severity == Severity::ERROR_LEVEL)
+			return "ERROR";
+		else if (severity == Severity::WARNING_LEVEL)
+			return "WARNING";
+		else if (severity == Severity::INFO_LEVEL)
+			return "INFO";
+		else
+			return "DEBUG";
+	}
+
 	void Logger::log(Severity severity, const string& msg, bool isPrintToConsole)
 	{
 		// Don't log messages before the logger is completely loaded
@@ -50,16 +62,7 @@ namespace battleship
 		if (severity < _limit)
 			return;
 
-		string severityStr;
-
-		if (severity == Severity::ERROR_LEVEL)
-			severityStr = "ERROR";
-		else if (severity == Severity::WARNING_LEVEL)
-			severityStr = "WARNING";
-		else if (severity == Severity::INFO_LEVEL)
-			severityStr = "INFO";
-		else
-			severityStr = "DEBUG";
+		string severityStr = severityToString(severity);
 
 		{	// Keep output synchronized for multiple threads accessing it
 			lock_guard<mutex> lock(_outputLock);
@@ -70,7 +73,7 @@ namespace battleship
 			int rc = localtime_s(&timeinfo, &t);
 
 			if (!rc)
-				_fs << "[" << std::put_time(&timeinfo, "%d-%m-%Y %H-%M-%S") << "][" << severityStr << "] " << msg << endl;
+				_fs << "[" << std::put_time(&timeinfo, "%d-%m-%Y %H:%M:%S") << "][" << severityStr << "] " << msg << endl;
 
 			// Errors are force printed to console as well
 			if (severity == Severity::ERROR_LEVEL)

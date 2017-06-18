@@ -11,12 +11,12 @@ using std::unique_ptr;
 
 namespace battleship
 {
-	enum class Severity : char
+	enum class Severity : int
 	{
-		DEBUG_LEVEL,
-		INFO_LEVEL,
-		WARNING_LEVEL,
-		ERROR_LEVEL
+		DEBUG_LEVEL = 0,
+		INFO_LEVEL = 1,
+		WARNING_LEVEL = 2,
+		ERROR_LEVEL = 3
 	};
 
 	/** Thread safe singelton logger class.
@@ -35,6 +35,8 @@ namespace battleship
 		void operator=(Logger const&) = delete;
 		Logger(Logger&& other) noexcept = delete;
 		Logger& operator= (Logger&& other) = delete;
+
+		static string severityToString(Severity severity);
 
 		/** Logs a single message to log file */
 		void log(Severity severity, const string& msg, bool isPrintToConsole = false);
