@@ -19,11 +19,11 @@ namespace battleship
 	{
 		Logger::getInstance().log(Severity::INFO_LEVEL,
 			"Number of legal players: " +
-			to_string(static_cast<unsigned int>(algoLoader->loadedGameAlgos().size())),
+			to_string(algoLoader->loadedGameAlgos().size()),
 			PRINT_TO_CONSOLE);
 		Logger::getInstance().log(Severity::INFO_LEVEL,
 			"Number of legal boards: " +
-			to_string(static_cast<unsigned int>(boardFactory->loadedBoardsList().size())),
+			to_string(boardFactory->loadedBoardsList().size()),
 			PRINT_TO_CONSOLE);
 
 		Logger::getInstance().log(Severity::DEBUG_LEVEL, "All resources validated, proceeding to competition");

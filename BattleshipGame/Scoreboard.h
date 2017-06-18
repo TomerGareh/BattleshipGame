@@ -52,7 +52,7 @@ namespace battleship
 	class Scoreboard
 	{
 	public:
-		Scoreboard(vector<string> players, int totalRounds);
+		Scoreboard(vector<string> players, size_t totalRounds);
 		virtual ~Scoreboard() = default;
 
 		/** Update the score table with the game results.
@@ -82,10 +82,10 @@ namespace battleship
 		static constexpr int MIN_PLAYER_NAME_SIZE = 12;
 
 		// Total rounds the competition should contain
-		int _totalRounds;
+		size_t _totalRounds;
 
 		// Number of player entries that must be present for a round to count as finished
-		int _playersPerRound;
+		size_t _playersPerRound;
 
 		// A mutex lock to protect the score table during updates from multiple worker thread updates
 		mutex _scoreLock;
@@ -111,7 +111,7 @@ namespace battleship
 		vector<shared_ptr<RoundResults>> _roundsResults;
 
 		// Holds the longest player name encountered
-		int _maxPlayerNameLength;
+		size_t _maxPlayerNameLength;
 
 		// Holds the cursor position for the printing of the results
 		pair<int, int> _resultsCursorPosition;

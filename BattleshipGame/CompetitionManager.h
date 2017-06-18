@@ -64,7 +64,7 @@ namespace battleship
 		mutex _gameSetLock;
 
 		/** Number of actual worker threads the competition manager employs */
-		int _workerThreadsCount;
+		size_t _workerThreadsCount;
 
 		/** Creates priority queue of games to run */
 		void prepareCompetition(shared_ptr<BattleshipGameBoardFactory> boardLoader,

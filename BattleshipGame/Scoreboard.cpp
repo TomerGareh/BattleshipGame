@@ -25,10 +25,9 @@ namespace battleship
 	{
 	}
 
-	Scoreboard::Scoreboard(vector<string> players, int totalRounds) :
+	Scoreboard::Scoreboard(vector<string> players, size_t totalRounds) :
 		_totalRounds(totalRounds),
-		_playersPerRound(static_cast<int>(players.size())), // Safe to assume that the number of players
-														    // does not overflow integer 
+		_playersPerRound(players.size()),
 		_resultsCursorPosition(std::make_pair(0, 0))
 	{
 		// Save max player name for score results table formatting
@@ -41,8 +40,7 @@ namespace battleship
 
 			// Query for the longest name
 			if (_maxPlayerNameLength < player.length())
-				_maxPlayerNameLength = static_cast<int>(player.length()); // Name is expected to be short enough
-																		  // to safely cast from size_t to int
+				_maxPlayerNameLength = player.length();
 		}
 
 		_maxPlayerNameLength += 2; // Apply some spacing between tabs in printed scoreboard

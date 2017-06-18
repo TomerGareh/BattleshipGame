@@ -63,8 +63,8 @@ namespace battleship
 		prepareCompetition(boardLoader, algoLoader);
 
 		// Don't use more threads than needed, even if count says so
-		_workerThreadsCount = threadCount < static_cast<int>(_gamesSet.size()) ? 
-							  threadCount : static_cast<int>(_gamesSet.size());
+		_workerThreadsCount = threadCount < _gamesSet.size() ? 
+							  threadCount : _gamesSet.size();
 		_workerThreads.reserve(_workerThreadsCount);
 	}
 
@@ -110,15 +110,15 @@ namespace battleship
 		{
 			Logger::getInstance().log(Severity::ERROR_LEVEL,
 								 	  "Attempted to start competition with illegal number of worker threads: " +
-									  to_string(static_cast<unsigned int>(_workerThreadsCount)));
+									  to_string(_workerThreadsCount));
 			return;
 		}
 
 		Logger::getInstance().log(Severity::INFO_LEVEL,
 								  "Competition started with " + 
-								  to_string(static_cast<unsigned int>(_gamesSet.size())) +
+								  to_string(_gamesSet.size()) +
 			                      " games run by " +
-								  to_string(static_cast<unsigned int>(_workerThreadsCount)) +
+								  to_string(_workerThreadsCount) +
 								  " threads.");
 
 		// Start all worker threads
