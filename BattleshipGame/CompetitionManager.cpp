@@ -124,10 +124,19 @@ namespace battleship
 		// Start all worker threads
 		for (int threadId = 1; threadId <= _workerThreadsCount; threadId++)
 		{
+			// This statement takes care of the edge case where we have too many worker threads running.
+			// If all existing worker threads have already drained the game tasks queue there is no point
+			// in creating any additional threads that will do nothing
 			if (!_gamesSet.empty())
 			{
 				_workerThreads.push_back(std::move(thread(&CompetitionManager::runWorkerThread,
 										 this, _boardLoader, _algoLoader, threadId)));
+			}
+			else
+			{
+				Logger::getInstance().log(Severity::INFO_LEVEL,
+					"Worker threads have divided all the remaining work between them, additional worker threads won't be created");
+				break;
 			}
 		}
 
@@ -139,6 +148,15 @@ namespace battleship
 			_scoreboard->waitOnRoundResults();
 		}
 
+		// Drain any existing round results in queue and report to screen / log.
+		// Make sure to lock the results queue since the _gameSet may have been drained but it's
+		// possible some worker threads are still executing their games.
+		// This print command exists to take care of the edge case where too many threads exist and the
+		// gameSet is drained before the main thread have had a chance to print results even once.
+		// We give it some time to print the ready round results here, before waiting for all worker threads
+		// to finish
+		_scoreboard->processRoundResultsQueue(true);
+
 		// Wait for all worker threads to finish
 		for (auto& worker : _workerThreads)
 		{
@@ -148,7 +166,8 @@ namespace battleship
 			}
 		}
 
-		// Drain any remaining round results in queue and report to screen / log
-		_scoreboard->processRoundResultsQueue();
+		// Drain any remaining round results in queue and report to screen / log,
+		// without locking the results queue since the game is finished
+		_scoreboard->processRoundResultsQueue(false);
 	}
 }

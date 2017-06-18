@@ -72,9 +72,10 @@ namespace battleship
 		 */
 		void waitOnRoundResults();
 
-		/** Pop and print all round results ready in the _roundResults queue
+		/** Pop and print all round results ready in the _roundResults queue.
+		 *  Boolean parameter defines if we should protect the resultsThread from multi-threaded access.
 		 */
-		void processRoundResultsQueue();
+		void processRoundResultsQueue(bool isLockResultsQueue);
 
 	private:
 

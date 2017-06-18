@@ -191,15 +191,27 @@ namespace battleship
 		Logger::getInstance().log(Severity::INFO_LEVEL, ss.str(), true); // true = Print to log & console
 	}
 
-	void Scoreboard::processRoundResultsQueue()
+	void Scoreboard::processRoundResultsQueue(bool isLockResultsQueue)
 	{
-		// Print all ready round results
-		// After they are printed, we pop this data from the queue
-		while (!_roundsResults.empty())
+		auto processQueueLogic = [this]() {
+			// Print all ready round results
+			// After they are printed, we pop this data from the queue
+			while (!_roundsResults.empty())
+			{
+				auto nextResults = _roundsResults.front();
+				_roundsResults.erase(_roundsResults.begin());
+				printRoundResults(nextResults);
+			}
+		};
+
+		if (isLockResultsQueue)
 		{
-			auto nextResults = _roundsResults.front();
-			_roundsResults.erase(_roundsResults.begin());
-			printRoundResults(nextResults);
+			unique_lock<mutex> lock(_roundResultsLock);
+			processQueueLogic();
+		}
+		else
+		{
+			processQueueLogic();
 		}
 	}
 
@@ -212,6 +224,6 @@ namespace battleship
 
 		Logger::getInstance().log(Severity::INFO_LEVEL, "Main thread woke up to handle new round results.");
 
-		processRoundResultsQueue();
+		processRoundResultsQueue(false); // No need to lock the results queue again
 	}
 }
