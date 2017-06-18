@@ -28,11 +28,12 @@ namespace battleship
 		virtual ~GameManager() = default;
 
 		/** Starts a new game session using the given board, between the 2 players algorithms.
-		 *  The game output will be depicted using the visualizer strategy.
 		 */
 		shared_ptr<GameResults> runGame(shared_ptr<BattleBoard> board,
 										shared_ptr<IBattleshipGameAlgo> playerA,
-										shared_ptr<IBattleshipGameAlgo> playerB) const;
+										shared_ptr<IBattleshipGameAlgo> playerB,
+										const BoardData& playerAView,
+										const BoardData& playerBView) const;
 
 	private:
 

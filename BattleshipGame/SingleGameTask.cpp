@@ -1,5 +1,6 @@
 #include "SingleGameTask.h"
 #include "BattleBoard.h"
+#include "BoardDataImpl.h"
 #include "Logger.h"
 #include <algorithm>
 
@@ -41,8 +42,21 @@ namespace battleship
 								  "Game started between Player A: " + _playerAName +
 								  " and Player B: " + _playerBName + " on board: " + _boardName + ".");
 
+		// Player views will be kept alive for the duration of the game (this scope)
+		auto playerAView = std::make_unique<BoardDataImpl>(PlayerEnum::A, board);
+		auto playerBView = std::make_unique<BoardDataImpl>(PlayerEnum::B, board);
+
 		// Run a single game and update scoreboard with results
-		auto gameResults = gameManager.runGame(board, playerA, playerB);
+		auto gameResults = gameManager.runGame(board, playerA, playerB, *playerAView, *playerBView);
+
+		// Keep player held views alive until the player gets a new board from the next game.
+		// This should prevent pesky players that access the boardView after the game is over
+		// from collapsing the game manager.
+		// Note 1: The pointer is moved and no longer valid but the algo keeps a reference to the
+		// real object which stays intact.
+		// Note 2: BattleBoard lifetime is extended by the BoardDataImpl view so we only cache that.
+		resourcePool.cacheResourcesForPlayer(_playerAName, std::move(playerAView));
+		resourcePool.cacheResourcesForPlayer(_playerBName, std::move(playerBView));
 
 		_scoreBoard->updateWithGameResults(gameResults, _playerAName, _playerBName, _boardName);
 	}

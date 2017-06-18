@@ -1,7 +1,6 @@
 #include <iostream>
 #include "GameManager.h"
 #include "AlgoCommon.h"
-#include "BoardDataImpl.h"
 #include "Logger.h"
 
 using std::cout;
@@ -93,14 +92,13 @@ namespace battleship
 
 	shared_ptr<GameResults> GameManager::runGame(shared_ptr<BattleBoard> board,
 												 shared_ptr<IBattleshipGameAlgo> playerA,
-												 shared_ptr<IBattleshipGameAlgo> playerB) const
+												 shared_ptr<IBattleshipGameAlgo> playerB,
+												 const BoardData& playerAView,
+												 const BoardData& playerBView) const
 	{
 		playerA->setPlayer(0);
 		playerB->setPlayer(1);
 
-		// Player views will be kept alive for the duration of the game (this scope)
-		BoardDataImpl playerAView(PlayerEnum::A, board);
-		BoardDataImpl playerBView(PlayerEnum::B, board);
 		playerA->setBoard(playerAView);
 		playerB->setBoard(playerBView);
 

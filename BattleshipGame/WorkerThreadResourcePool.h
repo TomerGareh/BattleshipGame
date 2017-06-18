@@ -36,13 +36,30 @@ namespace battleship
 		 */
 		shared_ptr<BattleBoard> requestBoard(const string& boardPath) const;
 
+		/** Resources cached by the player's algorithms are held here until
+		 *  the users relinquish ownership over them. Since we can't trust the algorithm
+		 *  not to access them after the game is over, we hold them here and manage their
+		 *  lifetime until the algorithm have shifted to another game or have been destroyed.
+		 */
+		void cacheResourcesForPlayer(const string& player,
+									 unique_ptr<BoardData> boardData);
+
 	private:
+
 		/** Loaders for boards and algorithms */
 		shared_ptr<BattleshipGameBoardFactory> _boardLoader;
 		shared_ptr<AlgoLoader> _algoLoader;
 
 		/** Cache of loaded algos */
 		unordered_map<string, shared_ptr<IBattleshipGameAlgo>> _algoPool;
+
+		/** A map to keep an eye on player held resources resources.
+		 *  Resources cached by the player's algorithms are held here until
+		 *  the users relinquish ownership over them. Since we can't trust the algorithm
+		 *  not to access them after the game is over, we hold them here and manage their
+		 *  lifetime until the algorithm have shifted to another game or have been destroyed.
+		 */
+		unordered_map<string, unique_ptr<BoardData>> _playerHeldResources;
 	};
 }
 

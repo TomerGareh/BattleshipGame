@@ -33,4 +33,10 @@ namespace battleship
 		// Always request from board factory to create a new instance out of board prototype
 		return _boardLoader->requestBattleboard(boardPath);
 	}
+
+	void WorkerThreadResourcePool::cacheResourcesForPlayer(const string& player,
+														   unique_ptr<BoardData> boardData)
+	{
+		_playerHeldResources[player] = std::move(boardData);
+	}
 }
