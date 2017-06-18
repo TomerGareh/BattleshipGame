@@ -24,18 +24,19 @@ namespace battleship
 	class GameManager
 	{
 	public:
-		GameManager();
-		virtual ~GameManager() = default;
+		virtual ~GameManager() = delete; // Shouldn't be instantiated / destroyed anymore (stateless class)
 
 		/** Starts a new game session using the given board, between the 2 players algorithms.
 		 */
-		shared_ptr<GameResults> runGame(shared_ptr<BattleBoard> board,
-										shared_ptr<IBattleshipGameAlgo> playerA,
-										shared_ptr<IBattleshipGameAlgo> playerB,
-										const BoardData& playerAView,
-										const BoardData& playerBView) const;
+		static unique_ptr<GameResults> runGame(shared_ptr<BattleBoard> board,
+											   IBattleshipGameAlgo* playerA,
+											   IBattleshipGameAlgo* playerB,
+											   const BoardData& playerAView,
+											   const BoardData& playerBView);
 
 	private:
+		/** Hide the ctor - this class is multithreaded because it's stateless and thus lockless */
+		GameManager();
 
 		/** Helper methods: Are all game pieces of player X gone? */
 		static bool isPlayerShipsLeft(const BattleBoard *const board, PlayerEnum player);

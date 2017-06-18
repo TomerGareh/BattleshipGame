@@ -59,7 +59,8 @@ namespace battleship
 		return playerRound;
 	}
 
-	void Scoreboard::updatePlayerGameResults(PlayerEnum player, const string& playerName, GameResults* results)
+	void Scoreboard::updatePlayerGameResults(PlayerEnum player, const string& playerName,
+											 const GameResults& results)
 	{
 		// Calculate round number for this player, start from round #1
 		int playerRound = getPlayerCurrentRound(playerName);
@@ -84,10 +85,10 @@ namespace battleship
 		PlayerStatistics& playerStatistics = _score.at(playerName);
 
 		// Update RoundResults with the new player's statistics
-		int pointsTo = (player == PlayerEnum::A) ? results->playerAPoints : results->playerBPoints;
-		int pointsAgainst = (player == PlayerEnum::A) ? results->playerBPoints : results->playerAPoints;
-		bool isWinner = (results->winner == player);
-		bool isLoser = (results->winner != player) && (results->winner != PlayerEnum::NONE);
+		int pointsTo = (player == PlayerEnum::A) ? results.playerAPoints : results.playerBPoints;
+		int pointsAgainst = (player == PlayerEnum::A) ? results.playerBPoints : results.playerAPoints;
+		bool isWinner = (results.winner == player);
+		bool isLoser = (results.winner != player) && (results.winner != PlayerEnum::NONE);
 		auto newRoundStatistics = playerStatistics.updateStatistics(pointsTo, pointsAgainst, isWinner, isLoser);
 		roundResults->playerStatistics.emplace(PlayerStatistics(newRoundStatistics)); // Save a copy in round results
 
@@ -113,7 +114,7 @@ namespace battleship
 		}
 	}
 
-	void Scoreboard::updateWithGameResults(shared_ptr<GameResults> results,
+	void Scoreboard::updateWithGameResults(const GameResults& results,
 										   const string& playerAName,
 										   const string& playerBName,
 										   const string& boardName)
@@ -122,22 +123,22 @@ namespace battleship
 		// Game result updates should be atomic so we lock here to protect the score table's integrity
 		lock_guard<mutex> lock(_scoreLock);
 
-		string gameResultStr = (results->winner == PlayerEnum::A) ?  "Player A wins" :
-							   ((results->winner == PlayerEnum::B) ? "Player B wins" :
+		string gameResultStr = (results.winner == PlayerEnum::A) ?  "Player A wins" :
+							   ((results.winner == PlayerEnum::B) ? "Player B wins" :
 																	 "Tie");
 
 		int playerARound = getPlayerCurrentRound(playerAName);
 		int playerBRound = getPlayerCurrentRound(playerBName);
 		string msg = "Game finished between Player A: " + playerAName +
-					 " (Round #" + std::to_string(playerARound) + ", " + std::to_string(results->playerAPoints) +
+					 " (Round #" + std::to_string(playerARound) + ", " + std::to_string(results.playerAPoints) +
 					 " pts) and Player B: " + playerBName +
-					 " (Round #" + std::to_string(playerBRound) + ", " + std::to_string(results->playerBPoints) +
+					 " (Round #" + std::to_string(playerBRound) + ", " + std::to_string(results.playerBPoints) +
 					 " pts) on board: " + boardName + ". Game result: " + gameResultStr;
 
 		Logger::getInstance().log(Severity::INFO_LEVEL, msg);
 
-		updatePlayerGameResults(PlayerEnum::A, playerAName, results.get());
-		updatePlayerGameResults(PlayerEnum::B, playerBName, results.get());
+		updatePlayerGameResults(PlayerEnum::A, playerAName, results);
+		updatePlayerGameResults(PlayerEnum::B, playerBName, results);
 	}
 
 	vector<shared_ptr<RoundResults>>& Scoreboard::getRoundResults()

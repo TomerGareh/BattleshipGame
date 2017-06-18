@@ -13,18 +13,23 @@ namespace battleship
 	{
 	}
 
-	shared_ptr<IBattleshipGameAlgo> WorkerThreadResourcePool::requestAlgo(const string& algoPath)
+	IBattleshipGameAlgo* WorkerThreadResourcePool::requestAlgo(const string& algoPath)
 	{
 		auto algoIt = _algoPool.find(algoPath);
 		if (algoIt != _algoPool.end())
 		{	// Exists in cache
-			return algoIt->second;
+			return algoIt->second.get();
 		}
 		else
 		{	// Not loaded before, cache and return
 			auto algo = _algoLoader->requestAlgo(algoPath);
-			_algoPool.emplace(algoPath, algo);
-			return algo;
+
+			if (nullptr == algo)
+				return nullptr;
+
+			auto insertionPair = _algoPool.emplace(std::make_pair(algoPath, std::move(algo)));
+			auto algoIt = insertionPair.first;
+			return algoIt->second.get();
 		}
 	}
 

@@ -58,7 +58,7 @@ namespace battleship
 		/** Update the score table with the game results.
 		 *  This method is thread safe.
 		 */
-		void updateWithGameResults(shared_ptr<GameResults> results,
+		void updateWithGameResults(const GameResults& results,
 								   const string& playerAName, const string& playerBName,
 								   const string& boardName);
 
@@ -118,7 +118,7 @@ namespace battleship
 
 		/** Update the score table with the results for a single player from a single match
 		 */
-		void updatePlayerGameResults(PlayerEnum player, const string& playerName, GameResults* results);
+		void updatePlayerGameResults(PlayerEnum player, const string& playerName, const GameResults& results);
 
 		/** Prints the round results in a formatted table to the console
 		 */

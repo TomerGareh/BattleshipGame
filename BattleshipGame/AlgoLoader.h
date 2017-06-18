@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include "IBattleshipGameAlgo.h"
 
+using std::unique_ptr;
 using std::shared_ptr;
 using std::vector;
 using std::unordered_map;
@@ -42,7 +43,7 @@ namespace battleship
 		 *  (algoPath should appear in "loadedAlgos()")
 		 *  This method is thread safe.
 		 */
-		shared_ptr<IBattleshipGameAlgo> requestAlgo(const string& algoName) const;
+		unique_ptr<IBattleshipGameAlgo> requestAlgo(const string& algoName) const;
 
 		/** Loads & validates all available game algorithms. 
 		 *	Returns a list of available algorithm names.
@@ -81,7 +82,7 @@ namespace battleship
 		vector<string> _loadedGameAlgoNames;
 
 		/** Vector of loaded algorithms: <Algorithm name, dll handle, GetAlgorithm function ptr> */
-		vector<shared_ptr<AlgoDescriptor>> _loadedGameAlgos;
+		vector<AlgoDescriptor> _loadedGameAlgos;
 
 		/** Loads the algorithm's DLL in the given path */
 		void loadAlgorithm(const string& algoName);

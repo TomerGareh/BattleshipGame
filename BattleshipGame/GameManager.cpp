@@ -90,11 +90,11 @@ namespace battleship
 		}
 	}
 
-	shared_ptr<GameResults> GameManager::runGame(shared_ptr<BattleBoard> board,
-												 shared_ptr<IBattleshipGameAlgo> playerA,
-												 shared_ptr<IBattleshipGameAlgo> playerB,
+	unique_ptr<GameResults> GameManager::runGame(shared_ptr<BattleBoard> board,
+												 IBattleshipGameAlgo* playerA,
+												 IBattleshipGameAlgo* playerB,
 												 const BoardData& playerAView,
-												 const BoardData& playerBView) const
+												 const BoardData& playerBView)
 	{
 		playerA->setPlayer(0);
 		playerB->setPlayer(1);
@@ -102,7 +102,7 @@ namespace battleship
 		playerA->setBoard(playerAView);
 		playerB->setBoard(playerBView);
 
-		IBattleshipGameAlgo* currentPlayer = playerA.get();
+		IBattleshipGameAlgo* currentPlayer = playerA;
 		bool isPlayerAForfeit = false;
 		bool isPlayerBForfeit = false;
 		int playerAPoints = 0;
@@ -112,12 +112,12 @@ namespace battleship
 		{
 			// Attack
 			auto target = currentPlayer->attack();
-			string currPlayerStr = (currentPlayer == playerA.get()) ? "A" : "B";
+			string currPlayerStr = (currentPlayer == playerA) ? "A" : "B";
 			Logger::getInstance().log(Severity::DEBUG_LEVEL, "Player " + currPlayerStr + " attacks at " + to_string(target));
 
 			if (target == NO_MORE_MOVES)
 			{	// Player chose not to attack - from now on this player forfeits the game
-				if (currentPlayer == playerA.get())
+				if (currentPlayer == playerA)
 					isPlayerAForfeit = true;
 				else
 					isPlayerBForfeit = true;
@@ -147,7 +147,7 @@ namespace battleship
 			auto attackedGamePiece = board->executeAttack(normalizedTarget);
 
 			// Notify on attack results
-			int attackingPlayerNumber = (currentPlayer == playerB.get()); // A - 0, B - 1
+			int attackingPlayerNumber = (currentPlayer == playerB); // A - 0, B - 1
 			AttackResult attackResult;
 			string attackResultStr;
 
@@ -178,7 +178,7 @@ namespace battleship
 
 		auto winner = getWinner(board.get());
 
-		shared_ptr<GameResults> results = std::make_shared<GameResults>();
+		auto results = std::make_unique<GameResults>();
 		results->winner = winner;
 		results->playerAPoints = playerAPoints;
 		results->playerBPoints = playerBPoints;

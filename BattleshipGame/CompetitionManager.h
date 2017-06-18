@@ -44,17 +44,12 @@ namespace battleship
 		/** Priority queue of games in the competition, sorted by "game number" for each player so
 		 *  matches are evenly distributed.
 		 */
-		queue<shared_ptr<SingleGameTask>> _gamesSet;
+		queue<unique_ptr<SingleGameTask>> _gamesSet;
 
 		/** Scoreboard of in game results for each round.
 		 *  Functions relevant for competition time are protected by locks to enable concurrency.
 		 */
-		shared_ptr<Scoreboard> _scoreboard;
-
-		/** Runs and manages a single game session.
-		 *	This is a stateless object that can be used by multiple threads at once.
-		 */
-		GameManager _gameManager;
+		unique_ptr<Scoreboard> _scoreboard;
 
 		/** Resources loader for available boards (creates new instances of BattleBoards) */
 		shared_ptr<BattleshipGameBoardFactory> _boardLoader;

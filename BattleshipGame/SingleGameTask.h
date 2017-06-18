@@ -15,14 +15,14 @@ namespace battleship
 	{
 	public:
 		SingleGameTask(const string& playerAName, const string& playerBName,
-					   const string& boardName, Scoreboard* scoreBoard);
+					   const string& boardName);
 		virtual ~SingleGameTask() = default;
 
 		/** Run single game betwen playerA and playerB on stored board.
 		 *  This method will allocate the resources needed to run the game if not already cached for
 		 *  this worker thread, and then run the game and update the scoreboard with the results
 		 */
-		void run(const GameManager& gameManager, WorkerThreadResourcePool& resourcePool) const;
+		void run(WorkerThreadResourcePool& resourcePool, Scoreboard* scoreBoard) const;
 
 		const string& playerAName() const;
 		const string& playerBName() const;
@@ -36,8 +36,5 @@ namespace battleship
 
 		// Board path identifier
 		string _boardName;
-
-		// Scoreboard that keeps track of the game results
-		Scoreboard* _scoreBoard;
 	};
 }

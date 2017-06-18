@@ -10,11 +10,10 @@ using std::max;
 namespace battleship
 {
 	SingleGameTask::SingleGameTask(const string& playerAName, const string& playerBName,
-								   const string& boardName, Scoreboard* scoreBoard):
+								   const string& boardName):
 		_playerAName(playerAName),
 		_playerBName(playerBName),
-		_boardName(boardName),
-		_scoreBoard(scoreBoard)
+		_boardName(boardName)
 	{
 		string msg = "Created game between Player A: " + _playerAName +
 					 " and Player B: " + _playerBName +
@@ -22,7 +21,7 @@ namespace battleship
 		Logger::getInstance().log(Severity::DEBUG_LEVEL, msg);
 	}
 
-	void SingleGameTask::run(const GameManager& gameManager, WorkerThreadResourcePool& resourcePool) const
+	void SingleGameTask::run(WorkerThreadResourcePool& resourcePool, Scoreboard* scoreBoard) const
 	{
 		// Load resources
 		auto playerA = resourcePool.requestAlgo(_playerAName);
@@ -47,7 +46,7 @@ namespace battleship
 		auto playerBView = std::make_unique<BoardDataImpl>(PlayerEnum::B, board);
 
 		// Run a single game and update scoreboard with results
-		auto gameResults = gameManager.runGame(board, playerA, playerB, *playerAView, *playerBView);
+		auto gameResults = GameManager::runGame(board, playerA, playerB, *playerAView, *playerBView);
 
 		// Keep player held views alive until the player gets a new board from the next game.
 		// This should prevent pesky players that access the boardView after the game is over
@@ -58,7 +57,7 @@ namespace battleship
 		resourcePool.cacheResourcesForPlayer(_playerAName, std::move(playerAView));
 		resourcePool.cacheResourcesForPlayer(_playerBName, std::move(playerBView));
 
-		_scoreBoard->updateWithGameResults(gameResults, _playerAName, _playerBName, _boardName);
+		scoreBoard->updateWithGameResults(*gameResults, _playerAName, _playerBName, _boardName);
 	}
 
 	const string& SingleGameTask::playerAName() const

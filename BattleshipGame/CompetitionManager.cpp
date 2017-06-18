@@ -20,10 +20,10 @@ namespace battleship
 		auto totalRounds = (algos.size() - 1) * 2 * boards.size();
 
 		// Reset scoreboard (casting totalRounds to int is safe since we don't expect that many games)
-		_scoreboard = std::make_shared<Scoreboard>(algos, static_cast<int>(totalRounds));
+		_scoreboard = std::make_unique<Scoreboard>(algos, static_cast<int>(totalRounds));
 		
 		// Iterate all boards and players and create SingleGameTask for each valid combination
-		queue<shared_ptr<SingleGameTask>> inversedGamesSet;
+		queue<unique_ptr<SingleGameTask>> inversedGamesSet;
 		size_t numOfAlgos = algos.size() - 1;
 		for (const auto& board : boards)
 		{
@@ -33,15 +33,13 @@ namespace battleship
 			{
 				for (size_t algo1 = 0, algo2 = round; ((algo1 <= (numOfAlgos - algo2)) && (algo2 <= numOfAlgos)); ++algo1, ++algo2)
 				{
-					_gamesSet.push(std::make_shared<SingleGameTask>(algos[algo1], algos[algo2], board, _scoreboard.get()));
-					inversedGamesSet.push(std::make_shared<SingleGameTask>(algos[algo2], algos[algo1], board, _scoreboard.get()));
+					_gamesSet.push(std::make_unique<SingleGameTask>(algos[algo1], algos[algo2], board));
+					inversedGamesSet.push(std::make_unique<SingleGameTask>(algos[algo2], algos[algo1], board));
 					if (algo1 != (numOfAlgos - algo2))	// On the secondary diagonal 'algo1' and 'numOfAlgos-algo2' indices meet
 														// and we don't want to add them twice
 					{
-						_gamesSet.push(std::make_shared<SingleGameTask>(algos[numOfAlgos-algo2], algos[numOfAlgos-algo1], board,
-									   _scoreboard.get()));
-						inversedGamesSet.push(std::make_shared<SingleGameTask>(algos[numOfAlgos-algo1], algos[numOfAlgos-algo2], board,
-											  _scoreboard.get()));
+						_gamesSet.push(std::make_unique<SingleGameTask>(algos[numOfAlgos-algo2], algos[numOfAlgos-algo1], board));
+						inversedGamesSet.push(std::make_unique<SingleGameTask>(algos[numOfAlgos-algo1], algos[numOfAlgos-algo2], board));
 					}
 				}
 			}
@@ -50,7 +48,7 @@ namespace battleship
 		// Move inversed games to the main queue
 		while (!inversedGamesSet.empty())
 		{
-			_gamesSet.push(inversedGamesSet.front());
+			_gamesSet.push(std::move(inversedGamesSet.front()));
 			inversedGamesSet.pop();
 		}
 	}
@@ -82,7 +80,7 @@ namespace battleship
 
 		while (!_gamesSet.empty()) // While there are still games to be played
 		{
-			shared_ptr<SingleGameTask> task;
+			unique_ptr<SingleGameTask> task;
 
 			// Protect the game-set queue from concurrent access, each worker fetches a task and releases the lock
 			{
@@ -92,14 +90,14 @@ namespace battleship
 
 				// Pop next game task from game-queue.
 				// Games are expected to be pre-sorted in a fair manner for all players.
-				task = _gamesSet.front();
+				task = std::move(_gamesSet.front());
 				_gamesSet.pop();
 			}
 
 			// Lock is released and the thread now runs the game the task represents
 			if (task != nullptr)
 			{
-				task->run(_gameManager, resourcePool);
+				task->run(resourcePool, _scoreboard.get());
 			}
 		}
 

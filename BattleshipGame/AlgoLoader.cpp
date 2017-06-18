@@ -46,8 +46,7 @@ namespace battleship
 		}
 
 		// Keep algorithm in list of loaded algos
-		auto algoDescriptor = std::make_shared<AlgoDescriptor>(algoName, hDll, getAlgorithmFunc);
-		_loadedGameAlgos.push_back(algoDescriptor);
+		_loadedGameAlgos.emplace_back(algoName, hDll, getAlgorithmFunc); // Build algoDescriptor
 		_loadedGameAlgoNames.push_back(algoName);
 
 		Logger::getInstance().log(Severity::INFO_LEVEL, algoName + " loaded successfully");
@@ -68,8 +67,8 @@ namespace battleship
 		{
 			// Free HINSTANCE loaded, which resides in the 2nd cell of the algo tuple
 			auto descriptor = *(algIter);
-			Logger::getInstance().log(Severity::DEBUG_LEVEL, "Freeing algorithm: " + descriptor->path);
-			FreeLibrary(descriptor->dll);
+			Logger::getInstance().log(Severity::DEBUG_LEVEL, "Freeing algorithm: " + descriptor.path);
+			FreeLibrary(descriptor.dll);
 		}
 	}
 
@@ -84,13 +83,11 @@ namespace battleship
 		return _loadedGameAlgoNames;
 	}
 
-	shared_ptr<IBattleshipGameAlgo> AlgoLoader::requestAlgo(const string& algoName) const
+	unique_ptr<IBattleshipGameAlgo> AlgoLoader::requestAlgo(const string& algoName) const
 	{
-		shared_ptr<AlgoDescriptor> algoDescriptor;
-
 		// Verify algo was already loaded before
 		auto it = std::find_if(_loadedGameAlgos.begin(), _loadedGameAlgos.end(),
-			[&algoName](shared_ptr<AlgoDescriptor> const& ad) { return ad->path == algoName; });
+			[&algoName](AlgoDescriptor const& ad) { return ad.path == algoName; });
 
 		if (it == _loadedGameAlgos.end())
 		{
@@ -100,13 +97,12 @@ namespace battleship
 									  " but this DLL isn't managed by the AlgoLoader");
 			return nullptr;
 		}
-		else
-		{	// Algo's DLL loaded before
-			// Retrieve algorithm descriptor & create an instance out of it
-			algoDescriptor = *it;
-		}
+		
+		// Algo's DLL loaded before
+		// Retrieve algorithm descriptor & create an instance out of it
+		auto algoDescriptor = *it;
 
-		auto getAlgorithmFunc = algoDescriptor->algoFunc;
+		auto getAlgorithmFunc = algoDescriptor.algoFunc;
 
 		// Call GetAlgorithm for the specified algorithm,
 		// this should create a new instance for that algo type 
@@ -114,14 +110,14 @@ namespace battleship
 		if (nullptr == algo)
 		{
 			Logger::getInstance().log(Severity::ERROR_LEVEL,
-									  "Error: Cannot create instance out of dll: " + algoDescriptor->path);
+									  "Error: Cannot create instance out of dll: " + algoDescriptor.path);
 			return nullptr;
 		}
 
 		Logger::getInstance().log(Severity::DEBUG_LEVEL, algoName + " new instance created");
 
 		// Wrap in a smart pointer, so consumers don't have to deal with memory deallocation manually
-		return shared_ptr<IBattleshipGameAlgo>(algo);
+		return unique_ptr<IBattleshipGameAlgo>(algo);
 	}
 
 	const vector<string>& AlgoLoader::availableGameAlgos() const
