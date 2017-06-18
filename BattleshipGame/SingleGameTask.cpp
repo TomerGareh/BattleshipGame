@@ -1,5 +1,4 @@
 #include "SingleGameTask.h"
-#include "BattleBoard.h"
 #include "BoardDataImpl.h"
 #include "Logger.h"
 #include <algorithm>

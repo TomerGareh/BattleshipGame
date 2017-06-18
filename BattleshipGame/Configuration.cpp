@@ -1,7 +1,7 @@
 #include "Configuration.h"
 #include "IOUtil.h"
 #include <iostream>
-#include <climits>
+#include <string>
 
 using std::cout;
 using std::cerr;

@@ -28,8 +28,8 @@ namespace battleship
 				return nullptr;
 
 			auto insertionPair = _algoPool.emplace(std::make_pair(algoPath, std::move(algo)));
-			auto algoIt = insertionPair.first;
-			return algoIt->second.get();
+			auto algoInstIt = insertionPair.first;
+			return algoInstIt->second.get();
 		}
 	}
 

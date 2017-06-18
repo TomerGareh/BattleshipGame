@@ -2,7 +2,6 @@
 
 #include <memory>
 #include "Scoreboard.h"
-#include "GameManager.h"
 #include "WorkerThreadResourcePool.h"
 
 using std::shared_ptr;

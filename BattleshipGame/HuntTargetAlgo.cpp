@@ -181,9 +181,10 @@ bool HuntTargetAlgo::calcTargetNext(Coordinate& coord, AttackDirection direction
 
 Coordinate HuntTargetAlgo::attack()
 {
+	Coordinate coord = NO_MORE_MOVES;
+
 	try
 	{
-		Coordinate coord = NO_MORE_MOVES;
 		if (targetsMap.empty())	// Hunt mode: we draw a random attack
 		{
 			int drawsCounter = 0;
@@ -231,7 +232,7 @@ Coordinate HuntTargetAlgo::attack()
 	{	// This should be a barrier that stops the app from failing.
 		// If the algorithm fails, let it forfeit
 		cerr << "Error: HuntTargetAlgo::attack failed on " << e.what() << endl;
-		return NO_MORE_MOVES;
+		return coord;
 	}
 }
 

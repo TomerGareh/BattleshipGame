@@ -1,5 +1,4 @@
 #include <iostream>
-#include <algorithm>
 #include "BoardBuilder.h"
 #include "Logger.h"
 

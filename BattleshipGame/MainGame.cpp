@@ -1,7 +1,6 @@
 #include "MainGame.h"
 #include "MainBattleshipGame.h"
 #include <iostream>
-#include <exception>
 
 using std::cerr;
 using std::endl;
