@@ -200,7 +200,7 @@ namespace battleship
 		while (!_roundsResults.empty())
 		{
 			auto nextResults = _roundsResults.front();
-			_roundsResults.pop_back();
+			_roundsResults.erase(_roundsResults.begin());
 			printRoundResults(nextResults);
 		}
 	}

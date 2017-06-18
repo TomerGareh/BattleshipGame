@@ -124,9 +124,11 @@ namespace battleship
 		// Start all worker threads
 		for (int threadId = 1; threadId <= _workerThreadsCount; threadId++)
 		{
-			_workerThreads.push_back(std::move(thread(&CompetitionManager::runWorkerThread, 
-									 this, _boardLoader, _algoLoader, threadId)));
-			threadId++;
+			if (!_gamesSet.empty())
+			{
+				_workerThreads.push_back(std::move(thread(&CompetitionManager::runWorkerThread,
+										 this, _boardLoader, _algoLoader, threadId)));
+			}
 		}
 
 		// While competition is not over, wake up when round results are ready and print them
