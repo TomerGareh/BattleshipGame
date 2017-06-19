@@ -243,7 +243,7 @@ Coordinate HuntTargetAlgo::attack()
 		AttackValidator validator;
 		return validator(coord, std::get<0>(boardSize), std::get<1>(boardSize), std::get<2>(boardSize));
 	}
-	catch (const exception& e)
+	catch (...)
 	{	// This should be a barrier that stops the app from failing.
 		// If the algorithm fails, let it forfeit
 		return coord;
@@ -541,7 +541,7 @@ void HuntTargetAlgo::notifyOnAttackResult(int player, Coordinate move, AttackRes
 			notifyOnAttackInTarget(moveZeroBased, currTarget, result);
 		}
 	}
-	catch (const exception& e)
+	catch (...)
 	{	// This should be a barrier that stops the app from failing
 	}
 }
