@@ -82,6 +82,9 @@ namespace battleship
 		/** Minimal space allocated for player name in the table (visual parameter) */
 		static constexpr int MIN_PLAYER_NAME_SIZE = 12;
 
+		/** Time to wait for conditional variable before timeout */
+		static constexpr int CV_TIMEOUT_MILLIS = 3000;
+
 		// Total rounds the competition should contain
 		size_t _totalRounds;
 

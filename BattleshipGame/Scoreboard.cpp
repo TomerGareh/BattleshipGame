@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <string>
 #include <sstream>
+#include <chrono>
 
 using std::lock_guard;
 using std::unique_lock;
@@ -220,9 +221,17 @@ namespace battleship
 		// Wait here until new data appears in round results queue
 		unique_lock<mutex> lock(_roundResultsLock);
 		Logger::getInstance().log(Severity::INFO_LEVEL, "Main thread going to sleep until new results arrive.");
-		_roundResultsCV.wait(lock, [this] { return !(_roundsResults.empty()); });
+		const std::chrono::milliseconds timeout(CV_TIMEOUT_MILLIS);
+		_roundResultsCV.wait_for(lock, timeout, [this] { return !(_roundsResults.empty()); });
 
-		Logger::getInstance().log(Severity::INFO_LEVEL, "Main thread woke up to handle new round results.");
+		if (!_roundsResults.empty())
+		{
+			Logger::getInstance().log(Severity::INFO_LEVEL, "Main thread woke up to handle new round results.");
+		}
+		else
+		{
+			Logger::getInstance().log(Severity::INFO_LEVEL, "Main thread woke up due to timeout.");
+		}
 
 		processRoundResultsQueue(false); // No need to lock the results queue again
 	}

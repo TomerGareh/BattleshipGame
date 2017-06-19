@@ -1,10 +1,12 @@
 #include <iostream>
+#include <exception>
 #include "GameManager.h"
 #include "AlgoCommon.h"
 #include "Logger.h"
 
 using std::cout;
 using std::endl;
+using std::exception;
 
 namespace battleship
 {
@@ -96,93 +98,113 @@ namespace battleship
 												 const BoardData& playerAView,
 												 const BoardData& playerBView)
 	{
-		playerA->setPlayer(0);
-		playerB->setPlayer(1);
-
-		playerA->setBoard(playerAView);
-		playerB->setBoard(playerBView);
-
-		IBattleshipGameAlgo* currentPlayer = playerA;
-		bool isPlayerAForfeit = false;
-		bool isPlayerBForfeit = false;
-		int playerAPoints = 0;
-		int playerBPoints = 0;
-
-		while (!isGameOver(board.get(), isPlayerAForfeit, isPlayerBForfeit))
+		try
 		{
-			// Attack
-			auto target = currentPlayer->attack();
-			string currPlayerStr = (currentPlayer == playerA) ? "A" : "B";
-			Logger::getInstance().log(Severity::DEBUG_LEVEL, "Player " + currPlayerStr + " attacks at " + to_string(target));
+			playerA->setPlayer(0);
+			playerB->setPlayer(1);
 
-			if (target == NO_MORE_MOVES)
-			{	// Player chose not to attack - from now on this player forfeits the game
-				if (currentPlayer == playerA)
-					isPlayerAForfeit = true;
-				else
-					isPlayerBForfeit = true;
+			playerA->setBoard(playerAView);
+			playerB->setBoard(playerBView);
 
-				currentPlayer = switchPlayerTurns(*playerA, *playerB, currentPlayer, nullptr,
-												  isPlayerAForfeit, isPlayerBForfeit);
-				continue;
-			}
-			else 
+			IBattleshipGameAlgo* currentPlayer = playerA;
+			bool isPlayerAForfeit = false;
+			bool isPlayerBForfeit = false;
+			int playerAPoints = 0;
+			int playerBPoints = 0;
+
+			while (!isGameOver(board.get(), isPlayerAForfeit, isPlayerBForfeit))
 			{
-				AttackValidator validator;
+				// Attack
+				auto target = currentPlayer->attack();
+				string currPlayerStr = (currentPlayer == playerA) ? "A" : "B";
+				Logger::getInstance().log(Severity::DEBUG_LEVEL, "Player " + currPlayerStr + " attacks at " + to_string(target));
 
-				if (NO_MORE_MOVES == validator(target, board->height(), board->width(), board->depth()))
-				{
-					// Player performed an illegal move and will lose his turn
+				if (target == NO_MORE_MOVES)
+				{	// Player chose not to attack - from now on this player forfeits the game
+					if (currentPlayer == playerA)
+						isPlayerAForfeit = true;
+					else
+						isPlayerBForfeit = true;
+
 					currentPlayer = switchPlayerTurns(*playerA, *playerB, currentPlayer, nullptr,
-													  isPlayerAForfeit, isPlayerBForfeit);
+						isPlayerAForfeit, isPlayerBForfeit);
 					continue;
 				}
+				else
+				{
+					AttackValidator validator;
+
+					if (NO_MORE_MOVES == validator(target, board->height(), board->width(), board->depth()))
+					{
+						// Player performed an illegal move and will lose his turn
+						currentPlayer = switchPlayerTurns(*playerA, *playerB, currentPlayer, nullptr,
+							isPlayerAForfeit, isPlayerBForfeit);
+						continue;
+					}
+				}
+
+				// Normalize coordinates to 0~BOARD_SIZE-1
+				Coordinate normalizedTarget{ target.row - 1, target.col - 1, target.depth - 1 };
+
+				// Execute attack move on the board itself and update the game-pieces status
+				// We get in return an object that describes the result of the attack
+				auto attackedGamePiece = board->executeAttack(normalizedTarget);
+
+				// Notify on attack results
+				int attackingPlayerNumber = (currentPlayer == playerB); // A - 0, B - 1
+				AttackResult attackResult;
+				string attackResultStr;
+
+				if (attackedGamePiece == nullptr)
+				{	// Miss
+					attackResult = AttackResult::Miss;
+					attackResultStr = "Miss";
+				}
+				else if (attackedGamePiece->_lifeLeft == 0)
+				{	// Sink
+					attackResult = AttackResult::Sink;
+					attackResultStr = "Sink";
+					updateCurrentGamePoints(attackedGamePiece.get(), playerAPoints, playerBPoints);
+				}
+				else
+				{	// Hit
+					attackResult = AttackResult::Hit;
+					attackResultStr = "Hit";
+				}
+
+				currentPlayer = switchPlayerTurns(*playerA, *playerB, currentPlayer, attackedGamePiece,
+					isPlayerAForfeit, isPlayerBForfeit);
+
+				playerA->notifyOnAttackResult(attackingPlayerNumber, target, attackResult);
+				playerB->notifyOnAttackResult(attackingPlayerNumber, target, attackResult);
+				Logger::getInstance().log(Severity::DEBUG_LEVEL, "Attack result: " + attackResultStr);
 			}
 
-			// Normalize coordinates to 0~BOARD_SIZE-1
-			Coordinate normalizedTarget{ target.row - 1, target.col - 1, target.depth - 1 };
+			auto winner = getWinner(board.get());
 
-			// Execute attack move on the board itself and update the game-pieces status
-			// We get in return an object that describes the result of the attack
-			auto attackedGamePiece = board->executeAttack(normalizedTarget);
+			auto results = std::make_unique<GameResults>();
+			results->winner = winner;
+			results->playerAPoints = playerAPoints;
+			results->playerBPoints = playerBPoints;
 
-			// Notify on attack results
-			int attackingPlayerNumber = (currentPlayer == playerB); // A - 0, B - 1
-			AttackResult attackResult;
-			string attackResultStr;
-
-			if (attackedGamePiece == nullptr)
-			{	// Miss
-				attackResult = AttackResult::Miss;
-				attackResultStr = "Miss";
-			}
-			else if (attackedGamePiece->_lifeLeft == 0)
-			{	// Sink
-				attackResult = AttackResult::Sink;
-				attackResultStr = "Sink";
-				updateCurrentGamePoints(attackedGamePiece.get(), playerAPoints, playerBPoints);
-			}
-			else
-			{	// Hit
-				attackResult = AttackResult::Hit;
-				attackResultStr = "Hit";
-			}
-
-			currentPlayer = switchPlayerTurns(*playerA, *playerB, currentPlayer, attackedGamePiece,
-											  isPlayerAForfeit, isPlayerBForfeit);
-
-			playerA->notifyOnAttackResult(attackingPlayerNumber, target, attackResult);
-			playerB->notifyOnAttackResult(attackingPlayerNumber, target, attackResult);
-			Logger::getInstance().log(Severity::DEBUG_LEVEL, "Attack result: " + attackResultStr);
+			return results;
 		}
+		catch (const exception& e)
+		{	// Protect game session from failing.
+			// This is possible if one of the players causes a fault.
+			// Errors that are caught by this barrier are logged with the logger
+			string errorMsg = e.what();
+			Logger::getInstance().log(Severity::ERROR_LEVEL,
+									  "Error: an error occured during game session, declaring a tie with 0 points. Details: " + errorMsg);
+			
+			// Since an error have occured and the game finished unexpectedly 
+			// we declare a tie and nobody gets points for this game
+			auto results = std::make_unique<GameResults>();
+			results->winner = PlayerEnum::NONE;
+			results->playerAPoints = 0;
+			results->playerBPoints = 0;
 
-		auto winner = getWinner(board.get());
-
-		auto results = std::make_unique<GameResults>();
-		results->winner = winner;
-		results->playerAPoints = playerAPoints;
-		results->playerBPoints = playerBPoints;
-
-		return results;
+			return results;
+		}
 	}
 }

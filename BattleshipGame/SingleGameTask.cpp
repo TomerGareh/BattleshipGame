@@ -27,12 +27,16 @@ namespace battleship
 		auto playerB = resourcePool.requestAlgo(_playerBName);
 		auto board = resourcePool.requestBoard(_boardName);
 
-		if ((playerA == nullptr) || (playerA == nullptr) || (playerA == nullptr))
+		if ((playerA == nullptr) || (playerB == nullptr) || (board == nullptr))
 		{
 			string msg = "Error: Can't start a game between Player A: " + _playerAName +
 						 " and Player B: " + _playerBName +
 					     " on board: " + _boardName + " due to invalid resources";
 			Logger::getInstance().log(Severity::ERROR_LEVEL, msg);
+
+			// Declare a tie so we won't be missing games for a round
+			GameResults gameResults{ PlayerEnum::NONE, 0, 0 };
+			scoreBoard->updateWithGameResults(gameResults, _playerAName, _playerBName, _boardName);
 			return;
 		}
 

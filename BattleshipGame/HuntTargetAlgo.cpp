@@ -3,11 +3,8 @@
 #include <stdlib.h>
 #include <algorithm>
 #include <time.h>
-#include <iostream>
 
 using std::exception;
-using std::cerr;
-using std::endl;
 
 const int HuntTargetAlgo::MAX_NUM_OF_DRAWS = 1000;
 const AttackDirection HuntTargetAlgo::nonInPlaceDirections[] = {AttackDirection::RowPlus, AttackDirection::RowMinus,
@@ -231,7 +228,6 @@ Coordinate HuntTargetAlgo::attack()
 	catch (const exception& e)
 	{	// This should be a barrier that stops the app from failing.
 		// If the algorithm fails, let it forfeit
-		cerr << "Error: HuntTargetAlgo::attack failed on " << e.what() << endl;
 		return coord;
 	}
 }
@@ -529,7 +525,6 @@ void HuntTargetAlgo::notifyOnAttackResult(int player, Coordinate move, AttackRes
 	}
 	catch (const exception& e)
 	{	// This should be a barrier that stops the app from failing
-		cerr << "Error: HuntTargetAlgo::notifyOnAttackResults failed on " << e.what() << endl;
 	}
 }
 

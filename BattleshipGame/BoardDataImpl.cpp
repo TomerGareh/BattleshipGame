@@ -1,6 +1,7 @@
 #include "BoardDataImpl.h"
 #include "BattleBoard.h"
 #include <stdexcept>
+#include <cctype>
 
 using std::invalid_argument;
 
@@ -30,7 +31,12 @@ namespace battleship
 		}
 		else
 		{
-			return static_cast<char>(gamePiece->_shipType->_representation); // Friendly ship
+			char piece = static_cast<char>(gamePiece->_shipType->_representation);
+
+			if (_player == PlayerEnum::B)
+				piece = std::tolower(piece);
+
+			return piece; // Friendly ship
 		}
 	}
 }
