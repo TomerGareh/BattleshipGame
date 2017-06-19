@@ -54,6 +54,16 @@ namespace battleship
 
 	void Logger::log(Severity severity, const string& msg, bool isPrintToConsole)
 	{
+		// Errors are force printed to console as well
+		if (severity == Severity::ERROR_LEVEL)
+		{
+			cerr << msg << endl;
+		}
+		else if (isPrintToConsole)
+		{
+			cout << msg << endl;
+		}
+
 		// Don't log messages before the logger is completely loaded
 		if ((_path == nullptr) || (!_fs))
 			return;
@@ -74,16 +84,6 @@ namespace battleship
 
 			if (!rc)
 				_fs << "[" << std::put_time(&timeinfo, "%d-%m-%Y %H:%M:%S") << "][" << severityStr << "] " << msg << endl;
-
-			// Errors are force printed to console as well
-			if (severity == Severity::ERROR_LEVEL)
-			{
-				cerr << msg << endl;
-			}
-			else if (isPrintToConsole)
-			{
-				cout << msg << endl;
-			}
 		}
 	}
 

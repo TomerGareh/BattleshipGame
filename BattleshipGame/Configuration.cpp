@@ -109,7 +109,7 @@ namespace battleship
 			{
 				IOUtil::removePrefix(nextLine, CONFIG_HEADER_PATH);
 				normalizeValue(nextLine);
-				this->path = nextLine;
+				this->path = (!(nextLine.empty())) ? nextLine : DEFAULT_PATH;
 			}
 			else if (IOUtil::startsWith(nextLine, CONFIG_HEADER_THREADS)) // Threads parameter (int)
 			{
