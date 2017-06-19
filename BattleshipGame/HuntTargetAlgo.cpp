@@ -71,9 +71,9 @@ void HuntTargetAlgo::setBoard(const BoardData& board)
 		{
 			for (int k = 0; k < std::get<2>(boardSize); ++k)
 			{
-				Coordinate coord(i, j, k);
-				if (board.charAt(coord) != static_cast<char>(BoardSquare::Empty))
+				if (board.charAt(Coordinate(i+1, j+1, k+1)) != static_cast<char>(BoardSquare::Empty))
 				{
+					Coordinate coord(i, j, k);
 					visitedCoords.insert(coord);
 					markRowNeighbors(coord);
 					markColNeighbors(coord);
