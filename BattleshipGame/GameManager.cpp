@@ -1,5 +1,6 @@
 #include <iostream>
 #include <exception>
+#include <string>
 #include "GameManager.h"
 #include "AlgoCommon.h"
 #include "Logger.h"
@@ -35,13 +36,13 @@ namespace battleship
 		}
 	}
 
-	IBattleshipGameAlgo* GameManager::switchPlayerTurns(IBattleshipGameAlgo& playerA,
-														IBattleshipGameAlgo& playerB,
+	IBattleshipGameAlgo* GameManager::switchPlayerTurns(IBattleshipGameAlgo* playerA,
+														IBattleshipGameAlgo* playerB,
 														IBattleshipGameAlgo* currPlayer,
 														shared_ptr<const GamePiece> lastAttackedPiece,
 														bool isPlayerAForfeit, bool isPlayerBForfeit)
 	{
-		bool isCurrPlayerA = (currPlayer == &playerA);
+		bool isCurrPlayerA = (currPlayer == playerA);
 		bool isCurrPlayerB = !isCurrPlayerA;
 
 		// Switch turns only if the player misses or hits himself
@@ -50,11 +51,11 @@ namespace battleship
 			((lastAttackedPiece->_player == PlayerEnum::B) && (isCurrPlayerB)))
 		{
 			if (isCurrPlayerA && (!isPlayerBForfeit)) // A just played and B still didn't forfeit
-				return &playerB;
+				return playerB;
 			else if (!isPlayerAForfeit)	// B forfeited or B just played now
-				return &playerA;
+				return playerA;
 			else
-				return &playerB;
+				return playerB;
 		}
 		else
 		{
@@ -119,6 +120,9 @@ namespace battleship
 				string currPlayerStr = (currentPlayer == playerA) ? "A" : "B";
 				Logger::getInstance().log(Severity::DEBUG_LEVEL, "Player " + currPlayerStr + " attacks at " + to_string(target));
 
+				bool isCurrPlayerA = (currentPlayer == playerA);
+				bool isCurrPlayerB = !isCurrPlayerA;
+
 				if (target == NO_MORE_MOVES)
 				{	// Player chose not to attack - from now on this player forfeits the game
 					if (currentPlayer == playerA)
@@ -126,7 +130,9 @@ namespace battleship
 					else
 						isPlayerBForfeit = true;
 
-					currentPlayer = switchPlayerTurns(*playerA, *playerB, currentPlayer, nullptr,
+					Logger::getInstance().log(Severity::DEBUG_LEVEL,
+											  "Player " + currPlayerStr + " has no more moves.");
+					currentPlayer = switchPlayerTurns(playerA, playerB, currentPlayer, nullptr,
 						isPlayerAForfeit, isPlayerBForfeit);
 					continue;
 				}
@@ -136,8 +142,11 @@ namespace battleship
 
 					if (NO_MORE_MOVES == validator(target, board->height(), board->width(), board->depth()))
 					{
+						Logger::getInstance().log(Severity::DEBUG_LEVEL,
+												  "Player " + currPlayerStr + " tried to perform an invalid attack - loses turn.");
+
 						// Player performed an illegal move and will lose his turn
-						currentPlayer = switchPlayerTurns(*playerA, *playerB, currentPlayer, nullptr,
+						currentPlayer = switchPlayerTurns(playerA, playerB, currentPlayer, nullptr,
 							isPlayerAForfeit, isPlayerBForfeit);
 						continue;
 					}
@@ -172,7 +181,7 @@ namespace battleship
 					attackResultStr = "Hit";
 				}
 
-				currentPlayer = switchPlayerTurns(*playerA, *playerB, currentPlayer, attackedGamePiece,
+				currentPlayer = switchPlayerTurns(playerA, playerB, currentPlayer, attackedGamePiece,
 					isPlayerAForfeit, isPlayerBForfeit);
 
 				playerA->notifyOnAttackResult(attackingPlayerNumber, target, attackResult);

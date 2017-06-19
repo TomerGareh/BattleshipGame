@@ -47,10 +47,10 @@ namespace battleship
 		/** Takes into consideration the current game state and points currPlayer to the next player who
 		 *  should be playing
 		 */
-		static IBattleshipGameAlgo* switchPlayerTurns(IBattleshipGameAlgo& playerA, IBattleshipGameAlgo& playerB,
-											   IBattleshipGameAlgo* currPlayer,
-											   shared_ptr<const GamePiece> lastAttackedPiece,
-											   bool isPlayerAForfeit, bool isPlayerBForfeit);
+		static IBattleshipGameAlgo* switchPlayerTurns(IBattleshipGameAlgo* playerA, IBattleshipGameAlgo* playerB,
+													  IBattleshipGameAlgo* currPlayer,
+													  shared_ptr<const GamePiece> lastAttackedPiece,
+													  bool isPlayerAForfeit, bool isPlayerBForfeit);
 
 		/** Updates the game points when a game piece have been sank */
 		static void updateCurrentGamePoints(const GamePiece *const sankPiece, int& playerAScore, int& playerBScore);
