@@ -145,6 +145,11 @@ namespace battleship
 		fullString.erase(0, prefix.length());
 	}
 
+	void IOUtil::removeSuffix(string& fullString, const string& suffix)
+	{
+		fullString.erase(fullString.length() - suffix.length(), suffix.length());
+	}
+
 	bool IOUtil::validatePath(const string& path)
 	{
 		WIN32_FIND_DATAA fileData;

@@ -56,6 +56,11 @@ namespace battleship
 		 */
 		static void removePrefix(string& fullString, const string& prefix);
 
+		/** Removes the suffix from the fullString. Assumes the fullString ends with suffix,
+		 *  otherwise behaviour is undefined.
+		 */
+		static void removeSuffix(string& fullString, const string& suffix);
+
 		/** Returns true if the path argument points to a real valid path on disk, false if not. */
 		static bool validatePath(const string& path);
 

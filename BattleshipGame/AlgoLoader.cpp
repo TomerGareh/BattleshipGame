@@ -22,6 +22,18 @@ namespace battleship
 		}
 	}
 
+	void AlgoLoader::stripNameSuffix(string& name)
+	{
+		if (IOUtil::endsWith(name, DLL_SUFFIX_LONG))
+		{
+			IOUtil::removeSuffix(name, DLL_SUFFIX_LONG);
+		}
+		else if (IOUtil::endsWith(name, DLL_SUFFIX_SHORT))
+		{
+			IOUtil::removeSuffix(name, DLL_SUFFIX_SHORT);
+		}
+	}
+
 	void AlgoLoader::loadAlgorithm(const string& algoName)
 	{
 		string algoFullpath = _algosPath + "\\" + algoName;
@@ -46,8 +58,10 @@ namespace battleship
 		}
 
 		// Keep algorithm in list of loaded algos
-		_loadedGameAlgos.emplace_back(algoName, hDll, getAlgorithmFunc); // Build algoDescriptor
-		_loadedGameAlgoNames.push_back(algoName);
+		string algoFormattedName = algoName;
+		stripNameSuffix(algoFormattedName);
+		_loadedGameAlgos.emplace_back(algoFormattedName, hDll, getAlgorithmFunc); // Build algoDescriptor
+		_loadedGameAlgoNames.push_back(algoFormattedName);
 
 		Logger::getInstance().log(Severity::INFO_LEVEL, algoName + " loaded successfully");
 	}
@@ -110,7 +124,7 @@ namespace battleship
 		if (nullptr == algo)
 		{
 			Logger::getInstance().log(Severity::ERROR_LEVEL,
-									  "Error: Cannot create instance out of dll: " + algoDescriptor.path);
+									  "Error: Cannot create instance out of dll of player: " + algoDescriptor.path);
 			return nullptr;
 		}
 

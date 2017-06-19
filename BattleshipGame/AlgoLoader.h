@@ -52,6 +52,9 @@ namespace battleship
 
 	private:
 
+		static constexpr auto DLL_SUFFIX_LONG = ".smart.dll";
+		static constexpr auto DLL_SUFFIX_SHORT = ".dll";
+
 		/** Typedef for object creating new IBattleshipGameAlgo objects from Dlls */
 		using GetAlgorithmFuncType = IBattleshipGameAlgo *(*)();
 
@@ -75,10 +78,10 @@ namespace battleship
 		/** Path to load dlls of algorithms from */
 		string _algosPath;
 
-		/** Vector of available algorithms for loading: <Algorithm name> */
+		/** Vector of available algorithms for loading: <Algorithm name>.smart.dll */
 		vector<string> _availableGameAlgos;
 
-		/** Vector of loaded algorithm names */
+		/** Vector of loaded algorithm names: <Algorithm name> */
 		vector<string> _loadedGameAlgoNames;
 
 		/** Vector of loaded algorithms: <Algorithm name, dll handle, GetAlgorithm function ptr> */
@@ -91,6 +94,10 @@ namespace battleship
 	 	 *	(populates the AlgoLoad with available dlls for loading)
 		 */
 		void fetchDLLs(const string& path);
+
+		/** Normalize algorithm's name - remove the suffix
+		 */
+		void stripNameSuffix(string& name);
 	};
 
 }
