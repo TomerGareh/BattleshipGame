@@ -120,9 +120,6 @@ namespace battleship
 				string currPlayerStr = (currentPlayer == playerA) ? "A" : "B";
 				Logger::getInstance().log(Severity::DEBUG_LEVEL, "Player " + currPlayerStr + " attacks at " + to_string(target));
 
-				bool isCurrPlayerA = (currentPlayer == playerA);
-				bool isCurrPlayerB = !isCurrPlayerA;
-
 				if (target == NO_MORE_MOVES)
 				{	// Player chose not to attack - from now on this player forfeits the game
 					if (currentPlayer == playerA)

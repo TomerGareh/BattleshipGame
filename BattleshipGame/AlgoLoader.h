@@ -97,7 +97,7 @@ namespace battleship
 
 		/** Normalize algorithm's name - remove the suffix
 		 */
-		void stripNameSuffix(string& name);
+		static void stripNameSuffix(string& name);
 	};
 
 }
