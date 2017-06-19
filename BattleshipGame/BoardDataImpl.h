@@ -21,7 +21,8 @@ namespace battleship
 		BoardDataImpl(PlayerEnum player, shared_ptr<BattleBoard> board);
 		virtual ~BoardDataImpl() = default;
 
-		// Returns only selected players' chars
+		// Returns only selected players' chars.
+		// Coordinates are defined in the range [1, BOARD_SIZE].
 		virtual char charAt(Coordinate c) const override;
 
 	private:

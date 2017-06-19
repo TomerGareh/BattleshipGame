@@ -113,6 +113,7 @@ namespace battleship
 		PlayerEnum whichPlayerOwnsSquare(const Coordinate& pos) const;
 
 		/** Returns game piece at given coordinate or NULL if this is an empty square.
+		 *  Coordinates are defined in the range [0, BOARD_SIZE-1].
 		 */
 		shared_ptr<const GamePiece> pieceAt(const Coordinate& c) const;
 
@@ -144,6 +145,7 @@ namespace battleship
 
 		// List of game pieces in the game (active pieces only, sank pieces are removed).
 		// Game pieces are indexed in this dictionary by their index on the game board.
+		// Coordinates are defined in the range [0, BOARD_SIZE-1].
 		GamePiecesDict _gamePieces;
 		int _playerAShipCount = 0;
 		int _playerBShipCount = 0;

@@ -72,6 +72,8 @@ private:
 	// coord is in the range 0 to board size - 1
 	void markDepthNeighbors(Coordinate coord);
 
+	static AttackDirection drawAvailableDirection(const map<AttackDirection, int>& directionMap);
+
 	AttackDirection getTargetDirection(targetsMapEntry targetIt);
 
 	static int getTargetSize(const map<AttackDirection, int>& targetSurround);

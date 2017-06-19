@@ -19,6 +19,9 @@ namespace battleship
 
 	char BoardDataImpl::charAt(Coordinate c) const
 	{
+		c.row -= 1;
+		c.col -= 1;
+		c.depth -= 1;
 		auto gamePiece = _board->pieceAt(c);
 		
 		if (gamePiece == nullptr)

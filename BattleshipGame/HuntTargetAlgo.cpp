@@ -103,6 +103,20 @@ Coordinate HuntTargetAlgo::searchUnvisitedCoord()
 	return NO_MORE_MOVES;
 }
 
+AttackDirection HuntTargetAlgo::drawAvailableDirection(const map<AttackDirection, int>& directionMap)
+{
+	vector<AttackDirection> availableDirections;
+	for (const auto& directionPair : directionMap)
+	{
+		if ((directionPair.first != AttackDirection::InPlace) && (directionPair.second != -1))
+			availableDirections.push_back(directionPair.first);
+	}
+
+	int directionInd = rand() % availableDirections.size();
+
+	return availableDirections[directionInd];
+}
+
 AttackDirection HuntTargetAlgo::getTargetDirection(targetsMapEntry targetIt)
 {
 	map<AttackDirection, int>& directionMap = targetIt->second;
@@ -116,6 +130,10 @@ AttackDirection HuntTargetAlgo::getTargetDirection(targetsMapEntry targetIt)
 			else
 				return (p1.second < p2.second);
 		});
+
+	if (maxDirection->second == 0)
+		return drawAvailableDirection(directionMap);
+
 	return maxDirection->first;
 }
 
